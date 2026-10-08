@@ -73,7 +73,7 @@
   .stat{width:210px;flex-shrink:0}
   .pill{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;font-size:13px;font-weight:700;white-space:nowrap}
   .pill i{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-  .stx{font-size:12px;color:var(--mut);margin-top:5px;padding-left:4px}
+  .stx{font-size:12px;color:var(--mut);margin-top:5px;padding-left:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   .stx.warn{color:var(--red-d);font-weight:700}
   .acts{display:flex;gap:8px;flex-shrink:0}
   .lib{display:flex;align-items:center;justify-content:center;gap:10px;width:170px;height:60px;border:0;border-radius:12px;background:var(--green);color:#FFFFFF;font-size:19px;font-weight:700}
@@ -90,6 +90,13 @@
   .k-done .bar{background:var(--blue)} .p-done{background:var(--blue-bg);color:var(--blue-d)} .p-done i{background:var(--blue)}
   .k-late{border-color:#F3C9B5}
 
+  .tab.alert:not(.on){border-color:#F3C9B5;color:var(--red-d)}
+  .chip{height:38px;padding:0 14px;border-radius:999px;border:1px solid var(--ln2);background:var(--card);color:var(--tx2);font-weight:700;margin-right:6px}
+  .chip.on{background:var(--navy);border-color:var(--navy);color:#FFFFFF}
+  .lib.warnb{background:var(--amb-d)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .esc-chip{padding:5px 10px;border-radius:8px;background:var(--gray-bg);color:var(--gray-d);font-size:13px;font-weight:600}
+  .esc-chip.pend{background:var(--amb-bg);color:var(--amb-d);cursor:pointer}
   .grp{display:flex;align-items:center;gap:10px;width:100%;margin-top:6px;padding:14px 18px;border-radius:14px;border:1px dashed #B8C3CF;background:transparent;color:var(--tx2);font-size:16px;font-weight:800;text-align:left}
   .grp .n{padding:2px 10px;border-radius:999px;background:var(--gray-bg)}
   .grp small{font-weight:600;color:var(--mut);font-size:13px}
@@ -235,7 +242,7 @@
 // URL da implantação do Apps Script (termina em /exec)
 var API_URL = 'https://script.google.com/macros/s/AKfycbzv0y28Rhb-Iy27Y8Z5daelqH8uHbXDGKauEpNUfeuvSoDhQsKI4hmlJeK4eSrKsqh9Pw/exec';
 
-var S = { dia:null, cad:{motivos:[],veiculos:[],motoristas:{}}, offset:0, tab:'pend', atual:null, modo:null, sel:null, novo:false, busy:false };
+var S = { dia:null, cad:{motivos:[],veiculos:[],motoristas:{}}, offset:0, tab:'pend', subLib:'conferir', atual:null, modo:null, sel:null, novo:false, busy:false };
 var LS_RESP='soltura.responsavel', LS_CHAVE='soltura.chave', LS_GAR='soltura.garagem';
 
 function $(id){ return document.getElementById(id); }
@@ -320,59 +327,102 @@ var ICO_CLOCK='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" strok
 var ICO_PIN='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>';
 var ICO_LOCK='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/></svg>';
 var ICO_OK='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>';
-var TABS=[['pend','Pendentes'],['verif','Em verificação'],['lib','Liberados'],['todos','Todos']];
+var TABS=[['pend','Pendentes'],['atr','Atrasados'],['interd','Interditados'],['lib','Liberados']];
+var SUBLIB=[['conferir','A conferir'],['conferidos','Conferidos'],['todos','Todos']];
 
 function render(){
   if(!S.dia) return;
-  var G=getGar(), q=$('fBusca').value.trim(), todos=base();
+  var G=getGar(), q=$('fBusca').value.trim(), todos=base(), lim=S.dia.cfg.limiteAtraso||60;
   var pendAll=todos.filter(function(i){return !i.reg;});
-  pendAll.forEach(function(it){ it._st=statusPend(it); it._loc=local(it); });
-  var pend=pendAll, sem=[], outra=0;
+  pendAll.forEach(function(it){ it._st=statusPend(it); it._loc=local(it); it._min=Math.floor((agora()-it.prevMs)/60000); });
+  // atrasados acima do limite saem da tela inicial
+  var atrasados=pendAll.filter(function(i){return i._min>lim;});
+  var vigentes=pendAll.filter(function(i){return i._min<=lim;});
+  var pend=vigentes, sem=[], outra=0;
   if(telOk() && G && !q){
-    pend=pendAll.filter(function(i){return i._loc.k==='in';});
-    sem=pendAll.filter(function(i){return i._loc.k==='fora';});
-    outra=pendAll.filter(function(i){return i._loc.k==='outra';}).length;
+    pend=vigentes.filter(function(i){return i._loc.k==='in';});
+    sem=vigentes.filter(function(i){return i._loc.k==='fora';});
+    outra=vigentes.filter(function(i){return i._loc.k==='outra';}).length;
+    atrasados=atrasados.filter(function(i){return i._loc.k!=='outra';});
   }
-  var verif=todos.filter(function(i){return i.reg && i.reg.conferido!=='SIM';});
-  var lib=todos.filter(function(i){return i.reg && i.reg.conferido==='SIM';});
-  var visPend=pend.concat(sem);
-  var tod=todos.filter(function(i){return i.reg || visPend.indexOf(i)>=0;});
-  var grupos={pend:pend,verif:verif,lib:lib,todos:tod};
-  var n={pend:pend.length+sem.length,verif:verif.length,lib:lib.length,todos:tod.length};
+  var feitas=todos.filter(function(i){return !!i.reg;});
+  var aConf=feitas.filter(function(i){return i.reg.conferido!=='SIM';});
+  var conf=feitas.filter(function(i){return i.reg.conferido==='SIM';});
+  var interd=(S.dia.interditados||[]).filter(function(x){ return !q || semAcento(x.prefixo+' '+x.os+' '+x.motivo).indexOf(semAcento(q))>=0; });
+  var n={pend:pend.length+sem.length, atr:atrasados.length, interd:interd.length, lib:feitas.length};
 
-  $('tabs').innerHTML=TABS.map(function(t){ return '<button type="button" class="tab'+(S.tab===t[0]?' on':'')+'" data-tab="'+t[0]+'">'+t[1]+' ('+n[t[0]]+')</button>'; }).join('');
+  $('tabs').innerHTML=TABS.map(function(t){
+    var extra=(t[0]==='lib'&&aConf.length)?' · '+aConf.length+' a conferir':'';
+    return '<button type="button" class="tab'+(S.tab===t[0]?' on':'')+(t[0]==='atr'&&n.atr?' alert':'')+'" data-tab="'+t[0]+'">'+t[1]+' ('+n[t[0]]+')'+extra+'</button>';
+  }).join('');
 
-  var atr=pendAll.filter(function(i){return (pend.indexOf(i)>=0||sem.indexOf(i)>=0) && i._st.k==='crit';}).length;
-  var semMot=verif.filter(function(i){return precisaMotivo(i,i.reg);}).length;
-  var r=[];
-  if(S.tab==='pend'){ if(atr) r.push('<b class="c">'+atr+' atrasado'+(atr>1?'s':'')+'</b>'); r.push('<b>'+pend.length+'</b> no pátio para sair'); if(sem.length) r.push(sem.length+' sem garagem'); if(outra) r.push(outra+' na outra garagem'); }
-  else if(S.tab==='verif'){ r.push('<b>'+verif.length+'</b> saída'+(verif.length===1?'':'s')+' aguardando conferência'); if(semMot) r.push('<b class="c">'+semMot+' sem motivo</b>'); }
-  else if(S.tab==='lib'){ r.push('<b>'+lib.length+'</b> saída'+(lib.length===1?'':'s')+' conferida'+(lib.length===1?'':'s')); }
-  else { r.push('<b>'+tod.length+'</b> escalas no dia'); }
-  $('resumo').innerHTML=r.join(' · ');
-
-  var itens=grupos[S.tab], h='';
-  if(!itens.length && !(S.tab==='pend' && sem.length)){
-    h='<div class="empty">'+({pend:'Nenhum carro aguardando soltura agora.',verif:'Nada para conferir agora.',lib:'Nenhuma saída conferida ainda.',todos:'Nenhuma escala encontrada.'})[S.tab]+'</div>';
+  var r=[], h='';
+  if(S.tab==='pend'){
+    var atr=pend.concat(sem).filter(function(i){return i._st.k==='crit';}).length;
+    if(atr) r.push('<b class="c">'+atr+' atrasado'+(atr>1?'s':'')+'</b>');
+    r.push('<b>'+pend.length+'</b> no pátio para sair');
+    if(sem.length) r.push(sem.length+' sem garagem'); if(outra) r.push(outra+' na outra garagem');
+    if(n.atr) r.push(n.atr+' com mais de '+fmtLim(lim)+' de atraso na aba Atrasados');
+    if(!pend.length && !sem.length) h='<div class="empty">Nenhum carro aguardando soltura agora.</div>';
+    pend.forEach(function(it){ h+=linhaPend(it); });
+    if(sem.length){
+      var atrS=sem.filter(function(i){return i._st.k==='crit';}).length;
+      h+='<button type="button" class="grp" id="btnSem">'+ICO_PIN+'<span>Sem garagem</span><span class="n">'+sem.length+'</span>'+(atrS?'<small style="color:var(--red-d)">'+atrS+' atrasado'+(atrS>1?'s':'')+'</small>':'')+'<span class="grow"></span><small>'+(S.abrirSem?'ocultar':'carro fora do pátio, sem sinal ou sem carro — toque para ver')+'</small></button>';
+      if(S.abrirSem) sem.forEach(function(it){ h+=linhaPend(it); });
+    }
   }
-  itens.forEach(function(it){ h+= it.reg ? linhaReg(it) : linhaPend(it); });
-  if(S.tab==='pend' && sem.length){
-    var atrS=sem.filter(function(i){return i._st.k==='crit';}).length;
-    h+='<button type="button" class="grp" id="btnSem">'+ICO_PIN+'<span>Sem garagem</span><span class="n">'+sem.length+'</span>'+(atrS?'<small style="color:var(--red-d)">'+atrS+' atrasado'+(atrS>1?'s':'')+'</small>':'')+'<span class="grow"></span><small>'+(S.abrirSem?'ocultar':'carro fora do pátio, sem sinal ou sem carro — toque para ver')+'</small></button>';
-    if(S.abrirSem) sem.forEach(function(it){ h+=linhaPend(it); });
+  else if(S.tab==='atr'){
+    r.push('Escalas com mais de <b>'+fmtLim(lim)+'</b> de atraso e ainda sem registro de saída');
+    if(!atrasados.length) h='<div class="empty">Nenhuma escala com atraso acima de '+fmtLim(lim)+'.</div>';
+    atrasados.forEach(function(it){ h+=linhaPend(it,true); });
   }
+  else if(S.tab==='interd'){
+    r.push('<b>'+interd.length+'</b> carro'+(interd.length===1?'':'s')+' com O.S. aberta'+(S.dia.interditadosEm?' · atualizado '+esc(S.dia.interditadosEm):''));
+    if(!interd.length) h='<div class="empty">Nenhum carro interditado.</div>';
+    interd.forEach(function(x){ h+=linhaInterd(x); });
+  }
+  else {
+    var grupos={conferir:aConf,conferidos:conf,todos:feitas};
+    r.push(SUBLIB.map(function(d){ return '<button type="button" class="chip'+(S.subLib===d[0]?' on':'')+'" data-sub="'+d[0]+'">'+d[1]+' ('+grupos[d[0]].length+')</button>'; }).join(''));
+    var lst=grupos[S.subLib];
+    if(!lst.length) h='<div class="empty">'+(S.subLib==='conferir'?'Nada para conferir agora.':'Nenhuma saída aqui.')+'</div>';
+    lst.forEach(function(it){ h+=linhaReg(it); });
+  }
+  $('resumo').innerHTML=r.join(S.tab==='lib'?' ':' · ');
   $('list').innerHTML=h;
 }
+function interdNome(v){ v=String(v||'').toUpperCase(); return (S.dia.interditados||[]).filter(function(x){return x.prefixo===v;})[0]||null; }
+function fmtLim(m){ return m%60===0? (m/60)+'h' : m+' min'; }
+function fmtAtraso(m){ return m<60? m+' min' : Math.floor(m/60)+'h'+('0'+(m%60)).slice(-2); }
 
-function linhaPend(it){
-  var st=it._st||statusPend(it), lc=it._loc!==undefined?it._loc:local(it), sc=semCarro(it);
+function linhaInterd(x){
+  var esc_=S.dia.itens.filter(function(i){ return (i.veiculo||'').toUpperCase()===x.prefixo; });
+  var lista=esc_.map(function(i){
+    var st=i.reg?(i.reg.status==='NAO_SAIU'?'não saiu':'saiu '+i.reg.hora_real+(i.reg.troca_veiculo==='SIM'?' com '+i.reg.veiculo_real:'')):'pendente';
+    return '<span class="esc-chip'+(i.reg?'':' pend')+'"'+(i.reg?'':' data-act="edit" data-id="'+i.id+'" role="button" tabindex="0"')+'>'+esc(i.hora_prevista)+' '+esc(i.escala)+' · '+st+(i.reg?'':' — trocar carro')+'</span>';
+  }).join('');
+  return '<div class="row k-late">'+
+    '<div class="bar"></div><div class="bus" role="img" aria-label="Ônibus"></div>'+
+    '<div class="ident"><div class="pref">'+esc(x.prefixo)+'</div><div class="esc">O.S. '+esc(x.os||'—')+'</div></div>'+
+    '<div class="info" style="cursor:default">'+
+      '<div><span><b>'+esc(x.motivo||'Motivo não informado')+'</b></span></div>'+
+      '<div>'+ICO_CLOCK+'<span>Aberta '+esc(x.aberta_em||'—')+(x.previsao?' · previsão '+esc(x.previsao):'')+'</span></div>'+
+      (lista?'<div class="chips">'+lista+'</div>':'<div class="loc" style="color:var(--mut)"><span>Sem escala hoje</span></div>')+
+    '</div>'+
+    '<div class="stat"><span class="pill p-late"><i></i>Indisponível</span></div>'+
+  '</div>';
+}
+
+function linhaPend(it,modoAtr){
+  var st=it._st||statusPend(it), lc=it._loc!==undefined?it._loc:local(it), sc=semCarro(it), itd=it.interd;
   var k, txt, stx='';
-  if(st.k==='crit'){ k='late'; txt='Atrasado '+st.txt.replace(/\D+/g,'')+' min'; }
+  if(itd){ k='late'; txt='Indisponível · O.S. '+(itd.os||''); stx=(itd.aberta_em?'Aberta '+itd.aberta_em+' · ':'')+(itd.motivo||''); }
+  else if(st.k==='crit'){ k='late'; txt='Atrasado '+fmtAtraso(it._min!=null?it._min:Number(st.txt.replace(/\D+/g,''))); }
   else if(lc && lc.k!=='in'){ k='warn'; txt=sc?'Definir carro':(lc.ns?'Sem sinal':'Fora do pátio'); }
   else if(st.k==='tol'){ k='warn'; txt='Na tolerância'; }
   else if(st.k==='soon'){ k='ready'; txt='Pronto para soltura'; stx=st.txt; }
   else { k='pend'; txt='Pendente'; }
-  if(st.k==='crit' && lc && lc.k!=='in') stx=sc?'Definir carro':(lc.ns?'Sem sinal da telemetria':'Carro fora do pátio');
+  if(!itd && st.k==='crit' && lc && lc.k!=='in') stx=sc?'Definir carro':(lc.ns?'Sem sinal da telemetria':'Carro fora do pátio');
   var locHtml=lc?'<div class="loc" style="color:'+(lc.k==='in'?'var(--green-d)':'var(--amb-d)')+'">'+ICO_PIN+'<span>'+esc(lc.txt)+'</span></div>':'';
   return '<div class="row k-'+k+'" id="r-'+it.id+'">'+
     '<div class="bar"></div><div class="bus" role="img" aria-label="Ônibus"></div>'+
@@ -382,7 +432,9 @@ function linhaPend(it){
       '<div>'+ICO_CLOCK+'<b>'+esc(it.hora_prevista)+'</b></div>'+locHtml+
     '</div>'+
     '<div class="stat"><span class="pill p-'+k+'"><i></i>'+esc(txt)+'</span>'+(stx?'<div class="stx">'+esc(stx)+'</div>':'')+'</div>'+
-    '<div class="acts"><button type="button" class="lib" data-act="ok" data-id="'+it.id+'" aria-label="Liberar '+esc(it.veiculo||it.escala)+'">'+ICO_LOCK+'Liberar</button></div>'+
+    '<div class="acts">'+(modoAtr?'<button type="button" class="out" data-act="nao" data-id="'+it.id+'">Não saiu</button>':'')+
+      (itd?'<button type="button" class="lib warnb" data-act="edit" data-id="'+it.id+'">Trocar carro</button>'
+          :'<button type="button" class="lib'+(modoAtr?' sm':'')+'" data-act="ok" data-id="'+it.id+'" aria-label="Liberar '+esc(it.veiculo||it.escala)+'">'+ICO_LOCK+'Liberar</button>')+'</div>'+
   '</div>';
 }
 
@@ -447,7 +499,7 @@ function item(id){ return S.dia.itens.filter(function(i){return i.id===id;})[0];
 
 /* OK da tela Soltura: registra na hora e a escala vai para Realizadas */
 function okSoltura(it){
-  if(semCarro(it) || !it.cracha || S.dia.data!==S.dia.hoje){ abrir(it,'soltar'); return; }
+  if(semCarro(it) || it.interd || !it.cracha || S.dia.data!==S.dia.hoje){ abrir(it,'soltar'); return; }
   var h=hhmm(agora());
   var d=Math.round((agora()-it.prevMs)/60000), tol=S.dia.cfg.tolerancia;
   it.reg={_pend:true,status:d>tol?'ATRASADA':(d<-tol?'ADIANTADA':'NO_HORARIO'),hora_real:h,desvio_min:d,veiculo_real:it.veiculo,cracha_real:it.cracha,motorista_real:it.motorista,troca_veiculo:'',troca_motorista:'',motivo:'',conferido:''};
@@ -476,7 +528,7 @@ function voltarSoltura(it){
 }
 
 /* ===================== modal ===================== */
-function abrir(it, modo){
+function abrir(it, modo, focoMotivo){
   S.atual=it; S.modo=modo; var r=it.reg;
   $('mTit').textContent=(modo==='soltar'?'Liberar ':'Editar saída · ')+it.escala;
   $('mSub').textContent=it.setor+' · '+it.linhas;
@@ -492,8 +544,9 @@ function abrir(it, modo){
   if(modo==='soltar') bt='<button class="btn dan" type="button" data-m="nao">Não saiu</button><div class="sp"></div><button class="btn" type="button" data-m="cancel">Cancelar</button><button class="btn pri" type="button" data-m="soltar">Liberar</button>';
   else bt='<button class="btn" type="button" data-m="voltar">Voltar para pendentes</button><div class="sp"></div><button class="btn" type="button" data-m="cancel">Cancelar</button><button class="btn pri" type="button" data-m="salvar">Salvar e confirmar</button>';
   $('mAct').innerHTML=bt;
+  if(it.interd && !r){ $('mVei').value=''; }
   validar(); $('ov').classList.add('on');
-  setTimeout(function(){ (!$('mVei').value?$('mVei'):(!S.sel?$('mBusca'):null)||{focus:function(){}}).focus(); },60);
+  setTimeout(function(){ if(focoMotivo){ $('mMotivo').focus(); return; } (!$('mVei').value?$('mVei'):(!S.sel?$('mBusca'):null)||{focus:function(){}}).focus(); },60);
 }
 function fechar(){ $('ov').classList.remove('on'); $('mDD').classList.remove('on'); S.atual=null; S.modo=null; render(); }
 
@@ -542,6 +595,7 @@ function validar(){
   $('mReq').style.display=precisa?'inline':'none';
   var w=[]; if(atrasada) w.push('Saída '+d+' min após o previsto.'); if(trocaV) w.push('Carro diferente do escalado.'); if(trocaM) w.push('Motorista diferente do escalado.');
   if(precisa) w.push('Informe o motivo para conferir.');
+  var bloq=interdNome(v); if(bloq) w.unshift('O carro '+v+' está interditado (O.S. '+(bloq.os||'—')+'). Escolha outro carro.');
   $('mAlerta').style.display=w.length?'block':'none'; $('mAlerta').textContent=w.join(' ');
   return {h:h,v:v,m:m,precisa:precisa};
 }
@@ -552,6 +606,7 @@ function salvar(acao){
   if(acao==='SAIU'){
     if(!x.h) return toast('Informe a hora de saída.',true);
     if(!x.v||x.v==='FOLGADOR') return toast('Informe o carro.',true);
+    if(interdNome(x.v)) return toast('O carro '+x.v+' está interditado. Escolha outro carro.',true);
     if(!x.m.c) return toast('Escolha o motorista.',true);
     if(S.novo && !x.m.n) return toast('Informe o nome do motorista novo.',true);
     if(x.precisa && !mot){ $('mMotivo').focus(); return toast('Selecione o motivo.',true); }
@@ -582,7 +637,9 @@ $('list').addEventListener('click',function(e){
   else if(a==='edit') abrir(it,'soltar');
   else if(a==='editR') abrir(it,'editar');
   else if(a==='conf') okConferir(it);
+  else if(a==='nao') abrir(it,'soltar',true);
 });
+$('resumo').addEventListener('click',function(e){ var b=e.target.closest('[data-sub]'); if(b){ S.subLib=b.getAttribute('data-sub'); render(); } });
 $('tabs').addEventListener('click',function(e){ var b=e.target.closest('[data-tab]'); if(b){ S.tab=b.getAttribute('data-tab'); render(); window.scrollTo(0,0); } });
 $('fBusca').addEventListener('input',render);
 $('btnFil').addEventListener('click',function(){ var f=$('filtros'), on=!f.classList.contains('on'); f.classList.toggle('on',on); this.classList.toggle('on',on); this.setAttribute('aria-expanded',on); });

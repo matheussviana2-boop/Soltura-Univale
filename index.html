@@ -49,7 +49,7 @@
   .filtros select,.filtros input{height:44px;min-width:220px;padding:0 12px;border:1px solid var(--ln2);border-radius:10px;background:var(--card)}
 
   /* abas */
-  .tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;padding:0 24px 10px}
+  .tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:0 24px 10px}
   .tab{height:46px;border-radius:10px;border:1px solid var(--ln2);background:var(--card);color:var(--tx2);font-size:15px;font-weight:700}
   .tab.on{background:var(--green);border-color:var(--green);color:#FFFFFF}
   .resumo{padding:0 24px 10px;font-size:14px;color:var(--mut)} .resumo b{color:var(--tx)} .resumo .c{color:var(--red-d)}
@@ -70,8 +70,10 @@
   .info svg{flex-shrink:0}
   .info .loc{font-size:13px;font-weight:600}
   .chg{color:var(--blue-d);font-weight:700}
-  .maplink{flex-shrink:0;display:inline-flex;align-items:center;min-height:32px;padding:0 10px;border-radius:8px;border:1px solid var(--ln2);background:var(--card);color:var(--navy);font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap}
-  .maplink:hover{border-color:var(--navy)}
+  .maplink{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;width:60px;height:60px;border-radius:12px;border:1px solid var(--ln2);background:var(--card);color:var(--navy);text-decoration:none}
+  .maplink:hover{border-color:var(--navy);background:var(--bg)}
+  .secao{display:flex;align-items:center;gap:10px;margin-top:10px;padding:6px 4px;color:var(--tx2);font-size:15px;font-weight:800}
+  .secao .n{padding:2px 10px;border-radius:999px;background:var(--gray-bg);font-size:13px}
   .stat{width:210px;flex-shrink:0}
   .pill{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;font-size:13px;font-weight:700;white-space:nowrap}
   .pill i{width:8px;height:8px;border-radius:50%;flex-shrink:0}
@@ -153,7 +155,7 @@
     .who{margin-left:auto}
     .tool{padding:12px 14px 10px} .bfil{padding:0 14px}
     .filtros{margin:0 14px 10px} .filtros label,.filtros select,.filtros input{width:100%;min-width:0}
-    .tabs{grid-template-columns:repeat(2,minmax(0,1fr));padding:0 14px 10px}
+    .tabs{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:0 14px 10px} .tab{font-size:13px;padding:0 4px} .tx-ext{display:none}
     .resumo,.banner{margin-left:14px;margin-right:14px;padding-left:0;padding-right:0}
     .banner{padding:10px 12px}
     .list{padding:0 14px 32px}
@@ -165,6 +167,7 @@
     .stat{order:3}
     .acts{order:5;flex-basis:100%;padding-left:18px}
     .acts .lib,.acts .out{flex:1;width:auto}
+    .acts .maplink{height:auto;min-height:56px}
   }
 </style>
 </head>
@@ -320,7 +323,7 @@ function local(it){
 }
 function mapa(it){
   var t=it.tel; if(!t||!t.lat||!t.lng) return '';
-  return '<a class="maplink" href="https://www.google.com/maps?q='+encodeURIComponent(t.lat+','+t.lng)+'" target="_blank" rel="noopener" title="Abrir a última posição no mapa">Ver no mapa</a>';
+  return '<a class="maplink" href="https://www.google.com/maps?q='+encodeURIComponent(t.lat+','+t.lng)+'" target="_blank" rel="noopener" title="Ver a última posição no mapa" aria-label="Ver a última posição de '+esc(it.veiculo)+' no mapa"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg></a>';
 }
 function base(){
   var G=getGar(), q=semAcento($('fBusca').value).trim();
@@ -336,7 +339,7 @@ var ICO_CLOCK='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" strok
 var ICO_PIN='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>';
 var ICO_LOCK='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/></svg>';
 var ICO_OK='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>';
-var TABS=[['pend','Pendentes'],['atr','Atrasados'],['interd','Interditados'],['lib','Liberados']];
+var TABS=[['pend','Pendentes'],['interd','Com O.S.'],['lib','Liberados']];
 var SUBLIB=[['conferir','A conferir'],['conferidos','Conferidos'],['todos','Todos']];
 
 function render(){
@@ -359,11 +362,11 @@ function render(){
   var aConf=feitas.filter(function(i){return i.reg.conferido!=='SIM';});
   var conf=feitas.filter(function(i){return i.reg.conferido==='SIM';});
   var interd=(S.dia.interditados||[]).filter(function(x){ return !q || semAcento(x.prefixo+' '+x.os+' '+x.motivo).indexOf(semAcento(q))>=0; });
-  var n={pend:pend.length+sem.length, atr:atrasados.length, interd:interd.length, lib:feitas.length};
+  var n={pend:pend.length+sem.length+atrasados.length, interd:interd.length, lib:feitas.length};
 
   $('tabs').innerHTML=TABS.map(function(t){
-    var extra=(t[0]==='lib'&&aConf.length)?' · '+aConf.length+' a conferir':'';
-    return '<button type="button" class="tab'+(S.tab===t[0]?' on':'')+(t[0]==='atr'&&n.atr?' alert':'')+'" data-tab="'+t[0]+'">'+t[1]+' ('+n[t[0]]+')'+extra+'</button>';
+    var extra=(t[0]==='lib'&&aConf.length)?'<span class="tx-ext"> · '+aConf.length+' a conferir</span>':'';
+    return '<button type="button" class="tab'+(S.tab===t[0]?' on':'')+''+'" data-tab="'+t[0]+'">'+t[1]+' ('+n[t[0]]+')'+extra+'</button>';
   }).join('');
 
   var r=[], h='';
@@ -371,25 +374,23 @@ function render(){
     var atr=pend.concat(sem).filter(function(i){return i._st.k==='crit';}).length;
     if(atr) r.push('<b class="c">'+atr+' atrasado'+(atr>1?'s':'')+'</b>');
     r.push('<b>'+pend.length+'</b> no pátio para sair');
-    if(sem.length) r.push(sem.length+' sem garagem'); if(outra) r.push(outra+' na outra garagem');
-    if(nInterdPend) r.push(nInterdPend+' com carro em O.S. na aba Interditados');
-    if(n.atr) r.push(n.atr+' com mais de '+fmtLim(lim)+' de atraso na aba Atrasados');
-    if(!pend.length && !sem.length) h='<div class="empty">Nenhum carro aguardando soltura agora.</div>';
+    if(sem.length) r.push(sem.length+' fora do pátio'); if(outra) r.push(outra+' na outra garagem');
+    if(nInterdPend) r.push(nInterdPend+' com carro em O.S. na aba Com O.S.');
+    if(atrasados.length) r.push(atrasados.length+' com mais de '+fmtLim(lim)+' de atraso no fim da lista');
+    if(!pend.length && !sem.length && !atrasados.length) h='<div class="empty">Nenhum carro aguardando soltura agora.</div>';
     pend.forEach(function(it){ h+=linhaPend(it); });
     if(sem.length){
-      var atrS=sem.filter(function(i){return i._st.k==='crit';}).length;
-      h+='<button type="button" class="grp" id="btnSem">'+ICO_PIN+'<span>Sem garagem</span><span class="n">'+sem.length+'</span>'+(atrS?'<small style="color:var(--red-d)">'+atrS+' atrasado'+(atrS>1?'s':'')+'</small>':'')+'<span class="grow"></span><small>'+(S.abrirSem?'ocultar':'carro fora do pátio, sem sinal ou sem carro — toque para ver')+'</small></button>';
-      if(S.abrirSem) sem.forEach(function(it){ h+=linhaPend(it); });
+      h+='<div class="secao">'+ICO_PIN+'<span>Fora do pátio, sem sinal ou sem carro</span><span class="n">'+sem.length+'</span></div>';
+      sem.forEach(function(it){ h+=linhaPend(it); });
     }
-  }
-  else if(S.tab==='atr'){
-    r.push('Escalas com mais de <b>'+fmtLim(lim)+'</b> de atraso e ainda sem registro de saída');
-    if(!atrasados.length) h='<div class="empty">Nenhuma escala com atraso acima de '+fmtLim(lim)+'.</div>';
-    atrasados.forEach(function(it){ h+=linhaPend(it,true); });
+    if(atrasados.length){
+      h+='<div class="secao">'+ICO_CLOCK+'<span>Atrasados há mais de '+fmtLim(lim)+'</span><span class="n">'+atrasados.length+'</span></div>';
+      atrasados.forEach(function(it){ h+=linhaPend(it,true); });
+    }
   }
   else if(S.tab==='interd'){
     r.push('<b>'+interd.length+'</b> carro'+(interd.length===1?'':'s')+' com O.S. aberta'+(S.dia.interditadosEm?' · atualizado '+esc(S.dia.interditadosEm):''));
-    if(!interd.length) h='<div class="empty">Nenhum carro interditado.</div>';
+    if(!interd.length) h='<div class="empty">Nenhum carro com O.S. aberta.</div>';
     interd.forEach(function(x){ h+=linhaInterd(x); });
   }
   else {
@@ -437,7 +438,7 @@ function linhaPend(it,modoAtr){
   else if(st.k==='soon'){ k='ready'; txt='Pronto para soltura'; stx=st.txt; }
   else { k='pend'; txt='Pendente'; }
   if(!itd && st.k==='crit' && lc && lc.k!=='in') stx=sc?'Definir carro':(lc.ns?'Sem sinal da telemetria':'Carro fora do pátio');
-  var locHtml=lc?'<div class="loc" style="color:'+(lc.k==='in'?'var(--green-d)':'var(--amb-d)')+'">'+ICO_PIN+'<span>'+esc(lc.txt)+'</span>'+mapa(it)+'</div>':'';
+  var locHtml=lc?'<div class="loc" style="color:'+(lc.k==='in'?'var(--green-d)':'var(--amb-d)')+'">'+ICO_PIN+'<span>'+esc(lc.txt)+'</span></div>':'';
   return '<div class="row k-'+k+'" id="r-'+it.id+'">'+
     '<div class="bar"></div><div class="bus" role="img" aria-label="Ônibus"></div>'+
     '<div class="ident"><div class="pref">'+(sc?'<span style="color:var(--amb-d)">'+(it.veiculo?esc(it.veiculo):'Sem carro')+'</span>':esc(it.veiculo))+'</div><div class="esc">'+esc(it.escala)+' · '+esc(it.linha)+'</div></div>'+
@@ -446,7 +447,7 @@ function linhaPend(it,modoAtr){
       '<div>'+ICO_CLOCK+'<b>'+esc(it.hora_prevista)+'</b></div>'+locHtml+
     '</div>'+
     '<div class="stat"><span class="pill p-'+k+'"><i></i>'+esc(txt)+'</span>'+(stx?'<div class="stx">'+esc(stx)+'</div>':'')+'</div>'+
-    '<div class="acts">'+(modoAtr?'<button type="button" class="out" data-act="nao" data-id="'+it.id+'">Não saiu</button>':'')+
+    '<div class="acts">'+mapa(it)+(modoAtr?'<button type="button" class="out" data-act="nao" data-id="'+it.id+'">Não saiu</button>':'')+
       (itd?'<button type="button" class="out" data-act="edit" data-id="'+it.id+'">Trocar carro</button>':'')+
       ('<button type="button" class="lib'+(modoAtr?' sm':'')+'" data-act="ok" data-id="'+it.id+'" aria-label="Liberar '+esc(it.veiculo||it.escala)+'">'+ICO_LOCK+'Liberar</button>')+'</div>'+
   '</div>';
@@ -666,7 +667,6 @@ $('tabs').addEventListener('click',function(e){ var b=e.target.closest('[data-ta
 $('fBusca').addEventListener('input',render);
 $('btnFil').addEventListener('click',function(){ var f=$('filtros'), on=!f.classList.contains('on'); f.classList.toggle('on',on); this.classList.toggle('on',on); this.setAttribute('aria-expanded',on); });
 $('fGar').addEventListener('change',function(){ ls(LS_GAR,this.value); tick(); });
-$('list').addEventListener('click',function(e){ if(e.target.closest('#btnSem')){ S.abrirSem=!S.abrirSem; render(); } });
 $('fData').addEventListener('change',function(){ carregar(false); });
 $('btnWho').addEventListener('click',pedirResp);
 $('mAct').addEventListener('click',function(e){

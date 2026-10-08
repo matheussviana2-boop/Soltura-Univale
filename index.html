@@ -69,6 +69,7 @@
   .info span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .info svg{flex-shrink:0}
   .info .loc{font-size:13px;font-weight:600}
+  .info .loc2{font-size:12px;color:var(--mut);padding-left:24px;margin-top:-4px}
   .chg{color:var(--blue-d);font-weight:700}
   .maplink{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;width:60px;height:60px;border-radius:12px;border:1px solid var(--ln2);background:var(--card);color:var(--navy);text-decoration:none}
   .maplink:hover{border-color:var(--navy);background:var(--bg)}
@@ -311,15 +312,13 @@ function telOk(){ var t=S.dia&&S.dia.telemetria; return !!(t&&t.ativa&&!t.erro);
 function local(it){
   if(!telOk()) return null;
   var G=getGar(), t=it.tel;
-  if(semCarro(it)) return {k:'fora',txt:'Sem carro definido'};
-  if(!t) return {k:'fora',txt:'Carro não encontrado na telemetria'};
+  if(semCarro(it)) return {k:'fora',txt:'Sem carro definido',extra:''};
+  if(!t) return {k:'fora',txt:'Carro não encontrado na telemetria',extra:''};
+  var extra='Ignição '+(t.ignicao==='ON'?'ligada':'desligada')+(t.quando?' · Última transmissão '+t.quando:'')+(t.semSinal?' (sem sinal)':'');
   // sinal antigo não muda onde o carro está: vale a última posição conhecida
-  var antigo=t.idade!=null && t.idade>30;
-  var sinal=t.semSinal?' · sem sinal desde '+t.quando:(antigo?' · último sinal '+t.quando:'');
-  if(t.garagem && (!G || t.garagem===G)) return {k:'in',txt:'No pátio'+(G?'':' · '+t.garagem)+(t.ignicao==='ON'&&!antigo?' · motor ligado':'')+sinal};
-  if(t.garagem) return {k:'outra',txt:'Na garagem '+t.garagem+sinal};
-  if(t.semSinal) return {k:'fora',ns:true,txt:'Sem sinal desde '+t.quando+(t.ponto?' · último local: '+t.ponto:'')};
-  return {k:'fora',txt:(t.ponto||'Em rota')+' · '+t.quando+' · '+(t.vel>0?Math.round(t.vel)+' km/h':(t.ignicao==='ON'?'ligado':'desligado'))};
+  if(t.garagem && (!G || t.garagem===G)) return {k:'in',txt:'No pátio'+(G?'':' · '+t.garagem),extra:extra};
+  if(t.garagem) return {k:'outra',txt:'Na garagem '+t.garagem,extra:extra};
+  return {k:'fora',ns:t.semSinal,txt:(t.ponto||'Em rota')+(t.vel>0?' · '+Math.round(t.vel)+' km/h':''),extra:extra};
 }
 function mapa(it){
   var t=it.tel; if(!t||!t.lat||!t.lng) return '';
@@ -432,10 +431,11 @@ function linhaPend(it,modoAtr){
   var k, txt, stx='';
   if(itd){ k='late'; txt='O.S. aberta · '+(itd.os||''); stx=(itd.aberta_em?'Aberta '+itd.aberta_em+' · ':'')+(itd.motivo||''); }
   else if(st.k==='crit'){ k='late'; txt='Atrasado '+fmtAtraso(it._min!=null?it._min:Number(st.txt.replace(/\D+/g,''))); }
-  else if(st.k==='tol'){ k='warn'; txt='Na tolerância'; }
-  else if(st.k==='soon'){ k='ready'; txt='Pronto para soltura'; stx=st.txt; }
-  else { k='pend'; txt='Pendente'; }
-  var locHtml=lc?'<div class="loc" style="color:'+(lc.k==='in'?'var(--green-d)':'var(--amb-d)')+'">'+ICO_PIN+'<span>'+esc(lc.txt)+'</span></div>':'';
+  else if(st.k==='tol'){ k='warn'; txt=''; }
+  else if(st.k==='soon'){ k='ready'; txt=''; }
+  else { k='pend'; txt=''; }
+  var locHtml=lc?'<div class="loc" style="color:'+(lc.k==='in'?'var(--green-d)':'var(--amb-d)')+'">'+ICO_PIN+'<span>'+esc(lc.txt)+'</span></div>'+
+    (lc.extra?'<div class="loc2"><span>'+esc(lc.extra)+'</span></div>':''):'';
   return '<div class="row k-'+k+'" id="r-'+it.id+'">'+
     '<div class="bar"></div><div class="bus" role="img" aria-label="Ônibus"></div>'+
     '<div class="ident"><div class="pref">'+(sc?'<span style="color:var(--amb-d)">'+(it.veiculo?esc(it.veiculo):'Sem carro')+'</span>':esc(it.veiculo))+'</div><div class="esc">'+esc(it.escala)+' · '+esc(it.linha)+'</div></div>'+
@@ -443,7 +443,7 @@ function linhaPend(it,modoAtr){
       '<div>'+ICO_USER+'<span>'+(it.motorista?esc(titulo(it.motorista)):'<span style="color:var(--amb-d)">Sem motorista</span>')+'</span></div>'+
       '<div>'+ICO_CLOCK+'<b>'+esc(it.hora_prevista)+'</b></div>'+locHtml+
     '</div>'+
-    '<div class="stat"><span class="pill p-'+k+'"><i></i>'+esc(txt)+'</span>'+(stx?'<div class="stx">'+esc(stx)+'</div>':'')+'</div>'+
+    '<div class="stat">'+(txt?'<span class="pill p-'+k+'"><i></i>'+esc(txt)+'</span>':'')+(stx?'<div class="stx">'+esc(stx)+'</div>':'')+'</div>'+
     '<div class="acts">'+mapa(it)+(modoAtr?'<button type="button" class="out" data-act="nao" data-id="'+it.id+'">Não saiu</button>':'')+
       (itd?'<button type="button" class="out" data-act="edit" data-id="'+it.id+'">Trocar carro</button>':'')+
       ('<button type="button" class="lib'+(modoAtr?' sm':'')+'" data-act="ok" data-id="'+it.id+'" aria-label="Liberar '+esc(it.veiculo||it.escala)+'">'+ICO_LOCK+'Liberar</button>')+'</div>'+

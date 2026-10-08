@@ -337,7 +337,8 @@ function render(){
   pendAll.forEach(function(it){ it._st=statusPend(it); it._loc=local(it); it._min=Math.floor((agora()-it.prevMs)/60000); });
   // atrasados acima do limite saem da tela inicial
   var atrasados=pendAll.filter(function(i){return i._min>lim;});
-  var vigentes=pendAll.filter(function(i){return i._min<=lim;});
+  var vigentes=pendAll.filter(function(i){return i._min<=lim && !i.interd;});
+  var nInterdPend=pendAll.filter(function(i){return i._min<=lim && i.interd;}).length;
   var pend=vigentes, sem=[], outra=0;
   if(telOk() && G && !q){
     pend=vigentes.filter(function(i){return i._loc.k==='in';});
@@ -362,6 +363,7 @@ function render(){
     if(atr) r.push('<b class="c">'+atr+' atrasado'+(atr>1?'s':'')+'</b>');
     r.push('<b>'+pend.length+'</b> no pátio para sair');
     if(sem.length) r.push(sem.length+' sem garagem'); if(outra) r.push(outra+' na outra garagem');
+    if(nInterdPend) r.push(nInterdPend+' com carro em O.S. na aba Interditados');
     if(n.atr) r.push(n.atr+' com mais de '+fmtLim(lim)+' de atraso na aba Atrasados');
     if(!pend.length && !sem.length) h='<div class="empty">Nenhum carro aguardando soltura agora.</div>';
     pend.forEach(function(it){ h+=linhaPend(it); });
@@ -391,16 +393,19 @@ function render(){
   $('resumo').innerHTML=r.join(S.tab==='lib'?' ':' · ');
   $('list').innerHTML=h;
 }
+function confirmSafe(msg){ try{ return window.confirm(msg); }catch(e){ return true; } }
 function interdNome(v){ v=String(v||'').toUpperCase(); return (S.dia.interditados||[]).filter(function(x){return x.prefixo===v;})[0]||null; }
 function fmtLim(m){ return m%60===0? (m/60)+'h' : m+' min'; }
 function fmtAtraso(m){ return m<60? m+' min' : Math.floor(m/60)+'h'+('0'+(m%60)).slice(-2); }
 
 function linhaInterd(x){
   var esc_=S.dia.itens.filter(function(i){ return (i.veiculo||'').toUpperCase()===x.prefixo; });
+  var prox=esc_.filter(function(i){return !i.reg;})[0];
   var lista=esc_.map(function(i){
     var st=i.reg?(i.reg.status==='NAO_SAIU'?'não saiu':'saiu '+i.reg.hora_real+(i.reg.troca_veiculo==='SIM'?' com '+i.reg.veiculo_real:'')):'pendente';
-    return '<span class="esc-chip'+(i.reg?'':' pend')+'"'+(i.reg?'':' data-act="edit" data-id="'+i.id+'" role="button" tabindex="0"')+'>'+esc(i.hora_prevista)+' '+esc(i.escala)+' · '+st+(i.reg?'':' — trocar carro')+'</span>';
+    return '<span class="esc-chip'+(i.reg?'':' pend')+'">'+esc(i.hora_prevista)+' '+esc(i.escala)+' · '+esc(titulo(i.motorista))+' · '+st+'</span>';
   }).join('');
+  var acts=prox?'<div class="acts"><button type="button" class="out" data-act="edit" data-id="'+prox.id+'">Trocar carro</button><button type="button" class="lib sm" data-act="ok" data-id="'+prox.id+'">'+ICO_LOCK+'Liberar</button></div>':'';
   return '<div class="row k-late">'+
     '<div class="bar"></div><div class="bus" role="img" aria-label="Ônibus"></div>'+
     '<div class="ident"><div class="pref">'+esc(x.prefixo)+'</div><div class="esc">O.S. '+esc(x.os||'—')+'</div></div>'+
@@ -409,14 +414,14 @@ function linhaInterd(x){
       '<div>'+ICO_CLOCK+'<span>Aberta '+esc(x.aberta_em||'—')+(x.previsao?' · previsão '+esc(x.previsao):'')+'</span></div>'+
       (lista?'<div class="chips">'+lista+'</div>':'<div class="loc" style="color:var(--mut)"><span>Sem escala hoje</span></div>')+
     '</div>'+
-    '<div class="stat"><span class="pill p-late"><i></i>Indisponível</span></div>'+
+    '<div class="stat"><span class="pill p-late"><i></i>Com O.S. aberta</span>'+(prox?'<div class="stx">Próxima saída '+esc(prox.hora_prevista)+' · '+esc(prox.escala)+'</div>':'')+'</div>'+acts+
   '</div>';
 }
 
 function linhaPend(it,modoAtr){
   var st=it._st||statusPend(it), lc=it._loc!==undefined?it._loc:local(it), sc=semCarro(it), itd=it.interd;
   var k, txt, stx='';
-  if(itd){ k='late'; txt='Indisponível · O.S. '+(itd.os||''); stx=(itd.aberta_em?'Aberta '+itd.aberta_em+' · ':'')+(itd.motivo||''); }
+  if(itd){ k='late'; txt='O.S. aberta · '+(itd.os||''); stx=(itd.aberta_em?'Aberta '+itd.aberta_em+' · ':'')+(itd.motivo||''); }
   else if(st.k==='crit'){ k='late'; txt='Atrasado '+fmtAtraso(it._min!=null?it._min:Number(st.txt.replace(/\D+/g,''))); }
   else if(lc && lc.k!=='in'){ k='warn'; txt=sc?'Definir carro':(lc.ns?'Sem sinal':'Fora do pátio'); }
   else if(st.k==='tol'){ k='warn'; txt='Na tolerância'; }
@@ -433,8 +438,8 @@ function linhaPend(it,modoAtr){
     '</div>'+
     '<div class="stat"><span class="pill p-'+k+'"><i></i>'+esc(txt)+'</span>'+(stx?'<div class="stx">'+esc(stx)+'</div>':'')+'</div>'+
     '<div class="acts">'+(modoAtr?'<button type="button" class="out" data-act="nao" data-id="'+it.id+'">Não saiu</button>':'')+
-      (itd?'<button type="button" class="lib warnb" data-act="edit" data-id="'+it.id+'">Trocar carro</button>'
-          :'<button type="button" class="lib'+(modoAtr?' sm':'')+'" data-act="ok" data-id="'+it.id+'" aria-label="Liberar '+esc(it.veiculo||it.escala)+'">'+ICO_LOCK+'Liberar</button>')+'</div>'+
+      (itd?'<button type="button" class="out" data-act="edit" data-id="'+it.id+'">Trocar carro</button>':'')+
+      ('<button type="button" class="lib'+(modoAtr?' sm':'')+'" data-act="ok" data-id="'+it.id+'" aria-label="Liberar '+esc(it.veiculo||it.escala)+'">'+ICO_LOCK+'Liberar</button>')+'</div>'+
   '</div>';
 }
 
@@ -499,12 +504,17 @@ function item(id){ return S.dia.itens.filter(function(i){return i.id===id;})[0];
 
 /* OK da tela Soltura: registra na hora e a escala vai para Realizadas */
 function okSoltura(it){
-  if(semCarro(it) || it.interd || !it.cracha || S.dia.data!==S.dia.hoje){ abrir(it,'soltar'); return; }
+  if(semCarro(it) || !it.cracha || S.dia.data!==S.dia.hoje){ abrir(it,'soltar'); return; }
+  var obsOS='';
+  if(it.interd){
+    if(!confirmSafe((it.veiculo||'')+' está com a O.S. '+(it.interd.os||'')+' aberta'+(it.interd.motivo?' ('+it.interd.motivo.slice(0,80)+')':'')+'.\n\nLiberar mesmo assim?')) return;
+    obsOS='Liberado com O.S. aberta '+(it.interd.os||'');
+  }
   var h=hhmm(agora());
   var d=Math.round((agora()-it.prevMs)/60000), tol=S.dia.cfg.tolerancia;
   it.reg={_pend:true,status:d>tol?'ATRASADA':(d<-tol?'ADIANTADA':'NO_HORARIO'),hora_real:h,desvio_min:d,veiculo_real:it.veiculo,cracha_real:it.cracha,motorista_real:it.motorista,troca_veiculo:'',troca_motorista:'',motivo:'',conferido:''};
   render();
-  api('registrar',{id:it.id,acao:'SAIU',responsavel:getResp(),garagem:getGar()},true).then(function(reg){
+  api('registrar',{id:it.id,acao:'SAIU',responsavel:getResp(),garagem:getGar(),observacao:obsOS},true).then(function(reg){
     it.reg=reg; render();
     toast((it.veiculo||it.escala)+' liberado às '+reg.hora_real,false,function(){ voltarSoltura(it); });
   }).catch(function(e){ it.reg=null; render(); toast(it.escala+': '+e.message,true); });
@@ -544,7 +554,6 @@ function abrir(it, modo, focoMotivo){
   if(modo==='soltar') bt='<button class="btn dan" type="button" data-m="nao">Não saiu</button><div class="sp"></div><button class="btn" type="button" data-m="cancel">Cancelar</button><button class="btn pri" type="button" data-m="soltar">Liberar</button>';
   else bt='<button class="btn" type="button" data-m="voltar">Voltar para pendentes</button><div class="sp"></div><button class="btn" type="button" data-m="cancel">Cancelar</button><button class="btn pri" type="button" data-m="salvar">Salvar e confirmar</button>';
   $('mAct').innerHTML=bt;
-  if(it.interd && !r){ $('mVei').value=''; }
   validar(); $('ov').classList.add('on');
   setTimeout(function(){ if(focoMotivo){ $('mMotivo').focus(); return; } (!$('mVei').value?$('mVei'):(!S.sel?$('mBusca'):null)||{focus:function(){}}).focus(); },60);
 }
@@ -595,7 +604,7 @@ function validar(){
   $('mReq').style.display=precisa?'inline':'none';
   var w=[]; if(atrasada) w.push('Saída '+d+' min após o previsto.'); if(trocaV) w.push('Carro diferente do escalado.'); if(trocaM) w.push('Motorista diferente do escalado.');
   if(precisa) w.push('Informe o motivo para conferir.');
-  var bloq=interdNome(v); if(bloq) w.unshift('O carro '+v+' está interditado (O.S. '+(bloq.os||'—')+'). Escolha outro carro.');
+  var bloq=interdNome(v); if(bloq) w.unshift('Atenção: '+v+' está com a O.S. '+(bloq.os||'—')+' aberta. Pode liberar, mas fica registrado.');
   $('mAlerta').style.display=w.length?'block':'none'; $('mAlerta').textContent=w.join(' ');
   return {h:h,v:v,m:m,precisa:precisa};
 }
@@ -606,13 +615,16 @@ function salvar(acao){
   if(acao==='SAIU'){
     if(!x.h) return toast('Informe a hora de saída.',true);
     if(!x.v||x.v==='FOLGADOR') return toast('Informe o carro.',true);
-    if(interdNome(x.v)) return toast('O carro '+x.v+' está interditado. Escolha outro carro.',true);
+    var osV=interdNome(x.v);
+    if(osV && !confirmSafe(x.v+' está com a O.S. '+(osV.os||'')+' aberta. Liberar mesmo assim?')) return;
     if(!x.m.c) return toast('Escolha o motorista.',true);
     if(S.novo && !x.m.n) return toast('Informe o nome do motorista novo.',true);
     if(x.precisa && !mot){ $('mMotivo').focus(); return toast('Selecione o motivo.',true); }
   } else if(!mot){ $('lbMotivo').scrollIntoView({block:'center'}); $('mMotivo').focus(); return toast('Selecione o motivo de não ter saído.',true); }
   var conferir=S.modo==='editar';
-  var p={id:it.id,acao:acao,hora_real:x.h,veiculo:x.v,cracha:x.m.c,motorista:x.m.n,motivo:mot,observacao:$('mObs').value.trim(),responsavel:getResp(),conferir:conferir,garagem:(it.reg&&it.reg.garagem)||getGar()};
+  var obsTxt=$('mObs').value.trim(), osSel=acao==='SAIU'?interdNome(x.v):null;
+  if(osSel && obsTxt.indexOf('O.S. aberta')<0) obsTxt=(obsTxt?obsTxt+' · ':'')+'Liberado com O.S. aberta '+(osSel.os||'');
+  var p={id:it.id,acao:acao,hora_real:x.h,veiculo:x.v,cracha:x.m.c,motorista:x.m.n,motivo:mot,observacao:obsTxt,responsavel:getResp(),conferir:conferir,garagem:(it.reg&&it.reg.garagem)||getGar()};
   S.busy=true; loading(true);
   api('registrar',p,true).then(function(reg){
     it.reg=reg;

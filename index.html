@@ -39,7 +39,7 @@
   .who{height:40px;padding:0 12px;border-radius:10px;border:1px solid var(--ln2);background:var(--card);color:var(--tx2);font-size:13px;font-weight:600}
 
   /* busca + filtros */
-  .tool{display:flex;gap:12px;padding:16px 24px 12px}
+  .tool{display:flex;gap:12px;padding:0 24px 12px}
   .busca{flex:1;display:flex;align-items:center;gap:10px;height:48px;padding:0 16px;background:var(--card);border:1px solid var(--ln2);border-radius:12px;color:#6B7A8C}
   .busca{min-width:0} .busca input{flex:1;min-width:0;width:100%;border:0;outline:none;background:transparent;color:var(--tx)}
   .bfil{display:flex;align-items:center;gap:8px;height:48px;padding:0 20px;background:var(--card);border:1px solid var(--ln2);border-radius:12px;font-weight:600;color:var(--tx)}
@@ -50,9 +50,14 @@
   .filtros select,.filtros input{height:44px;min-width:220px;padding:0 12px;border:1px solid var(--ln2);border-radius:10px;background:var(--card)}
 
   /* abas */
-  .tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:0 24px 10px}
+  .tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:16px 24px 12px}
   .tab{height:46px;border-radius:10px;border:1px solid var(--ln2);background:var(--card);color:var(--tx2);font-size:15px;font-weight:700}
-  .tab.on{background:var(--green);border-color:var(--green);color:#FFFFFF}
+  .tab.t-pend{background:#EAF6EF;border-color:#BFE3CD;color:var(--green-d)}
+  .tab.t-interd{background:#FDEEEA;border-color:#F3C9BC;color:var(--red-d)}
+  .tab.t-lib{background:#EAF1FA;border-color:#C3D6EE;color:var(--blue-d)}
+  .tab.t-pend.on{background:var(--green);border-color:var(--green);color:#FFFFFF}
+  .tab.t-interd.on{background:#C2410C;border-color:#C2410C;color:#FFFFFF}
+  .tab.t-lib.on{background:var(--blue);border-color:var(--blue);color:#FFFFFF}
   .resumo{padding:0 24px 10px;font-size:14px;color:var(--mut)} .resumo b{color:var(--tx)} .resumo .c{color:var(--red-d)}
   .banner{margin:0 24px 12px;padding:10px 14px;border-radius:10px;background:var(--amb-bg);border:1px solid #F0D58C;color:var(--amb-d);font-size:14px;font-weight:600}
 
@@ -161,9 +166,9 @@
     header{flex-wrap:wrap;gap:8px 12px;padding:10px 14px}
     .hinfo{order:3;width:100%;justify-content:space-between}
     .who{margin-left:auto}
-    .tool{padding:12px 14px 10px} .bfil{padding:0 14px}
+    .tool{padding:0 14px 10px} .bfil{padding:0 14px}
     .filtros{margin:0 14px 10px} .filtros label,.filtros select,.filtros input{width:100%;min-width:0}
-    .tabs{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:0 14px 10px} .tab{font-size:13px;padding:0 4px} .tx-ext{display:none}
+    .tabs{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:12px 14px 10px} .tab{font-size:13px;padding:0 4px} .tx-ext{display:none}
     .resumo,.banner{margin-left:14px;margin-right:14px;padding-left:0;padding-right:0}
     .banner{padding:10px 12px}
     .list{padding:0 14px 32px}
@@ -194,6 +199,7 @@
   <button class="who" id="btnWho" type="button">Responsável: —</button>
 </header>
 
+<nav class="tabs" id="tabs"></nav>
 <div class="tool">
   <label class="busca">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
@@ -201,7 +207,7 @@
   </label>
 </div>
 
-<nav class="tabs" id="tabs"></nav>
+
 <div class="banner" id="banner" style="display:none"></div>
 <div class="list" id="list"></div>
 
@@ -386,7 +392,7 @@ function render(){
 
   $('tabs').innerHTML=TABS.map(function(t){
     var extra='';
-    return '<button type="button" class="tab'+(S.tab===t[0]?' on':'')+''+'" data-tab="'+t[0]+'">'+t[1]+' ('+n[t[0]]+')'+extra+'</button>';
+    return '<button type="button" class="tab t-'+t[0]+(S.tab===t[0]?' on':'')+'" data-tab="'+t[0]+'">'+t[1]+' ('+n[t[0]]+')'+extra+'</button>';
   }).join('');
 
   var r=[], h='';

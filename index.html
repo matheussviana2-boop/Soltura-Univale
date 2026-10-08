@@ -58,6 +58,11 @@
   .nm{font-weight:600;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .sub{font-size:13px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
   .warn-txt{color:var(--late)}
+  .loc{font-size:13px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .loc.in{color:var(--ok)} .loc.out{color:var(--late)} .loc.ns{color:var(--mut)}
+  .grp{display:flex;align-items:center;gap:10px;width:100%;margin-top:10px;padding:14px 16px;border-radius:12px;border:1px dashed var(--ln2);background:transparent;color:var(--tx2);font-size:16px;font-weight:700;text-align:left}
+  .grp .n{font-family:var(--mono);padding:2px 8px;border-radius:999px;background:var(--sf2)}
+  .grp .sp{flex:1} .grp small{font-weight:500;color:var(--mut);font-size:13px}
   .ok{height:60px;border-radius:12px;border:0;background:var(--amb);color:#0E1318;font-family:var(--cond);font-size:24px;font-weight:700}
   .ok:active{transform:scale(.97)}
 
@@ -130,7 +135,7 @@
   @media (max-width:760px){
     header{padding:10px 12px}
     .brand{order:1} header .grow{order:2} .clock{order:3;font-size:22px} .who{order:4;height:36px;padding:0 10px;font-size:13px}
-    #fData{order:5;flex:1 1 140px} #fSetor{order:6;flex:1 1 160px;min-width:0}
+    #fData{order:5;flex:1 1 140px} #fGar{order:6;flex:1 1 160px;min-width:0}
     nav{padding:8px 12px} .aba{height:52px;font-size:18px;gap:6px} .alT{display:none}
     .bar{padding:10px 12px} .search{flex:1 1 100%}
     .list{padding:0 12px 32px}
@@ -153,7 +158,7 @@
     SOLTURA
   </div>
   <input type="date" id="fData" class="ctl" aria-label="Data">
-  <select id="fSetor" class="ctl" aria-label="Setor"><option value="">Todos os setores</option></select>
+  <select id="fGar" class="ctl" aria-label="Garagem deste aparelho"><option value="">Todas as garagens</option></select>
   <div class="grow"></div>
   <div class="clock" id="clock">--:--</div>
   <button class="who" id="btnWho" type="button">Responsável: —</button>
@@ -212,7 +217,7 @@
 var API_URL = 'https://script.google.com/macros/s/AKfycbzv0y28Rhb-Iy27Y8Z5daelqH8uHbXDGKauEpNUfeuvSoDhQsKI4hmlJeK4eSrKsqh9Pw/exec';
 
 var S = { dia:null, cad:{motivos:[],veiculos:[],motoristas:{}}, offset:0, tela:'soltura', filtroR:'conferir', atual:null, modo:null, sel:null, novo:false, busy:false };
-var LS_RESP='soltura.responsavel', LS_CHAVE='soltura.chave';
+var LS_RESP='soltura.responsavel', LS_CHAVE='soltura.chave', LS_GAR='soltura.garagem';
 
 function $(id){ return document.getElementById(id); }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
@@ -269,10 +274,23 @@ function precisaMotivo(it, r){
 }
 
 /* ===================== render ===================== */
+function getGar(){ return $('fGar').value; }
+function telOk(){ var t=S.dia&&S.dia.telemetria; return !!(t&&t.ativa&&!t.erro); }
+/* onde o carro está: 'in' (nesta garagem), 'outra', 'fora' (fora das garagens / sem sinal / sem carro), null (sem telemetria) */
+function local(it){
+  if(!telOk()) return null;
+  var G=getGar(), t=it.tel;
+  if(semCarro(it)) return {k:'fora',txt:'Sem carro definido — escolha o carro ao soltar'};
+  if(!t) return {k:'fora',txt:'Carro não encontrado na telemetria'};
+  if(t.semSinal) return {k:'fora',ns:true,txt:'Sem sinal'+(t.quando?' desde '+t.quando:'')+(t.ponto?' · último local: '+t.ponto:'')};
+  if(t.garagem && (!G || t.garagem===G)) return {k:'in',txt:'No pátio · '+t.garagem+(t.ignicao==='ON'?' · ligado':'')};
+  if(t.garagem) return {k:'outra',txt:'Na garagem '+t.garagem};
+  return {k:'fora',txt:(t.ponto||'Em rota')+(t.dist?' ('+t.dist+' m)':'')+' · '+t.quando+' · '+(t.vel>0?Math.round(t.vel)+' km/h':(t.ignicao==='ON'?'ligado':'desligado'))};
+}
 function base(){
-  var setor=$('fSetor').value, q=semAcento(($('fBusca')||{}).value||'').trim();
+  var G=getGar(), q=semAcento(($('fBusca')||{}).value||'').trim();
   return S.dia.itens.filter(function(it){
-    if(setor && it.setor!==setor) return false;
+    if(G && it.reg && it.reg.garagem && it.reg.garagem!==G && !q) return false;
     if(q){ var r=it.reg||{}; var hay=semAcento([it.escala,it.veiculo,it.cracha,it.motorista,it.linha,r.veiculo_real,r.cracha_real,r.motorista_real].join(' ')); if(hay.indexOf(q)<0) return false; }
     return true;
   });
@@ -296,26 +314,44 @@ function render(){
 
 function barHTML(extra){ return extra+'<div class="grow"></div><input class="search" id="fBusca" placeholder="Buscar escala, carro, matrícula ou nome" aria-label="Buscar">'; }
 
-function renderSoltura(pend){
-  pend.forEach(function(it){ it._st=statusPend(it); });
+function renderSoltura(todosPend){
+  var G=getGar(), busca=(($('fBusca')||{}).value||'').trim();
+  todosPend.forEach(function(it){ it._st=statusPend(it); it._loc=local(it); });
+  // com telemetria e garagem escolhida: só os carros desta garagem; o resto vai para "Sem garagem"
+  var pend=todosPend, sem=[], outra=0;
+  if(telOk() && G && !busca){
+    pend=todosPend.filter(function(i){return i._loc.k==='in';});
+    sem=todosPend.filter(function(i){return i._loc.k==='fora';});
+    outra=todosPend.filter(function(i){return i._loc.k==='outra';}).length;
+  }
+  $('nS').textContent=pend.length;
   var atr=pend.filter(function(i){return i._st.k==='crit';}).length;
   var prox=pend.filter(function(i){return i._st.k==='soon'||i._st.k==='tol';}).length;
-  $('bar').innerHTML=barHTML('<div class="resumo">'+(atr?'<b class="c">'+atr+' atrasada'+(atr>1?'s':'')+' no pátio</b> · ':'')+'<b>'+prox+'</b> saindo nos próximos '+S.dia.cfg.antecedencia+' min · <b>'+pend.length+'</b> a soltar</div>');
+  $('bar').innerHTML=barHTML('<div class="resumo">'+(atr?'<b class="c">'+atr+' atrasada'+(atr>1?'s':'')+'</b> · ':'')+'<b>'+prox+'</b> saindo nos próximos '+S.dia.cfg.antecedencia+' min · <b>'+pend.length+'</b> a soltar'+(outra?' · '+outra+' na outra garagem':'')+'</div>');
   var h='';
-  if(!pend.length) h='<div class="empty">Tudo solto por aqui. As saídas estão na aba Realizadas.</div>';
-  pend.forEach(function(it){
-    var st=it._st, sc=semCarro(it);
+  if(!pend.length) h='<div class="empty">'+(sem.length?'Nenhum carro escalado está no pátio agora.':'Tudo solto por aqui. As saídas estão na aba Realizadas.')+'</div>';
+  pend.forEach(function(it){ h+=linhaSoltura(it); });
+  if(sem.length){
+    var atrS=sem.filter(function(i){return i._st.k==='crit';}).length;
+    h+='<button type="button" class="grp" id="btnSem"><span>Sem garagem</span><span class="n">'+sem.length+'</span>'+(atrS?'<small style="color:var(--crit)">'+atrS+' atrasada'+(atrS>1?'s':'')+'</small>':'')+'<span class="sp"></span><small>'+(S.abrirSem?'ocultar':'carro fora do pátio, sem sinal ou sem carro')+'</small></button>';
+    if(S.abrirSem) sem.forEach(function(it){ h+=linhaSoltura(it); });
+  }
+  $('list').innerHTML=h;
+}
+
+function linhaSoltura(it){
+    var st=it._st, sc=semCarro(it), lc=it._loc, h='';
     h+='<div class="sl'+(st.crit?' crit':'')+'" id="r-'+it.id+'">'+
       '<div class="c-h"><div class="h">'+esc(it.hora_prevista)+'</div><div class="esc">'+esc(it.escala)+'</div></div>'+
       '<div class="who2" data-act="edit" data-id="'+it.id+'" title="Toque para alterar ou marcar que não saiu">'+
         '<div class="t"><span class="car'+(sc?' warn-txt':'')+'">'+(sc?(it.veiculo?esc(it.veiculo):'Sem carro'):esc(it.veiculo))+'</span><span class="nm">'+(it.motorista?esc(titulo(it.motorista)):'<span class="warn-txt">Sem motorista</span>')+'</span></div>'+
         '<div class="sub">'+esc(it.cracha||'—')+' · '+esc(it.linha)+'</div>'+
+        (lc?'<div class="loc '+(lc.k==='in'?'in':(lc.ns?'ns':'out'))+'">'+(lc.k==='in'?'● ':'')+esc(lc.txt)+'</div>':'')+
       '</div>'+
       '<div class="c-st"><span class="badge b-'+st.k+'">'+esc(st.txt)+'</span></div>'+
       '<button type="button" class="ok" data-act="ok" data-id="'+it.id+'" aria-label="OK, soltar '+esc(it.escala)+'">OK</button>'+
     '</div>';
-  });
-  $('list').innerHTML=h;
+    return h;
 }
 
 function renderRealizadas(feitas,aConf){
@@ -356,9 +392,11 @@ function renderRealizadas(feitas,aConf){
 function tick(){
   if(!S.dia) return;
   $('clock').textContent=hhmm(agora());
-  var b=$('banner');
-  if(S.dia.data!==S.dia.hoje){ b.style.display='block'; b.textContent='Você está vendo '+fmtData(S.dia.data)+', não hoje. Ao soltar, a hora de saída precisa ser informada.'; }
-  else b.style.display='none';
+  var b=$('banner'), msgs=[];
+  if(S.dia.data!==S.dia.hoje) msgs.push('Você está vendo '+fmtData(S.dia.data)+', não hoje. Ao soltar, a hora de saída precisa ser informada.');
+  if(S.dia.telemetria&&S.dia.telemetria.erro) msgs.push(S.dia.telemetria.erro+' — mostrando todas as escalas.');
+  else if(telOk()&&!getGar()) msgs.push('Escolha a garagem deste aparelho no topo da tela para ver só os carros do seu pátio.');
+  b.style.display=msgs.length?'block':'none'; b.textContent=msgs.join(' ');
   if(!S.atual) render();
 }
 
@@ -372,8 +410,8 @@ function carregar(silencioso){
     if(S.dia) S.dia.itens.forEach(function(o){ if(o.reg&&o.reg._pend){ d.itens.forEach(function(n){ if(n.id===o.id&&!n.reg) n.reg=o.reg; }); } });
     S.dia=d;
     if(!$('fData').value) $('fData').value=d.data;
-    var sel=$('fSetor'), cur=sel.value;
-    sel.innerHTML='<option value="">Todos os setores</option>'+d.setores.map(function(s){return '<option'+(s===cur?' selected':'')+'>'+esc(s)+'</option>';}).join('');
+    var sel=$('fGar'), cur=sel.value||ls(LS_GAR);
+    sel.innerHTML='<option value="">Todas as garagens</option>'+(d.garagens||[]).map(function(g){return '<option'+(g===cur?' selected':'')+'>'+esc(g)+'</option>';}).join('');
     tick();
   }).catch(function(e){ toast('Erro ao carregar: '+e.message,true); }).then(function(){ loading(false); });
 }
@@ -388,7 +426,7 @@ function okSoltura(it){
   var d=Math.round((agora()-it.prevMs)/60000), tol=S.dia.cfg.tolerancia;
   it.reg={_pend:true,status:d>tol?'ATRASADA':(d<-tol?'ADIANTADA':'NO_HORARIO'),hora_real:h,desvio_min:d,veiculo_real:it.veiculo,cracha_real:it.cracha,motorista_real:it.motorista,troca_veiculo:'',troca_motorista:'',motivo:'',conferido:''};
   render();
-  api('registrar',{id:it.id,acao:'SAIU',responsavel:getResp()},true).then(function(reg){
+  api('registrar',{id:it.id,acao:'SAIU',responsavel:getResp(),garagem:getGar()},true).then(function(reg){
     it.reg=reg; render();
     toast(it.escala+' solta às '+reg.hora_real,false,function(){ voltarSoltura(it); });
   }).catch(function(e){ it.reg=null; render(); toast(it.escala+': '+e.message,true); });
@@ -400,7 +438,7 @@ function okConferir(it){
   if(precisaMotivo(it,r)){ abrir(it,'editar'); return; }
   var ant=JSON.parse(JSON.stringify(r));
   r.conferido='SIM'; r.conferido_por=getResp(); r._pend=true; render();
-  var p={id:it.id,acao:r.status==='NAO_SAIU'?'NAO_SAIU':'SAIU',hora_real:r.hora_real,veiculo:r.veiculo_real,cracha:r.cracha_real,motorista:r.motorista_real,motivo:r.motivo,observacao:r.observacao,responsavel:getResp(),conferir:true};
+  var p={id:it.id,acao:r.status==='NAO_SAIU'?'NAO_SAIU':'SAIU',hora_real:r.hora_real,veiculo:r.veiculo_real,cracha:r.cracha_real,motorista:r.motorista_real,motivo:r.motivo,observacao:r.observacao,responsavel:getResp(),conferir:true,garagem:r.garagem||getGar()};
   api('registrar',p,true).then(function(reg){ it.reg=reg; render(); toast(it.escala+' conferida'); })
     .catch(function(e){ it.reg=ant; render(); toast(e.message,true); });
 }
@@ -493,7 +531,7 @@ function salvar(acao){
     if(x.precisa && !mot){ $('mMotivo').focus(); return toast('Selecione o motivo.',true); }
   } else if(!mot){ $('lbMotivo').scrollIntoView({block:'center'}); $('mMotivo').focus(); return toast('Selecione o motivo de não ter saído.',true); }
   var conferir=S.modo==='editar';
-  var p={id:it.id,acao:acao,hora_real:x.h,veiculo:x.v,cracha:x.m.c,motorista:x.m.n,motivo:mot,observacao:$('mObs').value.trim(),responsavel:getResp(),conferir:conferir};
+  var p={id:it.id,acao:acao,hora_real:x.h,veiculo:x.v,cracha:x.m.c,motorista:x.m.n,motivo:mot,observacao:$('mObs').value.trim(),responsavel:getResp(),conferir:conferir,garagem:(it.reg&&it.reg.garagem)||getGar()};
   S.busy=true; loading(true);
   api('registrar',p,true).then(function(reg){
     it.reg=reg;
@@ -522,7 +560,8 @@ $('list').addEventListener('click',function(e){
 $('bar').addEventListener('click',function(e){ var b=e.target.closest('[data-filtro]'); if(b){ S.filtroR=b.getAttribute('data-filtro'); render(); } });
 $('bar').addEventListener('input',function(e){ if(e.target.id==='fBusca') render(); });
 document.querySelector('nav').addEventListener('click',function(e){ var b=e.target.closest('[data-tela]'); if(b){ S.tela=b.getAttribute('data-tela'); render(); window.scrollTo(0,0); } });
-$('fSetor').addEventListener('change',render);
+$('fGar').addEventListener('change',function(){ ls(LS_GAR,this.value); tick(); });
+$('list').addEventListener('click',function(e){ if(e.target.closest('#btnSem')){ S.abrirSem=!S.abrirSem; render(); } });
 $('fData').addEventListener('change',function(){ carregar(false); });
 $('btnWho').addEventListener('click',pedirResp);
 $('mAct').addEventListener('click',function(e){

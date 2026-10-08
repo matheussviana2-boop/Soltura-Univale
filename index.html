@@ -70,6 +70,8 @@
   .info svg{flex-shrink:0}
   .info .loc{font-size:13px;font-weight:600}
   .chg{color:var(--blue-d);font-weight:700}
+  .maplink{flex-shrink:0;display:inline-flex;align-items:center;min-height:32px;padding:0 10px;border-radius:8px;border:1px solid var(--ln2);background:var(--card);color:var(--navy);font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap}
+  .maplink:hover{border-color:var(--navy)}
   .stat{width:210px;flex-shrink:0}
   .pill{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;font-size:13px;font-weight:700;white-space:nowrap}
   .pill i{width:8px;height:8px;border-radius:50%;flex-shrink:0}
@@ -308,10 +310,17 @@ function local(it){
   var G=getGar(), t=it.tel;
   if(semCarro(it)) return {k:'fora',txt:'Sem carro definido'};
   if(!t) return {k:'fora',txt:'Carro não encontrado na telemetria'};
-  if(t.semSinal) return {k:'fora',ns:true,txt:'Sem sinal'+(t.quando?' desde '+t.quando:'')+(t.ponto?' · '+t.ponto:'')};
-  if(t.garagem && (!G || t.garagem===G)) return {k:'in',txt:'No pátio'+(G?'':' · '+t.garagem)+(t.ignicao==='ON'?' · motor ligado':'')};
-  if(t.garagem) return {k:'outra',txt:'Na garagem '+t.garagem};
+  // sinal antigo não muda onde o carro está: vale a última posição conhecida
+  var antigo=t.idade!=null && t.idade>30;
+  var sinal=t.semSinal?' · sem sinal desde '+t.quando:(antigo?' · último sinal '+t.quando:'');
+  if(t.garagem && (!G || t.garagem===G)) return {k:'in',txt:'No pátio'+(G?'':' · '+t.garagem)+(t.ignicao==='ON'&&!antigo?' · motor ligado':'')+sinal};
+  if(t.garagem) return {k:'outra',txt:'Na garagem '+t.garagem+sinal};
+  if(t.semSinal) return {k:'fora',ns:true,txt:'Sem sinal desde '+t.quando+(t.ponto?' · último local: '+t.ponto:'')};
   return {k:'fora',txt:(t.ponto||'Em rota')+' · '+t.quando+' · '+(t.vel>0?Math.round(t.vel)+' km/h':(t.ignicao==='ON'?'ligado':'desligado'))};
+}
+function mapa(it){
+  var t=it.tel; if(!t||!t.lat||!t.lng) return '';
+  return '<a class="maplink" href="https://www.google.com/maps?q='+encodeURIComponent(t.lat+','+t.lng)+'" target="_blank" rel="noopener" title="Abrir a última posição no mapa">Ver no mapa</a>';
 }
 function base(){
   var G=getGar(), q=semAcento($('fBusca').value).trim();
@@ -428,7 +437,7 @@ function linhaPend(it,modoAtr){
   else if(st.k==='soon'){ k='ready'; txt='Pronto para soltura'; stx=st.txt; }
   else { k='pend'; txt='Pendente'; }
   if(!itd && st.k==='crit' && lc && lc.k!=='in') stx=sc?'Definir carro':(lc.ns?'Sem sinal da telemetria':'Carro fora do pátio');
-  var locHtml=lc?'<div class="loc" style="color:'+(lc.k==='in'?'var(--green-d)':'var(--amb-d)')+'">'+ICO_PIN+'<span>'+esc(lc.txt)+'</span></div>':'';
+  var locHtml=lc?'<div class="loc" style="color:'+(lc.k==='in'?'var(--green-d)':'var(--amb-d)')+'">'+ICO_PIN+'<span>'+esc(lc.txt)+'</span>'+mapa(it)+'</div>':'';
   return '<div class="row k-'+k+'" id="r-'+it.id+'">'+
     '<div class="bar"></div><div class="bus" role="img" aria-label="Ônibus"></div>'+
     '<div class="ident"><div class="pref">'+(sc?'<span style="color:var(--amb-d)">'+(it.veiculo?esc(it.veiculo):'Sem carro')+'</span>':esc(it.veiculo))+'</div><div class="esc">'+esc(it.escala)+' · '+esc(it.linha)+'</div></div>'+
@@ -642,6 +651,7 @@ function pedirResp(){
 
 /* ===================== eventos ===================== */
 $('list').addEventListener('click',function(e){
+  if(e.target.closest('a.maplink')) return;
   var b=e.target.closest('[data-act]'); if(!b||b.disabled) return;
   var it=item(b.getAttribute('data-id')); if(!it) return;
   var a=b.getAttribute('data-act');

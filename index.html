@@ -747,7 +747,7 @@ function render(){
 
   $('tabs').innerHTML=TABS.map(function(t){
     var extra='';
-    return '<button type="button" class="tab t-'+t[0]+(S.tab===t[0]?' on':'')+'" data-tab="'+t[0]+'"><i></i>'+t[1]+'<span class="n">'+n[t[0]]+'</span>'+extra+'</button>';
+    return '<button type="button" class="tab t-'+t[0]+(S.tab===t[0]?' on':'')+'" data-tab="'+t[0]+'"><i></i>'+t[1]+(t[0]==='pend'?'':'<span class="n">'+n[t[0]]+'</span>')+extra+'</button>';
   }).join('');
 
   var r=[], h='';
@@ -859,7 +859,7 @@ function linhaInterd(x){
   var prox=esc_.filter(function(i){return !i.reg;})[0];
   var lista=esc_.map(function(i){
     var st=i.reg?(i.reg.status==='NAO_SAIU'?'não saiu':'saiu '+i.reg.hora_real+(i.reg.troca_veiculo==='SIM'?' com '+i.reg.veiculo_real:'')):'pendente';
-    return '<span class="esc-chip'+(i.reg?'':' pend')+'">'+esc(i.hora_prevista)+' '+esc(i.escala)+' · '+esc(titulo(i.motorista))+' · '+st+'</span>';
+    return '<span class="esc-chip'+(i.reg?'':' pend')+'">'+esc(i.hora_prevista)+' '+esc(i.escala)+(i.motorista?' · '+esc(titulo(i.motorista)):'')+' · '+st+'</span>';
   }).join('');
   var acts=prox?'<div class="acts"><button type="button" class="out" data-act="edit" data-id="'+prox.id+'">Trocar carro</button>'+slideLib(prox.id,'Liberar',true)+'</div>':'';
   return '<div class="row">'+

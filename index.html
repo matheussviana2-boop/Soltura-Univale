@@ -117,6 +117,10 @@
   .avpop .avi span{flex:1;min-width:0;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .row.pisca{animation:pisca 1.2s ease}
   @keyframes pisca{0%,100%{box-shadow:inset 4px 0 0 #00A19B}40%{box-shadow:0 0 0 4px rgba(0,161,155,.35),inset 4px 0 0 #00A19B}}
+  .resp{display:flex;align-items:center;gap:10px;flex-shrink:0;min-width:150px;max-width:220px;padding:8px 12px 8px 8px;border-radius:12px;background:#F4F6F9}
+  .resp .av{width:34px;height:34px;flex-shrink:0;border-radius:50%;background:var(--navy);color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-weight:700}
+  .resp small{display:block;font-size:11px;color:var(--mut);font-weight:600}
+  .resp b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .tmini{display:flex;align-items:center;gap:10px;white-space:nowrap;margin-top:5px;font-size:12px;font-weight:600;color:#6B7A90}
   .tmini span{display:inline-flex;align-items:center;gap:4px}
   .tmini .ig{width:22px;height:22px;justify-content:center;border-radius:6px;background:#F1F4F8;color:#8A97A8}
@@ -223,6 +227,13 @@
   .btn.dan{border-color:#F1C7B8;color:var(--red-d)}
 
   .mapmd{width:min(900px,100%);padding:16px}
+  .ov.conf{z-index:26}
+  .cfmd{width:min(440px,100%);text-align:left}
+  .cfico{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;background:#FDECE7;color:#C2410C}
+  .cfico.az{background:#E7EEF8;color:#1E4E8C}
+  .cfmsg{font-size:15px;color:var(--tx2);line-height:1.45;margin-top:6px}
+  .cfmsg .cfbox{margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--bg);font-size:13px;color:var(--tx)}
+  .cfmd .btn{flex:1} .cfmd .mact .sp{display:none}
   .maphead{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
   .maphead>div{flex:1}
   #mapFrame{display:block;width:100%;height:min(60vh,520px);border:0;border-radius:12px;background:var(--bg)}
@@ -263,6 +274,7 @@
     .info{order:4;flex-basis:100%;padding-left:12px}
     .stat{order:3}
     .acts{order:5;flex-basis:100%;padding-left:12px}
+    .resp{order:6;margin-left:12px;max-width:none}
     .acts .lib,.acts .out,.acts .slide{flex:1;width:auto}
     .acts .maplink{height:auto;min-height:46px}
     .mapcol{width:auto;flex-direction:row;gap:8px} .lugar{text-align:left}
@@ -367,6 +379,15 @@
     <div class="mact"><div class="sp"></div><button type="button" class="btn" id="pkFechar">Cancelar</button></div>
   </div>
 </div>
+<!-- confirmação no estilo do sistema -->
+<div class="ov conf" id="ovConf" role="alertdialog" aria-modal="true" aria-labelledby="cfTit" aria-describedby="cfMsg">
+  <div class="md cfmd">
+    <div class="cfico" id="cfIco"></div>
+    <h2 id="cfTit">Confirmar</h2>
+    <div class="cfmsg" id="cfMsg"></div>
+    <div class="mact"><button type="button" class="btn" id="cfNao">Cancelar</button><div class="sp"></div><button type="button" class="btn pri" id="cfSim">Confirmar</button></div>
+  </div>
+</div>
 <div class="toast" id="toast"><span id="toastTx"></span><button type="button" id="toastBtn" style="display:none">Desfazer</button></div>
 
 <script>
@@ -389,9 +410,9 @@ function fmtData(iso){ var p=iso.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
 function semCarro(it){ return !it.veiculo || it.veiculo.toUpperCase()==='FOLGADOR'; }
 
 var _tt;
-function toast(msg, err, undo){
+function toast(msg, err, undo, rotulo){
   var t=$('toast'); $('toastTx').textContent=msg; t.className='toast on'+(err?' err':'');
-  var b=$('toastBtn'); b.style.display=undo?'inline-block':'none'; b.onclick=function(){ t.className='toast'; undo(); };
+  var b=$('toastBtn'); b.style.display=undo?'inline-block':'none'; b.textContent=rotulo||'Desfazer'; b.onclick=function(){ t.className='toast'; undo(); };
   clearTimeout(_tt); _tt=setTimeout(function(){ t.className='toast'; }, undo?7000:(err?5000:2600));
 }
 function loading(on){ var l=$('loading'); l.style.width=on?'70%':'100%'; if(!on) setTimeout(function(){ l.style.width='0'; },300); }
@@ -580,7 +601,32 @@ function avisos(lista){
   $('avPop').innerHTML='<h4>Saíram sem liberação</h4><p>A telemetria viu '+(lista.length===1?'este carro sair':'estes carros saírem')+' da garagem sem registro no sistema. Toque para ir até a linha e confirmar a saída.</p>'+
     lista.map(function(it){ return '<button type="button" class="avi" data-goto="'+it.id+'"><b>'+esc(it.saida.hora)+'</b><span><strong>'+esc(it.veiculo)+'</strong> · '+esc(it.escala)+' · prev. '+esc(it.hora_prevista)+'</span></button>'; }).join('');
 }
-function confirmSafe(msg){ try{ return window.confirm(msg); }catch(e){ return true; } }
+/* caixa de confirmação do sistema → Promise(true/false) */
+var ICO_ALERTA='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><circle cx="12" cy="17" r=".6"/></svg>';
+var ICO_TROCA='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h13l-3-3M20 17H7l3 3"/></svg>';
+function confirmar(o){
+  return new Promise(function(res){
+    $('cfTit').textContent=o.titulo||'Confirmar';
+    $('cfMsg').innerHTML=o.html||'';
+    $('cfIco').className='cfico'+(o.azul?' az':''); $('cfIco').innerHTML=o.icone||ICO_ALERTA;
+    $('cfSim').textContent=o.ok||'Confirmar'; $('cfNao').textContent=o.nao||'Cancelar';
+    var ov=$('ovConf'); ov.classList.add('on');
+    function fim(v){ ov.classList.remove('on'); $('cfSim').onclick=$('cfNao').onclick=ov.onclick=null; document.removeEventListener('keydown',tecla); res(v); }
+    function tecla(e){ if(e.key==='Escape') fim(false); }
+    $('cfSim').onclick=function(){ fim(true); }; $('cfNao').onclick=function(){ fim(false); };
+    ov.onclick=function(e){ if(e.target===ov) fim(false); };
+    document.addEventListener('keydown',tecla);
+    setTimeout(function(){ $('cfNao').focus(); },30);
+  });
+}
+function confirmaOS(v, x){
+  return confirmar({titulo:v+' está com O.S. aberta', ok:'Liberar mesmo assim',
+    html:'Liberar este carro mesmo com a O.S. aberta? Fica registrado na observação.<div class="cfbox"><b>O.S. '+esc(x.os||'—')+'</b>'+(x.motivo?' · '+esc(String(x.motivo).slice(0,160)):'')+'</div>'});
+}
+function confirmaTroca(v, o){
+  return confirmar({titulo:v+' está em outra escala', ok:'Confirmar troca', azul:true, icone:ICO_TROCA,
+    html:'Ao confirmar, a escala abaixo fica <b>sem carro</b> para você definir outro depois.<div class="cfbox"><b>'+esc(o.escala)+'</b> · '+esc(o.hora_prevista)+' · '+esc(titulo(o.motorista))+'</div>'});
+}
 function interdNome(v){ v=String(v||'').toUpperCase(); return (S.dia.interditados||[]).filter(function(x){return x.prefixo===v;})[0]||null; }
 function fmtLim(m){ return m%60===0? (m/60)+'h' : m+' min'; }
 function fmtAtraso(m){ return m<60? m+' min' : Math.floor(m/60)+'h'+('0'+(m%60)).slice(-2); }
@@ -732,6 +778,12 @@ function linhaPend(it,modoAtr){
 }
 
 function dataHora(iso,hhmm){ var p=String(iso||'').split('-'); return (p.length===3?p[2]+'/'+p[1]+' ':'')+(hhmm||''); }
+/* fiscal que liberou (ou marcou "não saiu") */
+function respBox(nome, ns){
+  nome=String(nome||'').trim(); if(!nome) return '';
+  var p=nome.split(/\s+/), curto=titulo(p[0])+(p.length>1?' '+titulo(p[p.length-1]):'');
+  return '<div class="resp" title="'+esc(nome)+'"><span class="av">'+esc(p[0].charAt(0).toUpperCase())+'</span><span><small>'+(ns?'Registrado por':'Liberado por')+'</small><b>'+esc(curto)+'</b></span></div>';
+}
 function linhaReg(it){
   var r=it.reg, ns=r.status==='NAO_SAIU';
   var tv=r.troca_veiculo==='SIM', tm=r.troca_motorista==='SIM';
@@ -744,7 +796,7 @@ function linhaReg(it){
       '<div class="mot"><span'+(tm?' class="chg"':'')+'>'+esc(titulo(ns?it.motorista:r.motorista_real))+'</span></div>'+
       '<div class="chs">'+ch('',ICO_CLK13,'Programado '+dataHora(S.dia.data,it.hora_prevista))+
         (ns?(r.motivo?ch('ns',null,r.motivo):''):ch('outra',ICO_OK13,'Liberado '+dataHora(dLib,r.hora_real)))+'</div>'+
-    '</div>'+
+    '</div>'+respBox(r.responsavel, ns)+
   '</div>';
 }
 
@@ -786,15 +838,15 @@ function item(id){ return S.dia.itens.filter(function(i){return i.id===id;})[0];
 /* OK da tela Soltura: registra na hora e a escala vai para Realizadas */
 function okSoltura(it){
   if(semCarro(it) || !it.cracha || S.dia.data!==S.dia.hoje){ abrir(it,'soltar'); return; }
-  var obsOS='';
-  if(it.interd){
-    if(!confirmSafe((it.veiculo||'')+' está com a O.S. '+(it.interd.os||'')+' aberta'+(it.interd.motivo?' ('+it.interd.motivo.slice(0,80)+')':'')+'.\n\nLiberar mesmo assim?')) return;
-    obsOS='Liberado com O.S. aberta '+(it.interd.os||'');
+  if(it.interd && !it._osOk){
+    confirmaOS(it.veiculo||'', it.interd).then(function(ok){ if(ok){ it._osOk=true; okSoltura(it); } else render(); });
+    return;
   }
+  var obsOS=it.interd?'Liberado com O.S. aberta '+(it.interd.os||''):''; it._osOk=false;
   var h=it.saida?it.saida.hora:hhmm(agora());
   var pp=it.hora_prevista.split(':'), qq=h.split(':'), d=(+qq[0]*60+ +qq[1])-(+pp[0]*60+ +pp[1]), tol=S.dia.cfg.tolerancia;
   if(d<-720) d+=1440; if(d>720) d-=1440;
-  it.reg={_pend:true,status:d>tol?'ATRASADA':(d<-tol?'ADIANTADA':'NO_HORARIO'),hora_real:h,desvio_min:d,veiculo_real:it.veiculo,cracha_real:it.cracha,motorista_real:it.motorista,troca_veiculo:'',troca_motorista:'',motivo:'',conferido:''};
+  it.reg={_pend:true,status:d>tol?'ATRASADA':(d<-tol?'ADIANTADA':'NO_HORARIO'),hora_real:h,desvio_min:d,responsavel:getResp(),veiculo_real:it.veiculo,cracha_real:it.cracha,motorista_real:it.motorista,troca_veiculo:'',troca_motorista:'',motivo:'',conferido:''};
   render();
   api('registrar',{id:it.id,acao:'SAIU',hora_real:it.saida?h:'',responsavel:getResp(),garagem:(it.saida&&it.saida.de)||getGar(),observacao:[obsOS,it.saida?'Saída pela telemetria '+h:''].filter(String).join(' · ')},true).then(function(reg){
     it.reg=reg; render();
@@ -895,33 +947,54 @@ function validar(){
 
 function salvar(acao){
   var it=S.atual; if(!it||S.busy) return;
-  var x=validar(), mot=$('mMotivo').value;
+  var x=validar(), mot=$('mMotivo').value, osV=null, outraEsc=null;
   if(acao==='SAIU'){
     if(!x.h) return toast('Informe a hora de saída.',true);
     if(!x.v||x.v==='FOLGADOR') return toast('Informe o carro.',true);
-    var osV=interdNome(x.v);
-    if(osV && !confirmSafe(x.v+' está com a O.S. '+(osV.os||'')+' aberta. Liberar mesmo assim?')) return;
-    var outraEsc=(x.v!==(it.veiculo||'').toUpperCase())?escalaDoCarro(x.v,it.id):null;
-    if(outraEsc && !confirmSafe(x.v+' está escalado na escala '+outraEsc.escala+' ('+outraEsc.hora_prevista+' · '+titulo(outraEsc.motorista)+').\n\nConfirmar a troca? A escala '+outraEsc.escala+' vai ficar SEM CARRO para você definir outro depois.')) return;
     if(!x.m.c) return toast('Escolha o motorista.',true);
     if(S.novo && !x.m.n) return toast('Informe o nome do motorista novo.',true);
     if(x.precisa && !mot){ $('mMotivo').focus(); return toast('Selecione o motivo.',true); }
+    osV=interdNome(x.v);
+    outraEsc=(x.v!==(it.veiculo||'').toUpperCase())?escalaDoCarro(x.v,it.id):null;
   } else if(!mot){ $('lbMotivo').scrollIntoView({block:'center'}); $('mMotivo').focus(); return toast('Selecione o motivo de não ter saído.',true); }
-  var conferir=false;
-  var obsTxt=$('mObs').value.trim(), osSel=acao==='SAIU'?interdNome(x.v):null;
-  if(osSel && obsTxt.indexOf('O.S. aberta')<0) obsTxt=(obsTxt?obsTxt+' · ':'')+'Liberado com O.S. aberta '+(osSel.os||'');
-  var liberarDe=(acao==='SAIU'&&typeof outraEsc!=='undefined'&&outraEsc)?outraEsc.id:'';
-  var p={id:it.id,acao:acao,liberarDe:liberarDe,hora_real:x.h,veiculo:x.v,cracha:x.m.c,motorista:x.m.n,motivo:mot,observacao:obsTxt,responsavel:getResp(),conferir:conferir,garagem:(it.reg&&it.reg.garagem)||getGar()};
-  S.busy=true; loading(true);
+  S.busy=true;
+  (osV?confirmaOS(x.v,osV):Promise.resolve(true)).then(function(ok){
+    if(!ok) return false;
+    return outraEsc?confirmaTroca(x.v,outraEsc):true;
+  }).then(function(ok){
+    S.busy=false;
+    if(ok) enviarModal(it, acao, x, mot, osV, outraEsc);
+  });
+}
+
+/* grava sem segurar a tela: fecha a janela na hora e confirma com o servidor em segundo plano */
+function enviarModal(it, acao, x, mot, osV, outraEsc){
+  var obsTxt=$('mObs').value.trim();
+  if(osV && obsTxt.indexOf('O.S. aberta')<0) obsTxt=(obsTxt?obsTxt+' · ':'')+'Liberado com O.S. aberta '+(osV.os||'');
+  var garagem=(it.reg&&it.reg.garagem)||getGar();
+  var p={id:it.id,acao:acao,liberarDe:outraEsc?outraEsc.id:'',hora_real:x.h,veiculo:x.v,cracha:x.m.c,motorista:x.m.n,motivo:mot,observacao:obsTxt,responsavel:getResp(),conferir:false,garagem:garagem};
+  var ant=it.reg, antOutra=outraEsc?{veiculo:outraEsc.veiculo,tel:outraEsc.tel,saida:outraEsc.saida}:null;
+  var eraEdicao=S.modo==='editar', modo=S.modo, novo=S.novo;
+  var d=0; if(x.h){ var pp=it.hora_prevista.split(':'), q=x.h.split(':'); d=(+q[0]*60+ +q[1])-(+pp[0]*60+ +pp[1]); if(d<-720) d+=1440; if(d>720) d-=1440; }
+  var tol=S.dia.cfg.tolerancia, saiu=acao==='SAIU';
+  it.reg={_pend:true,status:saiu?(d>tol?'ATRASADA':(d<-tol?'ADIANTADA':'NO_HORARIO')):'NAO_SAIU',hora_real:saiu?x.h:'',desvio_min:saiu?d:'',
+    veiculo_real:saiu?x.v:'',cracha_real:saiu?x.m.c:'',motorista_real:saiu?(x.m.n||it.motorista):'',
+    troca_veiculo:saiu&&x.v!==(it.veiculo||'').toUpperCase()?'SIM':'',troca_motorista:saiu&&x.m.c!==it.cracha?'SIM':'',
+    motivo:mot,observacao:obsTxt,responsavel:getResp(),garagem:garagem,registrado_em:ant?ant.registrado_em:'',conferido:''};
+  if(outraEsc){ outraEsc.veiculo=''; outraEsc.tel=null; outraEsc.saida=null; }
+  fechar();
   api('registrar',p,true).then(function(reg){
     it.reg=reg;
-    if(reg.liberou){ var o=item(reg.liberou); if(o){ o.veiculo=''; o.tel=null; o.saida=null; } }
-    if(S.novo && x.m.c) S.cad.motoristas[x.m.c]=x.m.n;
-    var eraEdicao=S.modo==='editar';
-    fechar();
+    if(novo && x.m.c) S.cad.motoristas[x.m.c]=x.m.n;
+    render();
     if(reg.liberou){ var oe=item(reg.liberou); toast(x.v+' liberado. A escala '+(oe?oe.escala+' ('+oe.hora_prevista+')':'')+' ficou sem carro.'); return; }
-    toast(acao==='NAO_SAIU'?it.escala+' marcada como não saiu':(eraEdicao?(it.veiculo||it.escala)+' corrigido':(it.veiculo||it.escala)+' liberado às '+reg.hora_real));
-  }).catch(function(e){ toast(e.message,true); }).then(function(){ S.busy=false; loading(false); });
+    toast(acao==='NAO_SAIU'?it.escala+' marcada como não saiu':(eraEdicao?(x.v||it.escala)+' corrigido':(x.v||it.escala)+' liberado às '+reg.hora_real));
+  }).catch(function(e){
+    it.reg=ant;
+    if(outraEsc&&antOutra){ outraEsc.veiculo=antOutra.veiculo; outraEsc.tel=antOutra.tel; outraEsc.saida=antOutra.saida; }
+    render();
+    toast(it.escala+': '+e.message,true,function(){ abrir(it,modo); },'Corrigir');
+  });
 }
 
 function pedirResp(){

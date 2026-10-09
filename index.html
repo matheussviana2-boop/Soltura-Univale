@@ -104,6 +104,16 @@
   .maplink.m-in{border-color:#9ED9BC;background:#F3FBF7;color:#0B7A4E}
   .maplink.m-fora{border-color:#F2C98A;background:#FFF8EE;color:#B45309}
   .maplink.m-outra{border-color:#B7CCEA;background:#F3F7FC;color:#1E4E8C}
+  .escbtn{display:flex;align-items:center;gap:7px;height:42px;padding:0 14px;border-radius:12px;border:1px solid #D7DFE8;background:var(--card);color:var(--navy);font-family:var(--sg);font-size:14px;font-weight:700}
+  .escbtn:hover{border-color:var(--teal);color:#007A75}
+  .esinfo{margin:12px 0;padding:12px 14px;border-radius:12px;background:var(--bg);font-size:14px;line-height:1.5;color:var(--tx2)}
+  .esinfo b{color:var(--tx)}
+  .esdrop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:22px;border:2px dashed #C9D3DE;border-radius:14px;color:#4A5A70;text-align:center;cursor:pointer;font-size:14px}
+  .esdrop:hover,.esdrop.on{border-color:var(--teal);background:#F2FBFA;color:#007A75}
+  .esdrop b{font-size:15px;color:var(--tx)}
+  .esset{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .esset span{padding:4px 9px;border-radius:8px;background:#E7EEF8;color:#1E4E8C;font-size:12px;font-weight:700}
+  .esaviso{margin-top:12px;padding:10px 12px;border-radius:10px;background:#FFF8E8;border:1px solid #F0D58C;color:#7A5200;font-size:14px;font-weight:600}
   .avwrap{position:relative;flex-shrink:0}
   .avbtn{position:relative;width:48px;height:48px;border-radius:12px;border:1px solid #F0C46B;background:#FFF8E8;color:#B45309;display:flex;align-items:center;justify-content:center}
   .avbtn .avn{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:#C2410C;color:#FFFFFF;font-family:var(--mono);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg)}
@@ -288,7 +298,7 @@
     .hsep,.titulo,.hdata{display:none}
     .logo{height:34px}
     .gseg{grid-column:1/-1;order:3} .gseg button{flex:1;justify-content:center;height:40px}
-    .hora{font-size:20px;padding:3px 8px} .net .t1{display:none} .who{height:38px;padding:0 4px} .who .nm{display:none} .who .av{width:30px;height:30px}
+    .hora{font-size:20px;padding:3px 8px} .escbtn{padding:0 10px;height:38px} .escbtn span{display:none} .net .t1{display:none} .who{height:38px;padding:0 4px} .who .nm{display:none} .who .av{width:30px;height:30px}
     .bfil{padding:0 14px}
     .filtros{margin:0 14px 10px} .filtros label,.filtros select,.filtros input{width:100%;min-width:0}
     .tool{flex-wrap:wrap;align-items:stretch;gap:10px;padding:12px 14px 10px}
@@ -326,6 +336,7 @@
   <div class="gseg" id="gSeg" role="group" aria-label="Garagem deste aparelho"></div>
   <select id="fGar" class="gsel" aria-hidden="true" tabindex="-1"></select>
   <div class="hr">
+    <button type="button" class="escbtn" id="btnEsc" title="Escala semanal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M12 18v-6M9.5 14.5L12 12l2.5 2.5"/></svg><span>Escala</span></button>
     <span class="net" id="net" title="Conexão"><i></i><span class="t1">Online</span><span class="t2">Sem conexão</span></span>
     <span class="hora" id="clock">--:--</span>
     <button class="who" id="btnWho" type="button" title="Trocar responsável"><span class="av" id="whoAv">?</span><span class="nm" id="whoNm">—</span></button>
@@ -410,6 +421,21 @@
     <div class="sub" id="pkSub">Escolha a escala que vai sair com este carro</div>
     <div class="pk" id="pkList"></div>
     <div class="mact"><div class="sp"></div><button type="button" class="btn" id="pkFechar">Cancelar</button></div>
+  </div>
+</div>
+<!-- escala semanal: anexar o relatório do TransNet (.xlsx) -->
+<div class="ov" id="ovEsc" role="dialog" aria-modal="true" aria-labelledby="esTit">
+  <div class="md">
+    <h2 id="esTit">Escala semanal</h2>
+    <div class="sub">Relatório semanal do TransNet em Excel (.xlsx)</div>
+    <div class="esinfo" id="esInfo">Carregando…</div>
+    <label class="esdrop" id="esDrop">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+      <b id="esDropTx">Escolher o arquivo da escala</b><span>ou arraste o .xlsx para cá</span>
+      <input type="file" id="esFile" accept=".xlsx" hidden>
+    </label>
+    <div id="esRes"></div>
+    <div class="mact" id="esAct"><div class="sp"></div><button type="button" class="btn" id="esFechar">Fechar</button></div>
   </div>
 </div>
 <!-- confirmação no estilo do sistema -->
@@ -1131,10 +1157,58 @@ $('vDD').addEventListener('click',function(e){ var o=e.target.closest('[data-v]'
 document.addEventListener('click',function(e){ if(!e.target.closest('#cbVei')) fecharVei(); });
 $('ov').addEventListener('click',function(e){ if(e.target===this) fechar(); });
 $('mapFechar').addEventListener('click',fecharMapa);
+$('btnEsc').addEventListener('click',abrirEscala);
+$('esFile').addEventListener('change',function(){ lerArquivoEscala(this.files[0]); });
+$('esAct').addEventListener('click',function(e){ if(e.target.id==='esFechar') fecharEscala(); if(e.target.id==='esOk') gravarEscalaArquivo(); });
+$('ovEsc').addEventListener('click',function(e){ if(e.target===this) fecharEscala(); });
+['dragover','dragenter'].forEach(function(t){ $('esDrop').addEventListener(t,function(e){ e.preventDefault(); this.classList.add('on'); }); });
+['dragleave','drop'].forEach(function(t){ $('esDrop').addEventListener(t,function(e){ e.preventDefault(); this.classList.remove('on'); }); });
+$('esDrop').addEventListener('drop',function(e){ var f=e.dataTransfer&&e.dataTransfer.files[0]; if(f) lerArquivoEscala(f); });
 $('pkFechar').addEventListener('click',fecharEscalar);
 $('ovPick').addEventListener('click',function(e){ if(e.target===this) fecharEscalar(); });
 $('pkList').addEventListener('click',function(e){ var o=e.target.closest('[data-id]'); if(!o) return; var it=item(o.getAttribute('data-id')), car=S.pickCar; fecharEscalar(); if(it) abrir(it,'soltar',false,car); });
 $('ovMap').addEventListener('click',function(e){ if(e.target===this) fecharMapa(); });
+
+/* ===================== escala semanal (anexar .xlsx) ===================== */
+var ESC={arq:null,b64:'',res:null};
+function dataBR(iso){ var p=String(iso||'').split('-'); return p.length===3?p[2]+'/'+p[1]:'—'; }
+function abrirEscala(){
+  ESC={arq:null,b64:'',res:null}; $('esRes').innerHTML=''; $('esFile').value=''; $('esDropTx').textContent='Escolher o arquivo da escala';
+  $('esAct').innerHTML='<div class="sp"></div><button type="button" class="btn" id="esFechar">Fechar</button>';
+  $('esInfo').textContent='Carregando…'; $('ovEsc').classList.add('on');
+  api('escalaInfo').then(function(i){
+    var u=i.ultima||{};
+    $('esInfo').innerHTML=i.linhas?('Carregada: <b>'+dataBR(i.de)+' a '+dataBR(i.ate)+'</b> · '+i.setores+' setores · '+i.linhas+' linhas'+
+      (u.em?'<br>Enviada em <b>'+esc(u.em)+'</b>'+(u.por?' por <b>'+esc(titulo(u.por))+'</b>':'')+(u.via?' ('+esc(u.via)+')':''):'')+
+      (i.ate && i.ate<i.hoje?'<br><span style="color:var(--red-d);font-weight:700">A escala carregada já terminou — envie a da semana atual.</span>':'')):'Nenhuma escala carregada ainda.';
+  }).catch(function(e){ $('esInfo').textContent='Não foi possível ler a escala atual: '+e.message; });
+}
+function fecharEscala(){ $('ovEsc').classList.remove('on'); }
+function lerArquivoEscala(f){
+  if(!f) return;
+  if(!/\.xlsx$/i.test(f.name)){ toast('Envie o relatório em Excel (.xlsx).',true); return; }
+  ESC.arq=f; $('esDropTx').textContent=f.name; $('esRes').innerHTML='<div class="esinfo">Lendo o arquivo…</div>'; $('esAct').innerHTML='';
+  var rd=new FileReader();
+  rd.onload=function(){
+    ESC.b64=String(rd.result).split(',')[1]||'';
+    api('escalaArquivo',{nome:f.name,base64:ESC.b64,confirmar:false},true).then(function(r){
+      ESC.res=r;
+      var subst=r.existentes>0;
+      $('esRes').innerHTML='<div class="esinfo">Arquivo: <b>'+esc(r.arquivo)+'</b><br>Período: <b>'+dataBR(r.de)+' a '+dataBR(r.ate)+'</b> · '+r.escalas+' escalas · '+r.linhas+' linhas'+
+        '<div class="esset">'+Object.keys(r.setores).map(function(k){ return '<span>'+esc(k)+' · '+r.setores[k]+'</span>'; }).join('')+'</div></div>'+
+        (subst?'<div class="esaviso">Já existe escala carregada para '+dataBR(r.de)+' a '+dataBR(r.ate)+'. Deseja substituí-la por este arquivo? As liberações já registradas continuam valendo.</div>':'');
+      $('esAct').innerHTML='<button type="button" class="btn" id="esFechar">Cancelar</button><div class="sp"></div><button type="button" class="btn pri" id="esOk">'+(subst?'Substituir escala':'Carregar escala')+'</button>';
+    }).catch(function(e){ $('esRes').innerHTML='<div class="esaviso" style="background:var(--red-bg);border-color:#F1C7B8;color:var(--red-d)">'+esc(e.message)+'</div>'; $('esAct').innerHTML='<div class="sp"></div><button type="button" class="btn" id="esFechar">Fechar</button>'; });
+  };
+  rd.readAsDataURL(f);
+}
+function gravarEscalaArquivo(){
+  if(!ESC.b64) return;
+  $('esAct').innerHTML='<div class="sp"></div><button type="button" class="btn pri" disabled>Gravando…</button>';
+  api('escalaArquivo',{nome:ESC.arq.name,base64:ESC.b64,confirmar:true,responsavel:getResp()},true).then(function(r){
+    fecharEscala(); toast('Escala '+dataBR(r.de)+' a '+dataBR(r.ate)+' carregada ('+r.escalas+' escalas).'); carregar(false);
+  }).catch(function(e){ toast(e.message,true); $('esAct').innerHTML='<button type="button" class="btn" id="esFechar">Cancelar</button><div class="sp"></div><button type="button" class="btn pri" id="esOk">Tentar de novo</button>'; });
+}
 
 /* ===================== painel TV (independente da soltura) ===================== */
 var Painel=(function(){

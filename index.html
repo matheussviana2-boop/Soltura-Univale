@@ -1171,7 +1171,7 @@ var Painel=(function(){
           var ponto=e(c.ponto||'sem posição')+(c.dist!==''&&c.dist!=null&&c.ponto?' · '+e(c.dist)+' m':'');
           return '<div class="pn-tile" style="border-left-color:'+cor+'" title="'+e(c.prefixo+' · '+(c.linhaNome||'')+' · '+(c.ponto||''))+'">'+
             '<div class="l1"><i style="background:'+cor+'"></i><b>'+e(c.prefixo)+'</b><span>'+e(c.escala||'sem escala')+(c.hora?' · '+e(c.hora):'')+'</span></div>'+
-            '<div class="mo">'+e(nomeCurto(c.motorista)||'—')+'</div>'+
+            '<div class="mo">'+(c.motorista?e(nomeCurto(c.motorista)):'<span style="color:#9AA6B6;font-weight:500">Motorista não identificado</span>')+'</div>'+
             '<div class="li">'+linha+'</div>'+
             '<div class="po">⌖ '+ponto+(c.tx?' · <span'+(c.semSinal?' class="ns"':'')+'>'+e(c.tx)+'</span>':'')+'</div></div>';
         }).join('')+'</div></section>';

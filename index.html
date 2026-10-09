@@ -264,28 +264,32 @@
   .pn-top .sep{width:1px;height:34px;background:#E1E7EE}
   .pn-tit b{display:block;font-size:19px} .pn-tit span{font-size:12px;color:#6B7A90}
   .pn-leg{display:flex;gap:10px;margin-left:auto;flex-wrap:wrap}
-  .pn-leg div{display:flex;align-items:center;gap:8px;padding:6px 14px;border-radius:10px;font-size:13px;font-weight:600}
-  .pn-leg b{font-family:var(--mono);font-size:22px}
-  .pn-leg i,.pn-tile i{width:10px;height:10px;border-radius:50%;display:inline-block;flex-shrink:0}
+  .pn-leg div{display:flex;align-items:center;gap:8px;padding:6px 16px;border-radius:12px;font-size:14px;font-weight:700;color:#FFFFFF}
+  .pn-leg b{font-family:var(--mono);font-size:24px}
   .pn-relogio{font-family:var(--mono);font-size:28px;font-weight:700;padding:4px 12px;border-radius:10px;background:#F2F5F8}
   .pn-relogio.off{color:var(--red)}
   .pn-main{flex:1;display:flex;flex-direction:column;gap:12px;padding:14px 24px 20px}
-  .pn-grp{display:flex;gap:12px;border-radius:14px;background:#E9EEF4;padding:10px}
+  .pn-grp{display:flex;align-items:stretch;gap:12px;border-radius:16px;background:#E9EEF4;padding:10px}
   .pn-grp.livre{background:#F7F9FB;border:1px dashed #C9D3DE}
-  .pn-gh{width:150px;flex-shrink:0;padding:6px 0 0 6px}
-  .pn-gh b{display:block;font-family:var(--mono);font-size:22px;color:var(--navy)}
-  .pn-gh span{display:block;font-size:13px;color:#4A5A70;margin-top:2px}
-  .pn-gh small{display:block;font-size:12px;color:#6B7A90;margin-top:8px}
-  .pn-grid{flex:1;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px;align-content:start}
-  .pn-tile{display:flex;flex-direction:column;gap:3px;padding:8px 10px;border-radius:10px;background:#FFFFFF;border:1px solid #E1E7EE;border-left:4px solid #94A3B8;min-width:0}
-  .pn-tile .l1{display:flex;align-items:center;gap:6px}
-  .pn-tile .l1 b{font-family:var(--mono);font-size:16px}
-  .pn-tile .l1 span{margin-left:auto;font-size:11px;color:#6B7A90}
+  .pn-gh{width:150px;flex-shrink:0;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:8px;border-radius:12px;background:#FFFFFF}
+  .pn-gh b{display:block;font-family:var(--mono);font-size:30px;color:var(--navy);line-height:1}
+  .pn-gh span{display:block;font-size:14px;font-weight:700;color:#14213D;margin-top:6px}
+  .pn-gh small{display:block;font-size:12px;color:#6B7A90;margin-top:8px;line-height:1.4}
+  .pn-gh .pn-mini{display:flex;gap:3px;justify-content:center;margin-top:8px;flex-wrap:wrap}
+  .pn-gh .pn-mini em{font-style:normal;font-family:var(--mono);font-size:12px;font-weight:700;color:#FFFFFF;padding:2px 7px;border-radius:6px}
+  .pn-grid{flex:1;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px;align-content:center}
+  .pn-tile{display:flex;flex-direction:column;gap:2px;padding:9px 12px;border-radius:12px;color:#FFFFFF;min-width:0;box-shadow:0 2px 6px rgba(15,27,51,.12)}
   .pn-tile div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .pn-tile .mo{font-size:12px;font-weight:600}
-  .pn-tile .li{font-size:11px;color:#007A75} .pn-tile .li b{font-family:var(--mono)}
-  .pn-tile .po{font-size:11px;color:#6B7A90}
-  .pn-tile .po .ns{color:#B45309;font-weight:700}
+  .pn-tile .l1{display:flex;align-items:baseline;gap:8px}
+  .pn-tile .l1 b{font-family:var(--mono);font-size:20px;letter-spacing:.02em}
+  .pn-tile .l1 span{margin-left:auto;font-family:var(--mono);font-size:12px;font-weight:700;padding:1px 6px;border-radius:5px;background:rgba(255,255,255,.22)}
+  .pn-tile .mo{font-size:13.5px;font-weight:700}
+  .pn-tile .mo.ni{font-weight:500;opacity:.7}
+  .pn-tile .li{font-size:12px;font-weight:600} .pn-tile .li b{font-family:var(--mono)}
+  .pn-tile .li.sem{opacity:.7;font-weight:500}
+  .pn-tile .po{font-size:11.5px;opacity:.92;display:flex;gap:6px} .pn-tile .po span:first-child{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+  .pn-tile .po .hr{font-family:var(--mono);font-weight:700;flex-shrink:0}
+  .pn-tile .po .ns{background:#FFFFFF;color:#B45309;padding:0 4px;border-radius:4px}
   @media (max-width:760px){ .pn-grp{flex-direction:column} .pn-gh{width:auto} .pn-top{padding:10px 14px} .pn-main{padding:12px} }
   @media (max-width:1100px){
     .hdata{display:none} .gseg button{padding:0 14px}
@@ -1212,7 +1216,7 @@ function gravarEscalaArquivo(){
 
 /* ===================== painel TV (independente da soltura) ===================== */
 var Painel=(function(){
-  var COR={rod:['#0B8F5A','Rodando'],par:['#D97706','Parado'],gar:['#64748B','Na garagem'],os:['#C2410C','Com O.S.']};
+  var COR={rod:['#0E9F62','Rodando'],par:['#F08A00','Parado'],gar:['#64748B','Na garagem'],os:['#DC2626','Com O.S.']};
   var dados=null, offset=0;
   function g(id){ return document.getElementById(id); }
   function e(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
@@ -1233,7 +1237,7 @@ var Painel=(function(){
     g('pnSub').innerHTML=e('Urbanos Cel Fab · '+C.length+' carros'+(p.length===3?' · '+p[2]+'/'+p[1]:''))+
       (es.de?' · escala '+dbr(es.de)+' a '+dbr(es.ate)+' ('+es.setores+' setores)':'')+
       (!es.de||es.ate<dados.data||es.setores<3?' <span style="color:#C2410C;font-weight:700">· carregue a escala semanal completa</span>':'');
-    g('pnLeg').innerHTML=['rod','par','gar','os'].map(function(k){ var c=COR[k][0]; return '<div style="background:'+c+'14;color:'+c+'"><i style="background:'+c+'"></i><b>'+conta[k]+'</b>'+COR[k][1]+'</div>'; }).join('');
+    g('pnLeg').innerHTML=['rod','par','gar','os'].map(function(k){ return '<div style="background:'+COR[k][0]+'"><b>'+conta[k]+'</b>'+COR[k][1]+'</div>'; }).join('');
     var grupos={}, ordem=[];
     C.forEach(function(c){ var k=c.setor||'~'; if(!grupos[k]){ grupos[k]=[]; ordem.push(k); } grupos[k].push(c); });
     ordem.sort(function(a,b){ if(a==='~') return 1; if(b==='~') return -1; return (parseInt(a,10)||0)-(parseInt(b,10)||0) || a.localeCompare(b); });
@@ -1241,16 +1245,16 @@ var Painel=(function(){
       var L=grupos[k].sort(function(a,b){ return (b.hojeNaEscala?1:0)-(a.hojeNaEscala?1:0) || (a.hora||'99').localeCompare(b.hora||'99') || a.prefixo.localeCompare(b.prefixo); });
       var livre=k==='~', cod=livre?'SEM SETOR':String(k).split(' - ')[0], nome=livre?'Fora da escala da semana':nomeCurto(String(k).split(' - ').slice(1).join(' - ')||k);
       var rod=L.filter(function(c){return c.sit==='rod';}).length, fora=L.filter(function(c){return !c.hojeNaEscala;}).length;
-      return '<section class="pn-grp'+(livre?' livre':'')+'"><div class="pn-gh"><b>'+e(cod)+'</b><span>'+e(nome)+'</span><small>'+L.length+' carros · '+rod+' rodando'+(fora&&!livre?'<br>'+fora+' sem escala hoje':'')+'</small></div><div class="pn-grid">'+
+      return '<section class="pn-grp'+(livre?' livre':'')+'"><div class="pn-gh"><b>'+e(cod)+'</b><span>'+e(nome)+'</span><small>'+L.length+' carros'+(fora&&!livre?' · '+fora+' sem escala hoje':'')+'</small><div class="pn-mini">'+['rod','par','gar','os'].map(function(s){ var n=L.filter(function(c){return c.sit===s;}).length; return n?'<em style="background:'+COR[s][0]+'" title="'+COR[s][1]+'">'+n+'</em>':''; }).join('')+'</div></div><div class="pn-grid">'+
         L.map(function(c){
           var cor=COR[c.sit][0];
-          var linha=c.linhaNum?'<b>'+e(c.linhaNum)+'</b> '+e(c.linhaNome):(c.sit==='gar'?'Na garagem':c.sit==='os'?'O.S. '+e(c.os):'Sem viagem aberta');
-          var ponto=e(c.ponto||'sem posição')+(c.dist!==''&&c.dist!=null&&c.ponto?' · '+e(c.dist)+' m':'');
-          return '<div class="pn-tile" style="border-left-color:'+cor+'" title="'+e(c.prefixo+' · '+(c.linhaNome||'')+' · '+(c.ponto||''))+'">'+
-            '<div class="l1"><i style="background:'+cor+'"></i><b>'+e(c.prefixo)+'</b><span>'+(c.hojeNaEscala?e(c.escala)+(c.hora?' · '+e(c.hora):''):'<em style="font-style:normal;color:#9AA6B6">sem escala hoje</em>')+'</span></div>'+
-            '<div class="mo">'+(c.motorista?e(nomeCurto(c.motorista)):'<span style="color:#9AA6B6;font-weight:500">Motorista não identificado</span>')+'</div>'+
-            '<div class="li">'+linha+'</div>'+
-            '<div class="po">⌖ '+ponto+(c.tx?' · <span'+(c.semSinal?' class="ns"':'')+'>'+e(c.tx)+'</span>':'')+'</div></div>';
+          var linha=c.linhaNum?'<div class="li"><b>'+e(c.linhaNum)+'</b> '+e(c.linhaNome)+'</div>':'<div class="li sem">Sem linha em andamento</div>';
+          var esc_=c.hojeNaEscala?e(c.escala):'sem escala';
+          return '<div class="pn-tile" style="background:'+cor+'" title="'+e(c.prefixo+' · '+COR[c.sit][1]+(c.os?' · O.S. '+c.os:'')+' · '+(c.linhaNome||'')+' · '+(c.ponto||''))+'">'+
+            '<div class="l1"><b>'+e(c.prefixo)+'</b><span>'+esc_+'</span></div>'+
+            '<div class="mo'+(c.motorista?'':' ni')+'">'+(c.motorista?e(nomeCurto(c.motorista)):'Motorista não identificado')+'</div>'+
+            linha+
+            '<div class="po"><span>⌖ '+e(c.ponto||'sem posição')+'</span>'+(c.tx?'<span class="hr'+(c.semSinal?' ns':'')+'">'+e(c.tx)+'</span>':'')+'</div></div>';
         }).join('')+'</div></section>';
     }).join('')||'<div class="empty">Nenhum carro da frota na telemetria.</div>';
   }

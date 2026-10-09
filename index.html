@@ -395,6 +395,27 @@
   #painel.claro .pp-c,#painel.claro .pp-l{background:#F4F7FB;border-color:#E1E7EF}
   #painel.claro .pp-c small{color:#56657C} #painel.claro .pp-c b{color:#0F1B33} #painel.claro .pp-l small{color:#4A5A72}
   #painel.claro .pp-st{background:#F4F7FB;color:#3A4A62}
+  /* claro: cards com faixa de status e textos mais fortes */
+  #painel.claro{background:#E8EDF3}
+  #painel.claro .pn-grp{background:#FFFFFF;border-color:#D3DCE7;box-shadow:0 1px 4px rgba(20,35,70,.06)}
+  #painel.claro .pn-gh{background:#F2F7FA;border-color:#C3D6E0}
+  #painel.claro .pn-tile{position:relative;padding-left:14px;background:#FFFFFF;border:1px solid #CBD5E1!important;box-shadow:0 1px 2px rgba(20,35,70,.06)!important}
+  #painel.claro .pn-tile::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;border-radius:12px 0 0 12px;background:#8593A8}
+  #painel.claro .pn-tile.s-rod{background:#F1FAF5;border-color:#9FD3B6!important} #painel.claro .pn-tile.s-rod::before{background:#047A45}
+  #painel.claro .pn-tile.s-par{background:#FFF8EC;border-color:#E8C68F!important} #painel.claro .pn-tile.s-par::before{background:#B86A00}
+  #painel.claro .pn-tile.s-gar::before{background:#8593A8}
+  #painel.claro .pn-tile.c-os{background:#FFF2F4;border-color:#EBA3B1!important} #painel.claro .pn-tile.c-os::before{background:#C8143C}
+  #painel.claro .pn-tile:hover{box-shadow:0 4px 12px rgba(20,35,70,.14)!important}
+  #painel.claro .pn-tile .l1 b{color:#0B1630;font-weight:800}
+  #painel.claro .pn-tile .l1 .es{color:#1A2540;background:#E4EAF2}
+  #painel.claro .pn-tile .l1 .os{background:#C8143C;color:#FFFFFF;border-color:#C8143C}
+  #painel.claro .pn-tile .mo{color:#0B1630;font-size:12.5px;font-weight:700}
+  #painel.claro .pn-tile .li{font-weight:600}
+  #painel.claro .pn-tile .po{color:#33435C;font-size:11px}
+  #painel.claro .pn-tile .po .hr{color:#0B1630;font-weight:700}
+  #painel.claro .pn-tile .vz{color:#8593A8;opacity:1}
+  #painel.claro .pn-gh small{color:#33435C}
+  #painel.claro .pn-gh .pn-mini em{background:#C8143C;color:#FFFFFF!important}
   @media (max-width:760px){ .pn-tema span{display:none} .pn-grp{flex-direction:column} .pn-gh{width:auto} .pn-top{padding:10px 14px} .pn-main{padding:12px} .pn-busca{width:100%;order:5} .pn-leg{order:4;flex-basis:100%} }
   @media (max-width:1100px){
     .hdata{display:none} .gseg button{padding:0 14px}
@@ -1385,7 +1406,7 @@ var Painel=(function(){
           var cor=COR[c.sit][0];
           var linha=c.linhaNum?'<div class="li" style="color:'+cor+'"><b>'+e(c.linhaNum)+'</b> '+e(c.linhaNome)+'</div>':'<div class="li vz">—</div>';
           var borda=c.os?COR.os[0]:(c.sit==='rod'?cor:cor+(tema==='cla'?'99':'66')), brilho=c.os?COR.os[0]+'48':(c.sit==='rod'?cor+'40':cor+'14');
-          return '<div class="pn-tile" data-car="'+e(c.prefixo)+'" style="border-color:'+borda+';box-shadow:0 0 16px '+brilho+'" title="'+e(c.prefixo+' · '+COR[c.sit][1]+(c.os?' · O.S. '+c.os:'')+(c.linhaNome?' · '+c.linhaNome:'')+' · '+(c.ponto||''))+'">'+
+          return '<div class="pn-tile s-'+c.sit+(c.os?' c-os':'')+'" data-car="'+e(c.prefixo)+'" style="border-color:'+borda+';box-shadow:0 0 16px '+brilho+'" title="'+e(c.prefixo+' · '+COR[c.sit][1]+(c.os?' · O.S. '+c.os:'')+(c.linhaNome?' · '+c.linhaNome:'')+' · '+(c.ponto||''))+'">'+
             '<div class="l1"><i style="background:'+cor+';box-shadow:0 0 8px '+cor+'"></i><b>'+e(c.prefixo)+'</b>'+(c.os?'<span class="os">O.S.</span>':'')+'<span class="es">'+(c.hojeNaEscala?e(c.escala):'—')+'</span></div>'+
             '<div class="mo'+(c.motorista?'':' vz')+'" title="'+e(c.motorista||'')+'">'+(c.motorista?e(nomeComp(c.motorista)):'—')+'</div>'+
             linha+

@@ -90,6 +90,33 @@
   .row.saiu{border-color:#9FDCD8;box-shadow:inset 4px 0 0 #00A19B}
   .row.atencao{border-color:#F0C46B;box-shadow:inset 4px 0 0 #E8A317}
   .grupo.g0{background:#007A75}
+  .slide{position:relative;flex-shrink:0;width:200px;height:56px;border-radius:14px;background:#E2F5EF;border:1px solid #BFE3CD;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none}
+  .slide.sm{width:180px}
+  .slide .sl-fill{position:absolute;left:0;top:0;bottom:0;width:0;background:#0B8F5A;opacity:.18}
+  .slide .sl-txt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding-left:46px;font-size:15px;font-weight:700;color:#08603E;letter-spacing:.01em;pointer-events:none}
+  .slide .sl-txt i{font-style:normal;opacity:.55;margin-left:4px;letter-spacing:-2px}
+  .slide .sl-knob{position:absolute;left:4px;top:4px;width:46px;height:46px;border-radius:11px;background:#0B8F5A;display:flex;align-items:center;justify-content:center;cursor:grab;box-shadow:0 2px 6px rgba(11,143,90,.35);touch-action:none}
+  .slide .sl-knob:focus-visible{outline:3px solid #2DD4BF;outline-offset:2px}
+  .slide.volta .sl-knob,.slide.volta .sl-fill{transition:transform .25s ease,width .25s ease}
+  .slide.ok{background:#0B8F5A;border-color:#0B8F5A} .slide.ok .sl-txt{color:#FFFFFF}
+  .slide.dica{animation:dica .4s ease}
+  @keyframes dica{0%,100%{transform:translateX(0)}30%{transform:translateX(6px)}60%{transform:translateX(-3px)}}
+  .maplink.m-in{border-color:#9ED9BC;background:#F3FBF7;color:#0B7A4E}
+  .maplink.m-fora{border-color:#F2C98A;background:#FFF8EE;color:#B45309}
+  .maplink.m-outra{border-color:#B7CCEA;background:#F3F7FC;color:#1E4E8C}
+  .avwrap{position:relative;flex-shrink:0}
+  .avbtn{position:relative;width:48px;height:48px;border-radius:12px;border:1px solid #F0C46B;background:#FFF8E8;color:#B45309;display:flex;align-items:center;justify-content:center}
+  .avbtn .avn{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:#C2410C;color:#FFFFFF;font-family:var(--mono);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg)}
+  .avpop{display:none;position:absolute;right:0;top:56px;z-index:15;width:340px;max-width:calc(100vw - 28px);background:var(--card);border:1px solid var(--ln2);border-radius:14px;box-shadow:0 14px 36px rgba(17,28,44,.2);padding:14px}
+  .avpop.on{display:block}
+  .avpop h4{margin:0 0 4px;font-size:15px}
+  .avpop p{margin:0 0 10px;font-size:12px;color:var(--mut);line-height:1.4}
+  .avpop .avi{display:flex;align-items:center;gap:10px;width:100%;padding:10px;border:1px solid var(--ln);border-radius:10px;background:var(--card);text-align:left;margin-top:6px}
+  .avpop .avi:hover{background:var(--bg)}
+  .avpop .avi b{font-family:var(--mono);color:#007A75}
+  .avpop .avi span{flex:1;min-width:0;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .row.pisca{animation:pisca 1.2s ease}
+  @keyframes pisca{0%,100%{box-shadow:inset 4px 0 0 #00A19B}40%{box-shadow:0 0 0 4px rgba(0,161,155,.35),inset 4px 0 0 #00A19B}}
   .tmini{display:flex;align-items:center;gap:10px;white-space:nowrap;margin-top:5px;font-size:12px;font-weight:600;color:#6B7A90}
   .tmini span{display:inline-flex;align-items:center;gap:4px}
   .tmini .ig{width:22px;height:22px;justify-content:center;border-radius:6px;background:#F1F4F8;color:#8A97A8}
@@ -220,7 +247,8 @@
     .hora{font-size:20px;padding:3px 8px} .net .t1{display:none} .who{height:38px;padding:0 4px} .who .nm{display:none} .who .av{width:30px;height:30px}
     .bfil{padding:0 14px}
     .filtros{margin:0 14px 10px} .filtros label,.filtros select,.filtros input{width:100%;min-width:0}
-    .tool{flex-direction:column;align-items:stretch;gap:10px;padding:12px 14px 10px}
+    .tool{flex-wrap:wrap;align-items:stretch;gap:10px;padding:12px 14px 10px}
+    .tool .tabs{flex-basis:100%} .tool .busca{flex:1}
     .busca{flex:none}
     .tabs{gap:3px} .tab{flex:1;font-size:13px;padding:0 4px;gap:5px} .tab i{width:6px;height:6px} .tab .n{font-size:12px} .tx-ext{display:none}
     .resumo,.banner{margin-left:14px;margin-right:14px;padding-left:0;padding-right:0}
@@ -235,7 +263,7 @@
     .info{order:4;flex-basis:100%;padding-left:12px}
     .stat{order:3}
     .acts{order:5;flex-basis:100%;padding-left:12px}
-    .acts .lib,.acts .out{flex:1;width:auto}
+    .acts .lib,.acts .out,.acts .slide{flex:1;width:auto}
     .acts .maplink{height:auto;min-height:46px}
     .mapcol{width:auto;flex-direction:row;gap:8px} .lugar{text-align:left}
   }
@@ -265,6 +293,13 @@
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
     <input id="fBusca" placeholder="Buscar veículo, linha ou motorista…" aria-label="Buscar">
   </label>
+  <div class="avwrap" id="avWrap" style="display:none">
+    <button type="button" class="avbtn" id="avBtn" aria-haspopup="true" aria-expanded="false" title="Avisos">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><circle cx="12" cy="17" r=".6"/></svg>
+      <span class="avn" id="avN">0</span>
+    </button>
+    <div class="avpop" id="avPop" role="dialog" aria-label="Avisos"></div>
+  </div>
 </div>
 
 
@@ -496,10 +531,7 @@ function render(){
     if(atrasados.length) r.push(atrasados.length+' com mais de '+fmtLim(lim)+' de atraso no fim da lista');
     var nEsc=pend.length+sem.length+atrasados.length;
     sugerir(pend.concat(sem,atrasados));
-    if(saiuSem.length){
-      h+='<div class="grupo g0">'+ICO_PIN.replace('currentColor','#FFFFFF')+'<span>Saíram sem liberação</span><span class="n">'+saiuSem.length+'</span><small>a telemetria viu o carro sair · confirme</small></div>';
-      saiuSem.forEach(function(it){ h+=linhaPend(it); });
-    }
+    saiuSem.forEach(function(it){ h+=linhaPend(it); });
     if(!nEsc) h+='<div class="empty">Nenhum carro escalado aguardando soltura agora.</div>';
     pend.forEach(function(it){ h+=linhaPend(it); });
     if(sem.length){
@@ -537,6 +569,16 @@ function render(){
     feitas.forEach(function(it){ h+=linhaReg(it); });
   }
   $('list').innerHTML=h;
+  avisos(saiuSem);
+}
+
+/* aviso discreto no canto: carros que a telemetria viu sair sem liberação */
+function avisos(lista){
+  var w=$('avWrap');
+  if(!lista.length){ w.style.display='none'; $('avPop').classList.remove('on'); return; }
+  w.style.display=''; $('avN').textContent=lista.length;
+  $('avPop').innerHTML='<h4>Saíram sem liberação</h4><p>A telemetria viu '+(lista.length===1?'este carro sair':'estes carros saírem')+' da garagem sem registro no sistema. Toque para ir até a linha e confirmar a saída.</p>'+
+    lista.map(function(it){ return '<button type="button" class="avi" data-goto="'+it.id+'"><b>'+esc(it.saida.hora)+'</b><span><strong>'+esc(it.veiculo)+'</strong> · '+esc(it.escala)+' · prev. '+esc(it.hora_prevista)+'</span></button>'; }).join('');
 }
 function confirmSafe(msg){ try{ return window.confirm(msg); }catch(e){ return true; } }
 function interdNome(v){ v=String(v||'').toUpperCase(); return (S.dia.interditados||[]).filter(function(x){return x.prefixo===v;})[0]||null; }
@@ -565,7 +607,7 @@ function linhaInterd(x){
     var st=i.reg?(i.reg.status==='NAO_SAIU'?'não saiu':'saiu '+i.reg.hora_real+(i.reg.troca_veiculo==='SIM'?' com '+i.reg.veiculo_real:'')):'pendente';
     return '<span class="esc-chip'+(i.reg?'':' pend')+'">'+esc(i.hora_prevista)+' '+esc(i.escala)+' · '+esc(titulo(i.motorista))+' · '+st+'</span>';
   }).join('');
-  var acts=prox?'<div class="acts"><button type="button" class="out" data-act="edit" data-id="'+prox.id+'">Trocar carro</button><button type="button" class="lib sm" data-act="ok" data-id="'+prox.id+'">'+ICO_ARROW+'Liberar</button></div>':'';
+  var acts=prox?'<div class="acts"><button type="button" class="out" data-act="edit" data-id="'+prox.id+'">Trocar carro</button>'+slideLib(prox.id,'Liberar',true)+'</div>':'';
   return '<div class="row">'+
     tbox('os',x.os||'—','Nº da O.S.')+
     '<div class="bus" role="img" aria-label="Ônibus"></div>'+
@@ -649,6 +691,11 @@ function sugerir(lista){
 }
 
 /* ignição (símbolo) + hora da última transmissão, embaixo do prefixo */
+/* botão de arrastar para liberar (evita toque sem querer) */
+function slideLib(id, txt, sm){
+  return '<div class="slide'+(sm?' sm':'')+'" data-slide="'+id+'"><div class="sl-fill"></div><div class="sl-txt">'+esc(txt)+'<i>›››</i></div>'+
+    '<div class="sl-knob" tabindex="0" role="button" aria-label="Arraste para a direita para '+esc(txt.toLowerCase())+'">'+ICO_ARROW+'</div></div>';
+}
 function telMini(t, sc){
   if(sc || !telOk()) return '';
   if(!t) return '<div class="tmini"><span class="ns">sem telemetria</span></div>';
@@ -660,6 +707,7 @@ function telMini(t, sc){
 function mapCol(btn, lc){
   if(!lc && !btn) return '';
   var k=lc?(lc.k==='in'?'in':lc.k==='outra'?'outra':'fora'):'';
+  if(btn && k) btn=btn.replace('class="maplink"','class="maplink m-'+k+'"');
   return '<div class="mapcol">'+btn+(lc?'<div class="lugar '+k+'" title="'+esc(lc.txt)+'">'+esc(lc.txt)+'</div>':'')+'</div>';
 }
 
@@ -679,7 +727,7 @@ function linhaPend(it,modoAtr){
     '</div>'+
     '<div class="acts">'+mapCol(mapa(it),(sc||!t)?null:lc)+(modoAtr?'<button type="button" class="out" data-act="nao" data-id="'+it.id+'">Não saiu</button>':'')+
       (itd?'<button type="button" class="out" data-act="edit" data-id="'+it.id+'">Trocar carro</button>':'')+
-      ('<button type="button" class="lib'+(modoAtr||itd||sd?' sm':'')+'" data-act="ok" data-id="'+it.id+'" aria-label="'+(sd?'Confirmar saída de ':'Liberar ')+esc(it.veiculo||it.escala)+'">'+(sd?ICO_OK.replace('width="20" height="20"','width="18" height="18"')+'Confirmar':ICO_ARROW+'Liberar')+'</button>')+'</div>'+
+      slideLib(it.id,sd?'Confirmar':'Liberar',!!(modoAtr||itd||sd))+'</div>'+
   '</div>';
 }
 
@@ -708,7 +756,7 @@ function tick(){
   if(S.dia.data!==S.dia.hoje) msgs.push('Você está vendo '+fmtData(S.dia.data)+', não hoje. Ao liberar, a hora de saída precisa ser informada.');
   if(S.dia.telemetria&&S.dia.telemetria.erro) msgs.push(S.dia.telemetria.erro+' — mostrando todas as escalas.');
   b.style.display=msgs.length?'block':'none'; b.textContent=msgs.join(' ');
-  if(!S.atual) render();
+  if(!S.atual && !S.arrasto) render();
 }
 
 /* ===================== carregar ===================== */
@@ -896,6 +944,50 @@ $('list').addEventListener('click',function(e){
   else if(a==='nao') abrir(it,'soltar',true);
   else if(a==='map') abrirMapa(it);
 });
+/* arrastar para liberar */
+(function(){
+  var cur=null;
+  function fim(ok){
+    var c=cur; cur=null; S.arrasto=false; if(!c) return;
+    if(ok){
+      c.el.classList.add('ok'); c.knob.style.transform='translateX('+c.max+'px)'; c.fill.style.width='100%';
+      var it=item(c.el.getAttribute('data-slide'));
+      setTimeout(function(){ if(it) okSoltura(it); else render(); },160);
+    } else {
+      c.el.classList.add('volta'); c.knob.style.transform='translateX(0)'; c.fill.style.width='0';
+      if(!c.moveu){ c.el.classList.add('dica'); toast('Arraste o botão para a direita para liberar'); }
+      setTimeout(function(){ c.el.classList.remove('volta','dica'); },420);
+    }
+  }
+  $('list').addEventListener('pointerdown',function(e){
+    var k=e.target.closest('.sl-knob'); if(!k) return;
+    var el=k.parentNode; e.preventDefault();
+    cur={el:el,knob:k,fill:el.querySelector('.sl-fill'),x0:e.clientX,max:el.clientWidth-k.offsetWidth-8,x:0,moveu:false};
+    S.arrasto=true; try{ k.setPointerCapture(e.pointerId); }catch(_){}
+  });
+  $('list').addEventListener('pointermove',function(e){
+    if(!cur) return;
+    var x=Math.max(0,Math.min(cur.max,e.clientX-cur.x0)); cur.x=x; if(x>4) cur.moveu=true;
+    cur.knob.style.transform='translateX('+x+'px)'; cur.fill.style.width=(x+50)+'px';
+  });
+  function solta(){ if(cur) fim(cur.x>=cur.max*0.85); }
+  $('list').addEventListener('pointerup',solta);
+  $('list').addEventListener('pointercancel',function(){ if(cur) fim(false); });
+  // teclado (computador): Enter/Espaço no botão libera
+  $('list').addEventListener('keydown',function(e){
+    var k=e.target.closest&&e.target.closest('.sl-knob'); if(!k||(e.key!=='Enter'&&e.key!==' ')) return;
+    e.preventDefault(); var it=item(k.parentNode.getAttribute('data-slide')); if(it) okSoltura(it);
+  });
+})();
+$('avBtn').addEventListener('click',function(e){ e.stopPropagation(); var p=$('avPop'); p.classList.toggle('on'); this.setAttribute('aria-expanded',p.classList.contains('on')); });
+$('avPop').addEventListener('click',function(e){
+  e.stopPropagation(); var b=e.target.closest('[data-goto]'); if(!b) return;
+  $('avPop').classList.remove('on');
+  if(S.tab!=='pend'){ S.tab='pend'; render(); }
+  var r=$('r-'+b.getAttribute('data-goto')); if(!r) return;
+  r.scrollIntoView({behavior:'smooth',block:'center'}); r.classList.remove('pisca'); void r.offsetWidth; r.classList.add('pisca');
+});
+document.addEventListener('click',function(e){ if(!e.target.closest('#avWrap')) $('avPop').classList.remove('on'); });
 $('tabs').addEventListener('click',function(e){ var b=e.target.closest('[data-tab]'); if(b){ S.tab=b.getAttribute('data-tab'); render(); window.scrollTo(0,0); } });
 $('fBusca').addEventListener('input',render);
 $('fGar').addEventListener('change',function(){ ls(LS_GAR,this.value); renderGar(); tick(); });

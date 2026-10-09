@@ -256,10 +256,53 @@
 
   /* ===== painel TV (#painel) — bloco independente, vai virar painel.html ===== */
   #painel{display:none}
-  body.modo-painel>*:not(#painel):not(.toast){display:none!important}
+  body.modo-painel>*:not(#painel):not(.toast):not(#menuTop){display:none!important}
+  #psol{display:none}
+  body.modo-psol>*:not(#psol):not(.toast):not(#menuTop){display:none!important}
+  body.modo-psol #psol{display:flex}
+  /* menu de telas (fase de validação: as 3 telas no mesmo index) */
+  #menuTop{display:flex;align-items:center;gap:4px;height:40px;padding:0 16px;background:#0B1228;border-bottom:1px solid rgba(34,230,255,.18);overflow-x:auto;scrollbar-width:none}
+  #menuTop a{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 14px;color:#9FB0D6;font-family:var(--sg);font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap;border-bottom:2px solid transparent}
+  #menuTop a:hover{color:#FFFFFF}
+  #menuTop a.on{color:#FFFFFF;border-bottom-color:#22E6FF}
+  #menuTop a svg{flex-shrink:0}
+  /* painel de soltura (#soltura) */
+  .ps-prog{display:flex;align-items:center;gap:12px;padding:12px 26px 0;font-family:var(--mono);font-size:12px;color:#9FB0D6}
+  .ps-prog .tr{flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden}
+  .ps-prog .tr i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,#22E6FF,#2EF29A);transition:width .4s}
+  .ps-prog b{color:#FFFFFF;font-size:13px}
+  .ps-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px}
+  .ps-h{display:flex;align-items:center;gap:10px;margin:6px 2px 2px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:#22E6FF}
+  .ps-h::after{content:"";flex:1;height:1px;background:rgba(34,230,255,.25)}
+  .ps-h small{font-size:11px;letter-spacing:0;color:#9FB0D6}
+  .ps-card{position:relative;display:flex;gap:10px;padding:10px 12px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.02));border:1px solid rgba(159,176,214,.22);min-width:0}
+  .ps-card .ck{flex-shrink:0;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#070B1A}
+  .ps-card .bd{flex:1;min-width:0}
+  .ps-card .l1{display:flex;align-items:center;gap:6px}
+  .ps-card .l1 b{font-family:var(--mono);font-size:18px;color:#FFFFFF}
+  .ps-card .l1 .es{margin-left:auto;font-family:var(--mono);font-size:11px;font-weight:700;color:#C9D6F2;background:rgba(255,255,255,.07);padding:1px 6px;border-radius:5px}
+  .ps-card .tr{white-space:nowrap;font-family:var(--mono);font-size:10px;font-weight:700;padding:0 5px;border-radius:4px;border:1px solid #22E6FF;color:#22E6FF}
+  .ps-card .mo{font-size:12.5px;font-weight:600;color:#DDE8FF;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+  .ps-card .hs{display:grid;grid-template-columns:auto auto 1fr;gap:4px 12px;align-items:end;margin-top:6px}
+  .ps-card .hs .dv{justify-self:end}
+  .ps-card .hs small{display:block;font-size:9.5px;letter-spacing:.1em;font-weight:700;color:#7C8BA6}
+  .ps-card .hs span{font-family:var(--mono);font-size:13px;font-weight:700;color:#DDE8FF;white-space:nowrap}
+  .ps-card .hs span em{font-style:normal;font-size:10.5px;font-weight:500;color:#9FB0D6;margin-right:4px}
+  .ps-card .dv{font-family:var(--mono);font-size:11px;font-weight:700;padding:2px 7px;border-radius:6px;white-space:nowrap}
+  .ps-card .ft{margin-top:5px;font-size:10.5px;color:#9FB0D6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #psol.claro .ps-prog{color:#3A4A62} #psol.claro .ps-prog b{color:#0F1B33} #psol.claro .ps-prog .tr{background:#D5DEEA}
+  #psol.claro .ps-prog .tr i{background:linear-gradient(90deg,#00778A,#047A45)}
+  #psol.claro .ps-h{color:#00778A} #psol.claro .ps-h::after{background:#C3D6E0} #psol.claro .ps-h small{color:#3A4A62}
+  #psol.claro .ps-card{background:#FFFFFF;border-color:#CBD5E1;box-shadow:0 1px 2px rgba(20,35,70,.06)}
+  #psol.claro .ps-card .ck{color:#FFFFFF}
+  #psol.claro .ps-card .l1 b{color:#0B1630} #psol.claro .ps-card .l1 .es{color:#1A2540;background:#E4EAF2}
+  #psol.claro .ps-card .tr{color:#00778A;border-color:#00778A}
+  #psol.claro .ps-card .mo{color:#0B1630;font-weight:700}
+  #psol.claro .ps-card .hs small{color:#56657C} #psol.claro .ps-card .hs span{color:#0B1630} #psol.claro .ps-card .hs span em{color:#4A5A72}
+  #psol.claro .ps-card .ft{color:#33435C}
   body.modo-painel #painel{display:flex}
   /* tema FX2 · vidro / HUD */
-  #painel{flex-direction:column;min-height:100vh;font-family:var(--sg);color:#DDE8FF;
+  #painel,#psol{flex-direction:column;min-height:100vh;font-family:var(--sg);color:#DDE8FF;
     background:radial-gradient(60% 60% at 15% 10%,rgba(34,230,255,.18),transparent 60%),radial-gradient(50% 60% at 90% 90%,rgba(124,92,255,.18),transparent 60%),#070B1A;background-attachment:fixed}
   .pn-top{display:flex;align-items:center;gap:16px;min-height:78px;padding:0 26px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(34,230,255,.25);flex-wrap:wrap}
   .pn-logo{background:rgba(255,255,255,.92);border-radius:10px;padding:4px 10px;display:flex}
@@ -312,7 +355,7 @@
   .pn-tile .po{font-size:10.5px;color:#9FB0D6;display:flex;gap:6px} .pn-tile .po span:first-child{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
   .pn-tile .po .hr{font-family:var(--mono);font-size:10px;color:#C9D6F2;flex-shrink:0}
   .pn-tile .po .ns{color:#FFC857}
-  #painel .empty{color:#9FB0D6}
+  #painel .empty,#psol .empty{color:#9FB0D6}
   .pn-ov{position:fixed;inset:0;z-index:30;background:rgba(3,6,16,.7);display:none;align-items:center;justify-content:center;padding:20px}
   .pn-ov.on{display:flex}
   .pn-md{width:min(1000px,100%);border-radius:18px;padding:16px;background:linear-gradient(180deg,#121A33,#0A1024);border:1px solid rgba(34,230,255,.35);box-shadow:0 0 40px rgba(34,230,255,.15)}
@@ -350,73 +393,73 @@
   .pn-tema:hover{border-color:#22E6FF}
   .pp-st{background:rgba(255,255,255,.05);color:#9FB0D6}
   /* ----- tema claro do painel ----- */
-  #painel.claro{color:#1A2540;background:radial-gradient(60% 60% at 15% 10%,rgba(0,140,170,.08),transparent 60%),radial-gradient(50% 60% at 90% 90%,rgba(90,70,200,.06),transparent 60%),#EEF2F7}
-  #painel.claro .pn-top{background:#FFFFFF;border-bottom:1px solid #D5DEEA;box-shadow:0 2px 10px rgba(20,35,70,.06)}
-  #painel.claro .pn-logo{background:transparent;padding:0}
-  #painel.claro .pn-tit .k{color:#00778A}
-  #painel.claro .pn-tit b{color:#0F1B33} #painel.claro .pn-tit span{color:#4A5A72}
-  #painel.claro .pn-tit .aviso{color:#9A5700}
-  #painel.claro .pn-leg div{background:#FFFFFF;color:#3A4A62;box-shadow:none!important}
-  #painel.claro .pn-leg div.on{background:#EAF0F7;color:#0F1B33;box-shadow:inset 0 0 0 1px currentColor!important}
-  #painel.claro .pn-leg i{box-shadow:none!important}
-  #painel.claro .pn-busca{background:#F6F8FB;border-color:#C9D4E2;color:#4A5A72}
-  #painel.claro .pn-busca:focus-within{border-color:#00778A;box-shadow:0 0 0 3px rgba(0,119,138,.15)}
-  #painel.claro .pn-busca input{color:#0F1B33} #painel.claro .pn-busca input::placeholder{color:#5A6880}
-  #painel.claro .pn-busca button{background:#E3E9F1;color:#1A2540}
-  #painel.claro .pn-tema{background:#F6F8FB;border-color:#C9D4E2;color:#1A2540}
-  #painel.claro .pn-tema:hover{border-color:#00778A}
-  #painel.claro .pn-relogio{color:#0F1B33;text-shadow:none} #painel.claro .pn-relogio small{color:#3A4A62;opacity:1}
-  #painel.claro .pn-relogio.off{color:#C8143C}
-  #painel.claro .pn-grp{background:rgba(255,255,255,.6);border-color:#D5DEEA}
-  #painel.claro .pn-gh{background:linear-gradient(180deg,#E3F3F6,#F7FBFC);border-color:#9CCFD8}
-  #painel.claro .pn-gh b{color:#0F1B33;text-shadow:none} #painel.claro .pn-gh span{color:#1A2540}
-  #painel.claro .pn-gh small{color:#3A4A62} #painel.claro .pn-gh .bar{background:#D5DEEA}
-  #painel.claro .pn-tile{background:#FFFFFF;box-shadow:0 1px 3px rgba(20,35,70,.08)!important}
-  #painel.claro .pn-tile .l1 i{box-shadow:none!important}
-  #painel.claro .pn-tile .l1 b{color:#0F1B33}
-  #painel.claro .pn-tile .l1 .es{color:#2A3A55;background:#EAF0F7}
-  #painel.claro .pn-tile .l1 .os{color:#C8143C;border-color:#C8143C;text-shadow:none}
-  #painel.claro .pn-tile .mo{color:#1A2540}
-  #painel.claro .pn-tile .vz{opacity:.55}
-  #painel.claro .pn-tile .po{color:#4A5A72} #painel.claro .pn-tile .po .hr{color:#2A3A55} #painel.claro .pn-tile .po .ns{color:#9A5700}
-  #painel.claro .pn-tile mark{background:#BFEAF2;color:#0F1B33}
-  #painel.claro .empty{color:#4A5A72}
-  #painel.claro .pn-ov{background:rgba(15,27,51,.45)}
-  #painel.claro .pn-md{background:#FFFFFF;border-color:#D5DEEA;box-shadow:0 20px 50px rgba(15,27,51,.25)}
-  #painel.claro .pn-md .hd b{color:#0F1B33} #painel.claro .pn-md .hd span{color:#4A5A72}
-  #painel.claro .pn-md .hd button{background:#F6F8FB;border-color:#C9D4E2;color:#00778A}
-  #painel.claro .pn-mapleg{color:#3A4A62} #painel.claro .pn-mapleg .ext{color:#00778A}
-  #painel.claro .leaflet-popup.pn-pop .leaflet-popup-content-wrapper{background:#FFFFFF;color:#1A2540;border-color:#D5DEEA;box-shadow:0 10px 30px rgba(15,27,51,.25)}
-  #painel.claro .leaflet-popup.pn-pop .leaflet-popup-tip{background:#FFFFFF;border-color:#D5DEEA}
-  #painel.claro .leaflet-popup.pn-pop a.leaflet-popup-close-button{color:#4A5A72}
-  #painel.claro .pp-h{border-color:#E1E7EF} #painel.claro .pp-h b{color:#0F1B33} #painel.claro .pp-h span{color:#4A5A72}
-  #painel.claro .pp-h em{color:#C8143C;border-color:#C8143C}
-  #painel.claro .pp-mot{color:#0F1B33}
-  #painel.claro .pp-c,#painel.claro .pp-l{background:#F4F7FB;border-color:#E1E7EF}
-  #painel.claro .pp-c small{color:#56657C} #painel.claro .pp-c b{color:#0F1B33} #painel.claro .pp-l small{color:#4A5A72}
-  #painel.claro .pp-st{background:#F4F7FB;color:#3A4A62}
+  #painel.claro,#psol.claro{color:#1A2540;background:radial-gradient(60% 60% at 15% 10%,rgba(0,140,170,.08),transparent 60%),radial-gradient(50% 60% at 90% 90%,rgba(90,70,200,.06),transparent 60%),#EEF2F7}
+  #painel.claro .pn-top,#psol.claro .pn-top{background:#FFFFFF;border-bottom:1px solid #D5DEEA;box-shadow:0 2px 10px rgba(20,35,70,.06)}
+  #painel.claro .pn-logo,#psol.claro .pn-logo{background:transparent;padding:0}
+  #painel.claro .pn-tit .k,#psol.claro .pn-tit .k{color:#00778A}
+  #painel.claro .pn-tit b,#psol.claro .pn-tit b{color:#0F1B33} #painel.claro .pn-tit span,#psol.claro .pn-tit span{color:#4A5A72}
+  #painel.claro .pn-tit .aviso,#psol.claro .pn-tit .aviso{color:#9A5700}
+  #painel.claro .pn-leg div,#psol.claro .pn-leg div{background:#FFFFFF;color:#3A4A62;box-shadow:none!important}
+  #painel.claro .pn-leg div.on,#psol.claro .pn-leg div.on{background:#EAF0F7;color:#0F1B33;box-shadow:inset 0 0 0 1px currentColor!important}
+  #painel.claro .pn-leg i,#psol.claro .pn-leg i{box-shadow:none!important}
+  #painel.claro .pn-busca,#psol.claro .pn-busca{background:#F6F8FB;border-color:#C9D4E2;color:#4A5A72}
+  #painel.claro .pn-busca:focus-within,#psol.claro .pn-busca:focus-within{border-color:#00778A;box-shadow:0 0 0 3px rgba(0,119,138,.15)}
+  #painel.claro .pn-busca input,#psol.claro .pn-busca input{color:#0F1B33} #painel.claro .pn-busca input::placeholder,#psol.claro .pn-busca input::placeholder{color:#5A6880}
+  #painel.claro .pn-busca button,#psol.claro .pn-busca button{background:#E3E9F1;color:#1A2540}
+  #painel.claro .pn-tema,#psol.claro .pn-tema{background:#F6F8FB;border-color:#C9D4E2;color:#1A2540}
+  #painel.claro .pn-tema:hover,#psol.claro .pn-tema:hover{border-color:#00778A}
+  #painel.claro .pn-relogio,#psol.claro .pn-relogio{color:#0F1B33;text-shadow:none} #painel.claro .pn-relogio small,#psol.claro .pn-relogio small{color:#3A4A62;opacity:1}
+  #painel.claro .pn-relogio.off,#psol.claro .pn-relogio.off{color:#C8143C}
+  #painel.claro .pn-grp,#psol.claro .pn-grp{background:rgba(255,255,255,.6);border-color:#D5DEEA}
+  #painel.claro .pn-gh,#psol.claro .pn-gh{background:linear-gradient(180deg,#E3F3F6,#F7FBFC);border-color:#9CCFD8}
+  #painel.claro .pn-gh b,#psol.claro .pn-gh b{color:#0F1B33;text-shadow:none} #painel.claro .pn-gh span,#psol.claro .pn-gh span{color:#1A2540}
+  #painel.claro .pn-gh small,#psol.claro .pn-gh small{color:#3A4A62} #painel.claro .pn-gh .bar,#psol.claro .pn-gh .bar{background:#D5DEEA}
+  #painel.claro .pn-tile,#psol.claro .pn-tile{background:#FFFFFF;box-shadow:0 1px 3px rgba(20,35,70,.08)!important}
+  #painel.claro .pn-tile .l1 i,#psol.claro .pn-tile .l1 i{box-shadow:none!important}
+  #painel.claro .pn-tile .l1 b,#psol.claro .pn-tile .l1 b{color:#0F1B33}
+  #painel.claro .pn-tile .l1 .es,#psol.claro .pn-tile .l1 .es{color:#2A3A55;background:#EAF0F7}
+  #painel.claro .pn-tile .l1 .os,#psol.claro .pn-tile .l1 .os{color:#C8143C;border-color:#C8143C;text-shadow:none}
+  #painel.claro .pn-tile .mo,#psol.claro .pn-tile .mo{color:#1A2540}
+  #painel.claro .pn-tile .vz,#psol.claro .pn-tile .vz{opacity:.55}
+  #painel.claro .pn-tile .po,#psol.claro .pn-tile .po{color:#4A5A72} #painel.claro .pn-tile .po .hr,#psol.claro .pn-tile .po .hr{color:#2A3A55} #painel.claro .pn-tile .po .ns,#psol.claro .pn-tile .po .ns{color:#9A5700}
+  #painel.claro .pn-tile mark,#psol.claro .pn-tile mark{background:#BFEAF2;color:#0F1B33}
+  #painel.claro .empty,#psol.claro .empty{color:#4A5A72}
+  #painel.claro .pn-ov,#psol.claro .pn-ov{background:rgba(15,27,51,.45)}
+  #painel.claro .pn-md,#psol.claro .pn-md{background:#FFFFFF;border-color:#D5DEEA;box-shadow:0 20px 50px rgba(15,27,51,.25)}
+  #painel.claro .pn-md .hd b,#psol.claro .pn-md .hd b{color:#0F1B33} #painel.claro .pn-md .hd span,#psol.claro .pn-md .hd span{color:#4A5A72}
+  #painel.claro .pn-md .hd button,#psol.claro .pn-md .hd button{background:#F6F8FB;border-color:#C9D4E2;color:#00778A}
+  #painel.claro .pn-mapleg,#psol.claro .pn-mapleg{color:#3A4A62} #painel.claro .pn-mapleg .ext,#psol.claro .pn-mapleg .ext{color:#00778A}
+  #painel.claro .leaflet-popup.pn-pop .leaflet-popup-content-wrapper,#psol.claro .leaflet-popup.pn-pop .leaflet-popup-content-wrapper{background:#FFFFFF;color:#1A2540;border-color:#D5DEEA;box-shadow:0 10px 30px rgba(15,27,51,.25)}
+  #painel.claro .leaflet-popup.pn-pop .leaflet-popup-tip,#psol.claro .leaflet-popup.pn-pop .leaflet-popup-tip{background:#FFFFFF;border-color:#D5DEEA}
+  #painel.claro .leaflet-popup.pn-pop a.leaflet-popup-close-button,#psol.claro .leaflet-popup.pn-pop a.leaflet-popup-close-button{color:#4A5A72}
+  #painel.claro .pp-h,#psol.claro .pp-h{border-color:#E1E7EF} #painel.claro .pp-h b,#psol.claro .pp-h b{color:#0F1B33} #painel.claro .pp-h span,#psol.claro .pp-h span{color:#4A5A72}
+  #painel.claro .pp-h em,#psol.claro .pp-h em{color:#C8143C;border-color:#C8143C}
+  #painel.claro .pp-mot,#psol.claro .pp-mot{color:#0F1B33}
+  #painel.claro .pp-c,#psol.claro .pp-c,#painel.claro .pp-l,#psol.claro .pp-l{background:#F4F7FB;border-color:#E1E7EF}
+  #painel.claro .pp-c small,#psol.claro .pp-c small{color:#56657C} #painel.claro .pp-c b,#psol.claro .pp-c b{color:#0F1B33} #painel.claro .pp-l small,#psol.claro .pp-l small{color:#4A5A72}
+  #painel.claro .pp-st,#psol.claro .pp-st{background:#F4F7FB;color:#3A4A62}
   /* claro: cards com faixa de status e textos mais fortes */
-  #painel.claro{background:#E8EDF3}
-  #painel.claro .pn-grp{background:#FFFFFF;border-color:#D3DCE7;box-shadow:0 1px 4px rgba(20,35,70,.06)}
-  #painel.claro .pn-gh{background:#F2F7FA;border-color:#C3D6E0}
-  #painel.claro .pn-tile{position:relative;padding-left:14px;background:#FFFFFF;border:1px solid #CBD5E1!important;box-shadow:0 1px 2px rgba(20,35,70,.06)!important}
-  #painel.claro .pn-tile::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;border-radius:12px 0 0 12px;background:#8593A8}
-  #painel.claro .pn-tile.s-rod{background:#F1FAF5;border-color:#9FD3B6!important} #painel.claro .pn-tile.s-rod::before{background:#047A45}
-  #painel.claro .pn-tile.s-par{background:#FFF8EC;border-color:#E8C68F!important} #painel.claro .pn-tile.s-par::before{background:#B86A00}
-  #painel.claro .pn-tile.s-gar::before{background:#8593A8}
-  #painel.claro .pn-tile.c-os{background:#FFF2F4;border-color:#EBA3B1!important} #painel.claro .pn-tile.c-os::before{background:#C8143C}
-  #painel.claro .pn-tile:hover{box-shadow:0 4px 12px rgba(20,35,70,.14)!important}
-  #painel.claro .pn-tile .l1 b{color:#0B1630;font-weight:800}
-  #painel.claro .pn-tile .l1 .es{color:#1A2540;background:#E4EAF2}
-  #painel.claro .pn-tile .l1 .os{background:#C8143C;color:#FFFFFF;border-color:#C8143C}
-  #painel.claro .pn-tile .mo{color:#0B1630;font-size:12.5px;font-weight:700}
-  #painel.claro .pn-tile .li{font-weight:600}
-  #painel.claro .pn-tile .po{color:#33435C;font-size:11px}
-  #painel.claro .pn-tile .po .hr{color:#0B1630;font-weight:700}
-  #painel.claro .pn-tile .vz{color:#8593A8;opacity:1}
-  #painel.claro .pn-gh small{color:#33435C}
-  #painel.claro .pn-gh .pn-mini em{background:#C8143C;color:#FFFFFF!important}
-  @media (max-width:760px){ .pn-tema span{display:none} .pn-grp{flex-direction:column} .pn-gh{width:auto} .pn-top{padding:10px 14px} .pn-main{padding:12px} .pn-busca{width:100%;order:5} .pn-leg{order:4;flex-basis:100%} }
+  #painel.claro,#psol.claro{background:#E8EDF3}
+  #painel.claro .pn-grp,#psol.claro .pn-grp{background:#FFFFFF;border-color:#D3DCE7;box-shadow:0 1px 4px rgba(20,35,70,.06)}
+  #painel.claro .pn-gh,#psol.claro .pn-gh{background:#F2F7FA;border-color:#C3D6E0}
+  #painel.claro .pn-tile,#psol.claro .pn-tile{position:relative;padding-left:14px;background:#FFFFFF;border:1px solid #CBD5E1!important;box-shadow:0 1px 2px rgba(20,35,70,.06)!important}
+  #painel.claro .pn-tile::before,#psol.claro .pn-tile::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;border-radius:12px 0 0 12px;background:#8593A8}
+  #painel.claro .pn-tile.s-rod,#psol.claro .pn-tile.s-rod{background:#F1FAF5;border-color:#9FD3B6!important} #painel.claro .pn-tile.s-rod::before,#psol.claro .pn-tile.s-rod::before{background:#047A45}
+  #painel.claro .pn-tile.s-par,#psol.claro .pn-tile.s-par{background:#FFF8EC;border-color:#E8C68F!important} #painel.claro .pn-tile.s-par::before,#psol.claro .pn-tile.s-par::before{background:#B86A00}
+  #painel.claro .pn-tile.s-gar::before,#psol.claro .pn-tile.s-gar::before{background:#8593A8}
+  #painel.claro .pn-tile.c-os,#psol.claro .pn-tile.c-os{background:#FFF2F4;border-color:#EBA3B1!important} #painel.claro .pn-tile.c-os::before,#psol.claro .pn-tile.c-os::before{background:#C8143C}
+  #painel.claro .pn-tile:hover,#psol.claro .pn-tile:hover{box-shadow:0 4px 12px rgba(20,35,70,.14)!important}
+  #painel.claro .pn-tile .l1 b,#psol.claro .pn-tile .l1 b{color:#0B1630;font-weight:800}
+  #painel.claro .pn-tile .l1 .es,#psol.claro .pn-tile .l1 .es{color:#1A2540;background:#E4EAF2}
+  #painel.claro .pn-tile .l1 .os,#psol.claro .pn-tile .l1 .os{background:#C8143C;color:#FFFFFF;border-color:#C8143C}
+  #painel.claro .pn-tile .mo,#psol.claro .pn-tile .mo{color:#0B1630;font-size:12.5px;font-weight:700}
+  #painel.claro .pn-tile .li,#psol.claro .pn-tile .li{font-weight:600}
+  #painel.claro .pn-tile .po,#psol.claro .pn-tile .po{color:#33435C;font-size:11px}
+  #painel.claro .pn-tile .po .hr,#psol.claro .pn-tile .po .hr{color:#0B1630;font-weight:700}
+  #painel.claro .pn-tile .vz,#psol.claro .pn-tile .vz{color:#8593A8;opacity:1}
+  #painel.claro .pn-gh small,#psol.claro .pn-gh small{color:#33435C}
+  #painel.claro .pn-gh .pn-mini em,#psol.claro .pn-gh .pn-mini em{background:#C8143C;color:#FFFFFF!important}
+  @media (max-width:760px){ .ps-prog{padding:10px 14px 0} .pn-tema span{display:none} .pn-grp{flex-direction:column} .pn-gh{width:auto} .pn-top{padding:10px 14px} .pn-main{padding:12px} .pn-busca{width:100%;order:5} .pn-leg{order:4;flex-basis:100%} }
   @media (max-width:1100px){
     .hdata{display:none} .gseg button{padding:0 14px}
   }
@@ -455,6 +498,7 @@
 </style>
 </head>
 <body>
+<nav id="menuTop" aria-label="Telas do sistema"><a href="#" data-tela=""><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V9l9-6 9 6v12"/><path d="M9 21v-6h6v6"/></svg>Soltura</a><a href="#soltura" data-tela="#soltura"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>Painel de soltura</a><a href="#painel" data-tela="#painel"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>Painel em tempo real</a></nav>
 <div class="loading" id="loading"></div>
 
 <header>
@@ -595,6 +639,19 @@
       <div class="pn-mapleg"><span><i style="background:#2EF29A"></i>Rodando</span><span><i style="background:#FFC857"></i>Parado</span><span><i style="background:#8A9BB8"></i>Na garagem</span><span><i style="background:#FF3D71"></i>Com O.S.</span><a id="pnMx" class="ext" href="#" target="_blank" rel="noopener">Abrir no Google Maps</a></div>
     </div>
   </div>
+</div>
+<!-- painel de soltura: abre com …/index.html#soltura (só o que o fiscal registrou, sem telemetria) -->
+<div id="psol">
+  <header class="pn-top">
+    <div class="pn-logo"><img id="psLogo" alt="Univale"></div>
+    <div class="pn-tit"><span class="k">// LIBERAÇÕES DO DIA</span><b>Painel de soltura</b><span id="psSub"></span></div>
+    <div class="pn-leg" id="psLeg"></div>
+    <label class="pn-busca"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="psQ" placeholder="Veículo, motorista, escala, fiscal…" aria-label="Pesquisar liberações" autocomplete="off"><button type="button" id="psQx" aria-label="Limpar pesquisa">×</button></label>
+    <button type="button" class="pn-tema" id="psTema" aria-label="Alternar tema claro/escuro"></button>
+    <div class="pn-relogio" id="psHora">--:--</div>
+  </header>
+  <div class="ps-prog" id="psProg"></div>
+  <main class="pn-main" id="psMain"><div class="empty">Carregando…</div></main>
 </div>
 <div class="toast" id="toast"><span id="toastTx"></span><button type="button" id="toastBtn" style="display:none">Desfazer</button></div>
 
@@ -870,7 +927,7 @@ function linhaInterd(x){
       '<div><span>Tipo de O.S.: <b>'+esc(osTipo(x))+'</b></span></div>'+
       '<div class="chs">'+ch('os',ICO_WR,'Aberta '+(x.aberta_em||'—'))+(x.previsao?ch('',null,'Previsão '+x.previsao):'')+'</div>'+
       (osDesc(x)?'<div class="osdesc"><b>Descrição:</b> '+esc(osDesc(x))+'</div>':'')+
-      (lista?'<div class="chips">'+lista+'</div>':'')+
+
     '</div>'+acts+
   '</div>';
 }
@@ -1493,9 +1550,87 @@ var Painel=(function(){
 })();
 window.addEventListener('hashchange',function(){ location.reload(); });
 
+/* ===================== painel de soltura (#soltura) — só registros do fiscal ===================== */
+var PSol=(function(){
+  function g(id){ return document.getElementById(id); }
+  function e(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  function semAc(s){ return String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase(); }
+  function nome(n){ return String(n||'').trim().replace(/\s+/g,' ').toLowerCase().replace(/(^|[\s(\/-])([a-zà-ú])/g,function(m,a,l){return a+l.toUpperCase();}).replace(/\s(De|Da|Do|Dos|Das|E)\s/g,function(m){return m.toLowerCase();}); }
+  var PAL={esc:{ok:'#2EF29A',atr:'#FFC857',adi:'#22E6FF',nao:'#FF3D71'}, cla:{ok:'#047A45',atr:'#9A5700',adi:'#00778A',nao:'#C8143C'}};
+  var ROT={ok:'No horário',atr:'Atrasadas',adi:'Adiantadas',nao:'Não saiu'};
+  var dados=null, offset=0, filtro='', tema='esc';
+  var ICO_OK='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>';
+  var ICO_SOL='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+  var ICO_LUA='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+  function cl(x){ return x.status==='ATRASADA'?'atr':(x.status==='ADIANTADA'?'adi':'ok'); }
+  function dBR(iso){ var p=String(iso||'').split('-'); return p.length===3?p[2]+'/'+p[1]:''; }
+  function desvio(m){ m=Math.round(m||0); if(!m) return 'no horário'; var a=Math.abs(m), t=a>=60?Math.floor(a/60)+'h'+('0'+a%60).slice(-2):a+' min'; return (m>0?'+':'−')+t; }
+  function aplicarTema(t){
+    tema=t==='cla'?'cla':'esc'; g('psol').classList.toggle('claro',tema==='cla');
+    var b=g('psTema'); b.innerHTML=tema==='cla'?ICO_LUA+'<span>Escuro</span>':ICO_SOL+'<span>Claro</span>'; b.title='Mudar para o tema '+(tema==='cla'?'escuro':'claro');
+    try{ localStorage.setItem('painel.tema',tema); }catch(x){}
+    if(dados) desenhar();
+  }
+  function relogio(){ var d=new Date(Date.now()+offset), z=function(n){ return ('0'+n).slice(-2); };
+    g('psHora').innerHTML='<small>'+['dom','seg','ter','qua','qui','sex','sáb'][d.getDay()]+' '+z(d.getDate())+'/'+z(d.getMonth()+1)+'/'+d.getFullYear()+'</small>'+z(d.getHours())+':'+z(d.getMinutes()); }
+  function buscar(){
+    var t0=Date.now();
+    return api('getSoltura',{data:''}).then(function(d){
+      dados=d; offset=(d.agoraMs||Date.now())-Math.round((t0+Date.now())/2); g('psHora').classList.remove('off'); desenhar();
+    }).catch(function(err){ g('psHora').classList.add('off'); if(!dados) g('psMain').innerHTML='<div class="empty">Não consegui carregar: '+e(err.message)+'</div>'; });
+  }
+  function desenhar(){
+    var P=PAL[tema], L=dados.liberados||[], conta={ok:0,atr:0,adi:0};
+    L.forEach(function(x){ conta[cl(x)]++; });
+    var prog=dados.programadas||0, tot=L.length, pct=prog?Math.min(100,Math.round(tot/prog*100)):0;
+    g('psSub').textContent=dados.data?'Dia '+dBR(dados.data):'';
+    g('psLeg').innerHTML=['ok','atr','adi'].map(function(k){ var c=P[k], on=filtro===k;
+      return '<div data-f="'+k+'" class="'+(on?'on':(filtro?'off':''))+'" title="'+(on?'Mostrar todas':'Filtrar: '+ROT[k])+'" style="border-color:'+c+(on?'':'55')+';box-shadow:inset 0 0 18px '+c+(on?'44':'22')+'"><i style="background:'+c+';box-shadow:0 0 10px '+c+'"></i><b style="color:'+c+'">'+conta[k]+'</b>'+ROT[k]+'</div>'; }).join('')+
+      (dados.naoSaiu?'<div style="cursor:default;border-color:'+P.nao+'55"><i style="background:'+P.nao+'"></i><b style="color:'+P.nao+'">'+dados.naoSaiu+'</b>Não saiu</div>':'');
+    g('psProg').innerHTML='<span><b>'+tot+'</b> de '+prog+' liberadas</span><div class="tr"><i style="width:'+pct+'%"></i></div><b>'+pct+'%</b>';
+    var q=semAc(g('psQ').value).trim();
+    g('psQ').parentNode.classList.toggle('on',!!g('psQ').value);
+    var V=L.filter(function(x){ if(filtro && cl(x)!==filtro) return false; return !q||semAc([x.veiculo,x.veiculo_prev,x.motorista,x.cracha,x.escala,x.responsavel,x.garagem].join(' ')).indexOf(q)>=0; });
+    if(!V.length){ g('psMain').innerHTML='<div class="empty">'+(L.length?'Nenhuma liberação encontrada'+(filtro?' em “'+ROT[filtro]+'”':'')+(q?' para “'+e(g('psQ').value)+'”':'')+'.':'Nenhuma liberação registrada hoje.')+'</div>'; return; }
+    // agrupa por hora da liberação (mais recente primeiro)
+    var grupos={}, ordem=[];
+    V.forEach(function(x){ var h=x.hora_real.slice(0,2); if(!grupos[h]){ grupos[h]=[]; ordem.push(h); } grupos[h].push(x); });
+    var dia=dBR(dados.data);
+    g('psMain').innerHTML=ordem.map(function(h){
+      return '<section><div class="ps-h">'+h+':00 – '+h+':59 <small>'+grupos[h].length+' liberada'+(grupos[h].length>1?'s':'')+'</small></div><div class="ps-grid">'+
+        grupos[h].map(function(x){
+          var k=cl(x), c=P[k];
+          return '<div class="ps-card" style="border-color:'+c+(tema==='cla'?'88':'55')+'" title="'+e(x.veiculo+' · '+x.escala+' · '+ROT[k])+'">'+
+            '<div class="ck" style="background:'+c+(tema==='cla'?'':';box-shadow:0 0 12px '+c+'88')+'">'+ICO_OK+'</div><div class="bd">'+
+            '<div class="l1"><b>'+e(x.veiculo||'—')+'</b>'+(x.troca_veiculo&&x.veiculo_prev?'<span class="tr" title="Carro previsto: '+e(x.veiculo_prev)+'">troca '+e(x.veiculo_prev)+'</span>':'')+'<span class="es">'+e(x.escala)+'</span></div>'+
+            '<div class="mo" title="'+e(x.motorista)+'">'+(x.motorista?e(nome(x.motorista)):'—')+(x.troca_motorista?' <span style="opacity:.7;font-weight:500">(troca)</span>':'')+'</div>'+
+            '<div class="hs"><div><small>PROGRAMADA</small><span><em>'+dia+'</em>'+e(x.hora_prevista||'—')+'</span></div><div><small>LIBERADA</small><span><em>'+dia+'</em>'+e(x.hora_real)+'</span></div>'+
+            '<span class="dv" style="color:'+c+';background:'+c+'1F">'+desvio(x.desvio)+'</span></div>'+
+            '<div class="ft">'+(x.responsavel?'Fiscal '+e(nome(x.responsavel)):'')+(x.garagem?' · '+e(x.garagem):'')+(x.motivo?' · '+e(x.motivo):'')+'</div>'+
+          '</div></div>';
+        }).join('')+'</div></section>';
+    }).join('');
+  }
+  function iniciar(){
+    document.body.classList.add('modo-psol'); document.title='Painel de soltura · Univale';
+    var lg=document.querySelector('header .logo'); if(lg) g('psLogo').src=lg.src;
+    var t0='esc'; try{ t0=localStorage.getItem('painel.tema')||'esc'; }catch(x){} aplicarTema(t0);
+    g('psTema').addEventListener('click',function(){ aplicarTema(tema==='cla'?'esc':'cla'); });
+    g('psLeg').addEventListener('click',function(ev){ var t=ev.target.closest('[data-f]'); if(!t) return; var k=t.getAttribute('data-f'); filtro=filtro===k?'':k; if(dados) desenhar(); });
+    g('psQ').addEventListener('input',function(){ if(dados) desenhar(); });
+    g('psQ').addEventListener('keydown',function(ev){ if(ev.key==='Escape'){ this.value=''; if(dados) desenhar(); } });
+    g('psQx').addEventListener('click',function(){ g('psQ').value=''; g('psQ').focus(); if(dados) desenhar(); });
+    relogio(); buscar();
+    setInterval(relogio,15000); setInterval(buscar,30000);
+  }
+  return { iniciar: iniciar };
+})();
+
 /* ===================== início ===================== */
 (function init(){
+  [].forEach.call(document.querySelectorAll('#menuTop a'),function(a){ var t=a.getAttribute('data-tela'); if(t===(location.hash==='#painel'||location.hash==='#soltura'?location.hash:'')) a.classList.add('on'); });
   if(location.hash==='#painel'){ Painel.iniciar(); return; }
+  if(location.hash==='#soltura'){ PSol.iniciar(); return; }
   mostrarResp();
   if(API_URL.indexOf('http')!==0){ toast('Configure a API_URL no index.html',true); return; }
   api('getCadastros').then(function(c){

@@ -279,26 +279,36 @@
   .pn-grp.livre{border-style:dashed}
   .pn-gh{width:140px;flex-shrink:0;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:4px;padding:8px;border-radius:12px;background:linear-gradient(180deg,rgba(34,230,255,.12),rgba(34,230,255,.02));border:1px solid rgba(34,230,255,.35)}
   .pn-gh b{display:block;font-family:var(--mono);font-size:28px;color:#FFFFFF;line-height:1;text-shadow:0 0 12px rgba(34,230,255,.5)}
-  .pn-gh span{display:block;font-size:12px;font-weight:600;color:#9FB0D6}
+  .pn-gh span{display:block;font-size:13px;font-weight:700;color:#DDE8FF}
   .pn-gh .bar{display:flex;width:96px;height:3px;border-radius:2px;overflow:hidden;background:rgba(255,255,255,.08);margin-top:4px}
-  .pn-gh small{display:block;font-family:var(--mono);font-size:10px;color:#7C8BA6;line-height:1.5}
+  .pn-gh small{display:block;font-family:var(--mono);font-size:11px;color:#B7C6E6;line-height:1.5}
   .pn-gh .pn-mini{display:flex;gap:4px;justify-content:center;margin-top:4px;flex-wrap:wrap}
   .pn-gh .pn-mini em{font-style:normal;font-family:var(--mono);font-size:11px;font-weight:700;padding:1px 6px;border-radius:5px;border:1px solid}
   .pn-grid{flex:1;display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;align-content:center}
-  .pn-tile{display:flex;flex-direction:column;gap:2px;padding:8px 10px;border-radius:12px;min-width:0;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.02));border:1px solid}
+  .pn-tile{display:flex;flex-direction:column;gap:2px;padding:8px 10px;border-radius:12px;min-width:0;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.02));border:1px solid;cursor:pointer;transition:transform .12s ease}
+  .pn-tile:hover{transform:translateY(-2px)}
   .pn-tile div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .pn-tile .l1{display:flex;align-items:center;gap:6px}
   .pn-tile .l1 i{width:7px;height:7px;transform:rotate(45deg);flex-shrink:0}
   .pn-tile .l1 b{font-family:var(--mono);font-size:17px;color:#FFFFFF}
-  .pn-tile .l1 .es{margin-left:auto;font-family:var(--mono);font-size:10px;color:#7C8BA6}
+  .pn-tile .l1 .es{margin-left:auto;font-family:var(--mono);font-size:11px;font-weight:700;color:#C9D6F2;background:rgba(255,255,255,.07);padding:1px 6px;border-radius:5px}
   .pn-tile .l1 .os{font-family:var(--mono);font-size:10px;font-weight:700;color:#FF3D71;border:1px solid #FF3D71;padding:0 5px;border-radius:4px;text-shadow:0 0 6px rgba(255,61,113,.7)}
   .pn-tile .mo{font-size:12px;font-weight:600;color:#DDE8FF}
   .pn-tile .li{font-size:11px} .pn-tile .li b{font-family:var(--mono)}
   .pn-tile .vz{opacity:.4}
-  .pn-tile .po{font-size:10.5px;color:#7C8BA6;display:flex;gap:6px} .pn-tile .po span:first-child{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
-  .pn-tile .po .hr{font-family:var(--mono);font-size:10px;color:#9FB0D6;flex-shrink:0}
+  .pn-tile .po{font-size:10.5px;color:#9FB0D6;display:flex;gap:6px} .pn-tile .po span:first-child{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+  .pn-tile .po .hr{font-family:var(--mono);font-size:10px;color:#C9D6F2;flex-shrink:0}
   .pn-tile .po .ns{color:#FFC857}
   #painel .empty{color:#9FB0D6}
+  .pn-ov{position:fixed;inset:0;z-index:30;background:rgba(3,6,16,.7);display:none;align-items:center;justify-content:center;padding:20px}
+  .pn-ov.on{display:flex}
+  .pn-md{width:min(1000px,100%);border-radius:18px;padding:16px;background:linear-gradient(180deg,#121A33,#0A1024);border:1px solid rgba(34,230,255,.35);box-shadow:0 0 40px rgba(34,230,255,.15)}
+  .pn-md .hd{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+  .pn-md .hd b{display:block;font-family:var(--mono);font-size:24px;color:#FFFFFF}
+  .pn-md .hd span{display:block;font-size:13px;color:#9FB0D6;margin-top:2px}
+  .pn-md .hd button{margin-left:auto;height:40px;padding:0 16px;border-radius:10px;border:1px solid rgba(34,230,255,.45);background:rgba(34,230,255,.08);color:#22E6FF;font-weight:700;font-family:var(--sg)}
+  .pn-md iframe{display:block;width:100%;height:min(62vh,560px);border:0;border-radius:12px;background:#0A1024}
+  .pn-md .ext{display:inline-block;margin-top:10px;font-size:13px;font-weight:700;color:#22E6FF}
   @media (max-width:760px){ .pn-grp{flex-direction:column} .pn-gh{width:auto} .pn-top{padding:10px 14px} .pn-main{padding:12px} }
   @media (max-width:1100px){
     .hdata{display:none} .gseg button{padding:0 14px}
@@ -469,6 +479,13 @@
     <div class="pn-relogio" id="pnHora">--:--</div>
   </header>
   <main class="pn-main" id="pnMain"><div class="empty">Carregando…</div></main>
+  <div class="pn-ov" id="pnOv" role="dialog" aria-modal="true" aria-labelledby="pnMt">
+    <div class="pn-md">
+      <div class="hd"><div style="min-width:0"><b id="pnMt">—</b><span id="pnMs"></span></div><button type="button" id="pnMf">Fechar</button></div>
+      <iframe id="pnMap" title="Mapa com a posição do veículo" src="about:blank" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      <a id="pnMx" class="ext" href="#" target="_blank" rel="noopener">Abrir no Google Maps</a>
+    </div>
+  </div>
 </div>
 <div class="toast" id="toast"><span id="toastTx"></span><button type="button" id="toastBtn" style="display:none">Desfazer</button></div>
 
@@ -1224,7 +1241,8 @@ function gravarEscalaArquivo(){
 
 /* ===================== painel TV (independente da soltura) ===================== */
 var Painel=(function(){
-  var COR={rod:['#22E6FF','Rodando'],par:['#FFC857','Parado'],gar:['#7C8BA6','Na garagem'],os:['#FF3D71','Com O.S.']};
+  var COR={rod:['#2EF29A','Rodando'],par:['#FFC857','Parado'],gar:['#8A9BB8','Na garagem'],os:['#FF3D71','Com O.S.']};
+  var ORD={rod:0,par:1,gar:2};
   var dados=null, offset=0;
   function g(id){ return document.getElementById(id); }
   function e(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
@@ -1250,8 +1268,8 @@ var Painel=(function(){
     C.forEach(function(c){ var k=c.setor||'~'; if(!grupos[k]){ grupos[k]=[]; ordem.push(k); } grupos[k].push(c); });
     ordem.sort(function(a,b){ if(a==='~') return 1; if(b==='~') return -1; return (parseInt(a,10)||0)-(parseInt(b,10)||0) || a.localeCompare(b); });
     g('pnMain').innerHTML=ordem.map(function(k){
-      var L=grupos[k].sort(function(a,b){ return (b.hojeNaEscala?1:0)-(a.hojeNaEscala?1:0) || (a.hora||'99').localeCompare(b.hora||'99') || a.prefixo.localeCompare(b.prefixo); });
-      var livre=k==='~', cod=livre?'SEM SETOR':String(k).split(' - ')[0], nome=livre?'Fora da escala da semana':nomeCurto(String(k).split(' - ').slice(1).join(' - ')||k);
+      var L=grupos[k].sort(function(a,b){ return ORD[a.sit]-ORD[b.sit] || (b.hojeNaEscala?1:0)-(a.hojeNaEscala?1:0) || (a.hora||'99').localeCompare(b.hora||'99') || a.prefixo.localeCompare(b.prefixo); });
+      var livre=k==='~', cod=livre?'SEM SETOR':String(k).split(' - ')[0], nome=livre?'Fora da escala da semana':nomeCurto((String(k).split(' - ').slice(1).join(' - ')||k).replace(/\s+ESCALAS?\s*$/i,''));
       var rod=L.filter(function(c){return c.sit==='rod';}).length, fora=L.filter(function(c){return !c.hojeNaEscala;}).length;
       var ct={rod:0,par:0,gar:0}; L.forEach(function(c){ ct[c.sit]++; });
       var barra=['rod','par','gar'].filter(function(s){return ct[s];}).map(function(s){ return '<span style="width:'+(ct[s]/L.length*100)+'%;background:'+COR[s][0]+'"></span>'; }).join('');
@@ -1262,8 +1280,8 @@ var Painel=(function(){
         L.map(function(c){
           var cor=COR[c.sit][0];
           var linha=c.linhaNum?'<div class="li" style="color:'+cor+'"><b>'+e(c.linhaNum)+'</b> '+e(c.linhaNome)+'</div>':'<div class="li vz">—</div>';
-          var borda=c.os?'#FF3D71':cor+'44', brilho=c.os?'rgba(255,61,113,.25)':cor+'18';
-          return '<div class="pn-tile" style="border-color:'+borda+';box-shadow:0 0 16px '+brilho+'" title="'+e(c.prefixo+' · '+COR[c.sit][1]+(c.os?' · O.S. '+c.os:'')+(c.linhaNome?' · '+c.linhaNome:'')+' · '+(c.ponto||''))+'">'+
+          var borda=c.os?'#FF3D71':(c.sit==='rod'?cor:cor+'66'), brilho=c.os?'rgba(255,61,113,.28)':(c.sit==='rod'?cor+'40':cor+'14');
+          return '<div class="pn-tile" data-car="'+e(c.prefixo)+'" style="border-color:'+borda+';box-shadow:0 0 16px '+brilho+'" title="'+e(c.prefixo+' · '+COR[c.sit][1]+(c.os?' · O.S. '+c.os:'')+(c.linhaNome?' · '+c.linhaNome:'')+' · '+(c.ponto||''))+'">'+
             '<div class="l1"><i style="background:'+cor+';box-shadow:0 0 8px '+cor+'"></i><b>'+e(c.prefixo)+'</b>'+(c.os?'<span class="os">O.S.</span>':'')+'<span class="es">'+(c.hojeNaEscala?e(c.escala):'—')+'</span></div>'+
             '<div class="mo'+(c.motorista?'':' vz')+'">'+(c.motorista?e(nomeCurto(c.motorista)):'—')+'</div>'+
             linha+
@@ -1271,7 +1289,22 @@ var Painel=(function(){
         }).join('')+'</div></section>';
     }).join('')||'<div class="empty">Nenhum carro da frota na telemetria.</div>';
   }
+  function abrirMapa(p){
+    var c=(dados&&dados.carros||[]).filter(function(x){return x.prefixo===p;})[0]; if(!c) return;
+    g('pnMt').textContent=c.prefixo+' · '+COR[c.sit][1]+(c.os?' · O.S. '+c.os:'');
+    g('pnMs').textContent=[c.motorista?nomeCurto(c.motorista):'', c.linhaNum?c.linhaNum+' '+c.linhaNome:'', c.ponto, c.tx].filter(String).join(' · ');
+    if(c.lat&&c.lng){
+      g('pnMap').src='https://maps.google.com/maps?q='+encodeURIComponent(c.lat+','+c.lng)+'&z=16&output=embed';
+      g('pnMx').href='https://www.google.com/maps?q='+encodeURIComponent(c.lat+','+c.lng); g('pnMx').style.display='';
+    } else { g('pnMap').src='about:blank'; g('pnMx').style.display='none'; g('pnMs').textContent+=' · sem posição no momento'; }
+    g('pnOv').classList.add('on');
+  }
+  function fecharMapa(){ g('pnOv').classList.remove('on'); g('pnMap').src='about:blank'; }
   function iniciar(){
+    g('pnMain').addEventListener('click',function(ev){ var t=ev.target.closest('[data-car]'); if(t) abrirMapa(t.getAttribute('data-car')); });
+    g('pnMf').addEventListener('click',fecharMapa);
+    g('pnOv').addEventListener('click',function(ev){ if(ev.target===this) fecharMapa(); });
+    document.addEventListener('keydown',function(ev){ if(ev.key==='Escape') fecharMapa(); });
     document.body.classList.add('modo-painel'); document.title='Painel da frota · Univale';
     var lg=document.querySelector('header .logo'); if(lg) g('pnLogo').src=lg.src;
     relogio(); buscar();

@@ -1440,7 +1440,7 @@ var Painel=(function(){
       '<div class="pp-g"><div class="pp-c"><small>DATA / HORA</small><b>'+e(c.tx||'—')+'</b></div>'+
       '<div class="pp-c"><small>VELOCIDADE</small><b'+(c.vel>0?' style="color:'+COR.rod[0]+'"':'')+'>'+vel+'</b></div></div>'+
       '<div class="pp-l">'+(c.linhaNum?'<span style="color:'+COR.rod[0]+'">●</span> <b style="font-family:var(--mono)">'+e(c.linhaNum)+'</b> '+e(c.linhaNome)+(c.linhaStatus?'<small>'+e(c.linhaStatus)+'</small>':''):'<span style="opacity:.6">Sem linha em andamento</span>')+'</div>'+
-      '<div class="pp-l" style="font-weight:500">⌖ '+e(c.ponto||'—')+(c.escala?'<small>Escala '+e(c.escala)+(c.hora?' · '+e(c.hora):'')+'</small>':'')+'</div>'+
+      '<div class="pp-l" style="font-weight:500">⌖ '+e(c.ponto||'—')+'</div>'+
       '<div class="pp-st'+(ign?' lg':'')+'" style="'+(ign?'background:'+COR.rod[0]+'1A;color:'+COR.rod[0]:'')+'"><i style="background:'+(ign?COR.rod[0]:COR.gar[0])+'"></i>Ignição '+(ign?'ligada':'desligada')+' · '+COR[c.sit][1]+'</div>';
   }
   function abrirMapa(p){

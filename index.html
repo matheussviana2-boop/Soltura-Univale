@@ -339,21 +339,35 @@
   .hs-btn.pri{background:#0B8F5A;border-color:#0B8F5A;color:#FFFFFF}
   .hs-btn.pri:hover{background:#0A7A4D}
   .hs-btn:disabled{opacity:.5;cursor:default}
-  .hs-rings{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
-  .hs-ring{display:flex;align-items:center;gap:16px;padding:16px;border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.02));border:1px solid rgba(159,176,214,.2);min-width:0}
+  #hist .pn-main{gap:16px;padding:18px 24px 28px}
+  #hist .hs-box h3{font-size:13px;padding:14px 18px} #hist .hs-box h3 small{font-size:13px;color:#B7C6E6}
+  .hs-big{font-size:15px} .hs-big th{font-size:12px;padding:12px 14px;color:#A9B8D6} .hs-big td{padding:11px 14px;color:#E6EEFF}
+  .hs-big .st{font-size:12.5px;padding:3px 10px}
+  .hs-fl{display:flex;flex-direction:column;gap:10px;padding:14px 16px 16px}
+  .hs-fc{display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(159,176,214,.16)}
+  .hs-av{width:44px;height:44px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#1E3A70;color:#FFFFFF;font-weight:700;font-size:15px;text-transform:uppercase}
+  .hs-fn{flex:1;min-width:0} .hs-fn b{display:block;font-size:16px;color:#FFFFFF;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .hs-fn span{font:500 13px var(--mono);color:#B7C6E6}
+  .hs-fq{text-align:right} .hs-fq b{display:block;font:700 26px var(--mono);color:#FFFFFF;line-height:1} .hs-fq span{font-size:12px;color:#B7C6E6}
+  .hs-vazio{padding:20px;color:#B7C6E6;font-size:15px}
+  #hist.claro .hs-box h3 small{color:#3A4A62}
+  #hist.claro .hs-big th{color:#3A4A62} #hist.claro .hs-big td{color:#0F1B33}
+  #hist.claro .hs-fc{background:#F6F8FB;border-color:#E1E7EF} #hist.claro .hs-av{background:#0F1B33}
+  #hist.claro .hs-fn b,#hist.claro .hs-fq b{color:#0B1630} #hist.claro .hs-fn span,#hist.claro .hs-fq span,#hist.claro .hs-vazio{color:#3A4A62}
+  .hs-rings{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+  .hs-ring{display:flex;align-items:center;gap:18px;padding:18px 20px;border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.02));border:1px solid rgba(159,176,214,.2);min-width:0}
   .hs-ring svg{flex-shrink:0}
-  .hs-ring small{display:block;font:600 10.5px var(--mono);letter-spacing:.16em;color:#7C8BA6}
-  .hs-ring b{display:block;font:700 30px var(--mono);color:#FFFFFF;line-height:1.15} .hs-ring b em{font-style:normal;font-size:15px;color:#7C8BA6}
-  .hs-ring span{font-size:12px;color:#9FB0D6}
-  .hs-mid{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:14px;align-items:start}
-  .hs-gr{padding:6px 16px 4px}
-  .hs-lg{display:flex;flex-wrap:wrap;gap:14px;padding:0 16px 12px;font-size:12px;color:#9FB0D6}
-  .hs-lg i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
-  .hs-dq{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px}
-  .hs-dq input{flex:1;min-width:200px;max-width:340px;height:34px;padding:0 10px;border-radius:8px;border:1px solid rgba(34,230,255,.3);background:rgba(255,255,255,.06);color:inherit;font-family:var(--sg)}
-  .hs-chip{height:32px} .hs-chip.on{border-color:#22E6FF;color:#FFFFFF;background:rgba(34,230,255,.14)}
+  .hs-ring small{display:block;font:700 12px var(--mono);letter-spacing:.14em;color:#A9B8D6}
+  .hs-ring b{display:block;font:700 36px var(--mono);color:#FFFFFF;line-height:1.15} .hs-ring b em{font-style:normal;font-size:18px;color:#A9B8D6}
+  .hs-ring span{font-size:14px;color:#C3CEE4}
+  .hs-mid{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:16px;align-items:stretch}
+  .hs-gr{padding:6px 16px 4px;overflow-x:auto}
+  .hs-lg{display:flex;flex-wrap:wrap;gap:18px;padding:2px 18px 14px;font-size:14px;color:#C3CEE4}
+  .hs-lg i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+  .hs-dq{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 18px}
+  .hs-dq input{flex:1;min-width:220px;max-width:420px;height:42px;font-size:15px;padding:0 10px;border-radius:8px;border:1px solid rgba(34,230,255,.3);background:rgba(255,255,255,.06);color:inherit;font-family:var(--sg)}
+  .hs-chip{height:40px;font-size:14px;padding:0 14px} .hs-chip.on{border-color:#22E6FF;color:#FFFFFF;background:rgba(34,230,255,.14)}
   #hist.claro .hs-ring{background:#FFFFFF;border-color:#D3DCE7;box-shadow:0 1px 3px rgba(20,35,70,.06)}
-  #hist.claro .hs-ring small{color:#56657C} #hist.claro .hs-ring b{color:#0B1630} #hist.claro .hs-ring b em{color:#56657C} #hist.claro .hs-ring span{color:#3A4A62}
+  #hist.claro .hs-ring small{color:#3A4A62} #hist.claro .hs-ring b{color:#0B1630} #hist.claro .hs-ring b em{color:#56657C} #hist.claro .hs-ring span{color:#3A4A62}
   #hist.claro .hs-lg{color:#3A4A62}
   #hist.claro .hs-dq input{background:#FFFFFF;border-color:#C9D4E2;color:#0F1B33}
   #hist.claro .hs-chip.on{border-color:#00778A;color:#0B1630;background:#E3F3F6}
@@ -613,7 +627,7 @@
   #painel.claro .pn-gh small,#psol.claro .pn-gh small,#hist.claro .pn-gh small{color:#33435C}
   #painel.claro .pn-gh .pn-mini em,#psol.claro .pn-gh .pn-mini em,#hist.claro .pn-gh .pn-mini em{background:#C8143C;color:#FFFFFF!important}
   @media (max-width:1100px){ .hs-rings{grid-template-columns:repeat(2,minmax(0,1fr))} .hs-mid{grid-template-columns:minmax(0,1fr)} }
-  @media (max-width:760px){ .hs-rings{grid-template-columns:minmax(0,1fr)} .hs-ring b{font-size:24px} .hs-bar{width:100%;order:5} .hs-bar label{flex:1} .hs-bar input[type=date]{width:100%} .ps-prog{padding:10px 14px 0} .pn-tema span{display:none} .pn-grp{flex-direction:column} .pn-gh{width:auto} .pn-top{padding:10px 14px} .pn-main{padding:12px} .pn-busca{width:100%;order:5} .pn-leg{order:4;flex-basis:100%} }
+  @media (max-width:760px){ .hs-gr svg{min-width:720px} #hist .pn-main{padding:12px} .hs-ring{padding:14px} .hs-rings{grid-template-columns:minmax(0,1fr)} .hs-ring b{font-size:24px} .hs-bar{width:100%;order:5} .hs-bar label{flex:1} .hs-bar input[type=date]{width:100%} .ps-prog{padding:10px 14px 0} .pn-tema span{display:none} .pn-grp{flex-direction:column} .pn-gh{width:auto} .pn-top{padding:10px 14px} .pn-main{padding:12px} .pn-busca{width:100%;order:5} .pn-leg{order:4;flex-basis:100%} }
   @media (max-width:1100px){
     .hdata{display:none} .gseg button{padding:0 14px}
   }
@@ -1852,22 +1866,22 @@ var Hist=(function(){
   }
   function ring(p,col,txt){
     var r=30, c=2*Math.PI*r, tr=tema==='cla'?'#E1E7EF':'rgba(255,255,255,.08)', tx=tema==='cla'?'#0B1630':'#FFFFFF';
-    return '<svg width="76" height="76" viewBox="0 0 76 76" aria-hidden="true"><circle cx="38" cy="38" r="30" stroke="'+tr+'" stroke-width="7" fill="none"/>'+
+    return '<svg width="88" height="88" viewBox="0 0 76 76" aria-hidden="true"><circle cx="38" cy="38" r="30" stroke="'+tr+'" stroke-width="7" fill="none"/>'+
       '<circle cx="38" cy="38" r="30" stroke="'+col+'" stroke-width="7" fill="none" stroke-dasharray="'+(c*Math.min(p,100)/100).toFixed(1)+' '+c.toFixed(1)+'" transform="rotate(-90 38 38)" stroke-linecap="round"'+(tema==='cla'?'':' style="filter:drop-shadow(0 0 6px '+col+')"')+'/>'+
       '<text x="38" y="43" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="15" font-weight="700" fill="'+tx+'">'+(txt!=null?txt:p+'%')+'</text></svg>';
   }
   function linhaTempo(P){
-    var W=820, H=150, mut=tema==='cla'?'#56657C':'#7C8BA6', gr=tema==='cla'?'#E1E7EF':'rgba(159,176,214,.12)';
+    var W=1100, H=200, mut=tema==='cla'?'#3A4A62':'#A9B8D6', gr=tema==='cla'?'#E1E7EF':'rgba(159,176,214,.12)';
     var hs=dia.itens.map(function(x){ return +x.hora_prevista.slice(0,2); }), h0=Math.max(0,Math.min.apply(null,hs.concat([24]))), h1=Math.min(24,Math.max.apply(null,hs.concat([0]))+1);
     if(h1-h0<6) h1=Math.min(24,h0+6);
     var X=function(h,m){ return 24+(h-h0+m/60)/(h1-h0)*(W-48); };
-    var s='<svg viewBox="0 0 '+W+' '+H+'" width="100%" style="display:block;max-height:190px" role="img" aria-label="Linha do tempo das saídas">';
+    var s='<svg viewBox="0 0 '+W+' '+H+'" width="100%" style="display:block" role="img" aria-label="Linha do tempo das saídas">';
     var passo=(h1-h0)>12?3:((h1-h0)>6?2:1);
-    for(var h=h0;h<=h1;h+=passo){ var x=X(h,0); s+='<line x1="'+x.toFixed(1)+'" x2="'+x.toFixed(1)+'" y1="8" y2="'+(H-28)+'" stroke="'+gr+'"/><text x="'+x.toFixed(1)+'" y="'+(H-10)+'" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="'+mut+'">'+('0'+(h%24)).slice(-2)+'h</text>'; }
+    for(var h=h0;h<=h1;h+=passo){ var x=X(h,0); s+='<line x1="'+x.toFixed(1)+'" x2="'+x.toFixed(1)+'" y1="8" y2="'+(H-28)+'" stroke="'+gr+'"/><text x="'+x.toFixed(1)+'" y="'+(H-10)+'" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="12" fill="'+mut+'">'+('0'+(h%24)).slice(-2)+'h</text>'; }
     var pilha={};
-    dia.itens.forEach(function(x){ var p=x.hora_prevista.split(':'), xx=X(+p[0],+p[1]), k=Math.round(xx/7), n=pilha[k]||0; pilha[k]=n+1;
-      var st=(ST[x.status]||[0,'ok'])[1], col=P[st]||P.ok, cx=xx+Math.floor(n/12)*7, cy=H-34-(n%12)*8;
-      s+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy+'" r="3.2" fill="'+col+'"'+(st==='pen'?' opacity=".6"':'')+'><title>'+e(x.hora_prevista+' '+x.escala+' · '+(x.veiculo||'')+' · '+(ST[x.status]||[x.status])[0])+'</title></circle>'; });
+    dia.itens.forEach(function(x){ var p=x.hora_prevista.split(':'), xx=X(+p[0],+p[1]), k=Math.round(xx/10), n=pilha[k]||0; pilha[k]=n+1;
+      var st=(ST[x.status]||[0,'ok'])[1], col=P[st]||P.ok, cx=xx+Math.floor(n/14)*10, cy=H-36-(n%14)*10;
+      s+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy+'" r="4.5" fill="'+col+'"'+(st==='pen'?' opacity=".6"':'')+'><title>'+e(x.hora_prevista+' '+x.escala+' · '+(x.veiculo||'')+' · '+(ST[x.status]||[x.status])[0])+'</title></circle>'; });
     return s+'</svg>';
   }
   function histograma(P){
@@ -1893,17 +1907,17 @@ var Hist=(function(){
       '<div class="hs-ring">'+ring(pLib,P.ok)+'<div><small>LIBERADAS</small><b>'+d.liberadas+'<em> / '+d.programadas+'</em></b><span>programadas do dia</span></div></div>'+
       '<div class="hs-ring">'+ring(pPont,P.adi)+'<div><small>PONTUALIDADE</small><b>'+(d.no_horario+d.adiantadas)+'</b><span>no horário (até '+(dados.tolerancia||5)+' min)</span></div></div>'+
       '<div class="hs-ring">'+ring(pSem,P.pen)+'<div><small>SEM REGISTRO</small><b>'+d.pendentes+'</b><span>não liberadas no sistema</span></div></div>'+
-      '<div class="hs-ring">'+ring(atr.length&&d.liberadas?pct(atr.length,d.liberadas):0,P.atr,med+"'")+'<div><small>ATRASO MÉDIO</small><b>'+atr.length+'</b><span>atrasadas · '+d.trocas+' troca'+(d.trocas===1?'':'s')+' de carro</span></div></div></div>';
-    h+='<div class="hs-mid"><div class="hs-box"><h3>LINHA DO TEMPO DAS SAÍDAS <small>cada ponto é uma escala</small></h3><div class="hs-gr">'+linhaTempo(P)+'</div>'+
-      '<div class="hs-lg"><span><i style="background:'+P.ok+'"></i>No horário</span><span><i style="background:'+P.atr+'"></i>Atrasada</span><span><i style="background:'+P.adi+'"></i>Adiantada</span><span><i style="background:'+P.pen+'"></i>Sem registro</span></div></div>'+
-      '<div class="hs-box"><h3>DESVIO NA LIBERAÇÃO <small>minutos em relação ao programado</small></h3><div class="hs-gr">'+histograma(P)+'</div></div></div>';
-    h+='<div class="hs-mid"><div class="hs-box"><h3>ESCALAS DO DIA <small id="hsCnt"></small></h3>'+
+      '<div class="hs-ring">'+ring(d.liberadas?pct(atr.length,d.liberadas):0,P.atr)+'<div><small>ATRASADAS</small><b>'+atr.length+'</b><span>média '+(med>=60?Math.floor(med/60)+'h'+('0'+med%60).slice(-2):med+' min')+' · '+d.trocas+' troca'+(d.trocas===1?'':'s')+' de carro</span></div></div></div>';
+    h+='<div class="hs-mid"><div class="hs-box"><h3>LINHA DO TEMPO DAS SAÍDAS <small>cada ponto é uma escala, no horário programado</small></h3><div class="hs-gr">'+linhaTempo(P)+'</div>'+
+      '<div class="hs-lg"><span><i style="background:'+P.ok+'"></i>No horário</span><span><i style="background:'+P.atr+'"></i>Atrasada</span><span><i style="background:'+P.adi+'"></i>Adiantada</span><span><i style="background:'+P.pen+'"></i>Sem registro</span>'+(d.nao_saiu?'<span><i style="background:'+P.nao+'"></i>Não saiu</span>':'')+'</div></div>'+
+      '<div class="hs-box hs-fis"><h3>FISCAIS DO DIA</h3><div class="hs-fl">'+
+      (F.length?F.map(function(f){ var nm=f.nome==='—'?'Sem fiscal informado':nome(f.nome);
+        return '<div class="hs-fc"><div class="hs-av">'+(f.nome==='—'?'?':e(nm.split(' ').map(function(p){return p[0];}).slice(0,2).join('')))+'</div><div class="hs-fn"><b>'+e(nm)+'</b><span>'+(f.ini?f.ini+' – '+f.fim:'—')+' · '+f.atr+' atrasada'+(f.atr===1?'':'s')+'</span></div><div class="hs-fq"><b>'+f.qtd+'</b><span>liberaç'+(f.qtd===1?'ão':'ões')+'</span></div></div>'; }).join(''):'<div class="hs-vazio">Nenhuma liberação neste dia.</div>')+
+      '</div></div></div>';
+    h+='<div class="hs-box"><h3>ESCALAS DO DIA <small id="hsCnt"></small></h3>'+
       '<div class="hs-dq"><input id="hsDq" placeholder="Filtrar escala, veículo, motorista, fiscal…" value="'+e(q)+'" aria-label="Filtrar escalas">'+
       chip('','Todas',d.itens.length)+chip('lib','Liberadas',d.liberadas)+chip('pen','Sem registro',d.pendentes)+chip('atr','Atrasadas',d.atrasadas)+'</div>'+
-      '<div class="hs-tw"><table class="hs-t"><thead><tr><th>Prog.</th><th>Escala</th><th>Veículo</th><th>Motorista</th><th>Liberada</th><th class="n">Desvio</th><th>Status</th><th>Fiscal</th><th>Obs.</th></tr></thead><tbody id="hsBody"></tbody></table></div></div>'+
-      '<div class="hs-box hs-fis"><h3>FISCAIS</h3><div class="hs-tw"><table class="hs-t"><thead><tr><th>Fiscal</th><th class="n">Lib.</th><th class="n">Atras.</th><th class="n">Turno</th></tr></thead><tbody>'+
-      (F.length?F.map(function(f){ return '<tr><td>'+e(nome(f.nome))+'</td><td class="n">'+f.qtd+'</td><td class="n">'+f.atr+'</td><td class="n">'+(f.ini?f.ini+'–'+f.fim:'—')+'</td></tr>'; }).join(''):'<tr><td colspan="4">Nenhuma liberação neste dia.</td></tr>')+
-      '</tbody></table></div></div></div>';
+      '<div class="hs-tw"><table class="hs-t hs-big"><thead><tr><th>Programada</th><th>Escala</th><th>Veículo</th><th>Motorista</th><th>Liberada</th><th class="n">Desvio (min)</th><th>Status</th><th>Fiscal</th><th>Observação</th></tr></thead><tbody id="hsBody"></tbody></table></div></div>';
     g('hsMain').innerHTML=h;
     linhas();
     g('hsDq').addEventListener('input',function(){ q=this.value; linhas(); });

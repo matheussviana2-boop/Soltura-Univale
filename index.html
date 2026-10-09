@@ -92,6 +92,15 @@
   .ch.ch-sug{background:#1B2F5C;color:#FFFFFF;border:0;cursor:pointer;font-family:inherit}
   .ch.ch-sug:hover{background:#2A4478}
   .grupo.g0{background:#007A75}
+  .tmini{display:flex;align-items:center;gap:10px;white-space:nowrap;margin-top:5px;font-size:12px;font-weight:600;color:#6B7A90}
+  .tmini span{display:inline-flex;align-items:center;gap:4px}
+  .tmini .ig{width:22px;height:22px;justify-content:center;border-radius:6px;background:#F1F4F8;color:#8A97A8}
+  .tmini .ig.on{background:#DDF4EA;color:#0B8F5A}
+  .tmini .ns{color:#B45309}
+  .mapcol{display:flex;flex-direction:column;align-items:center;gap:4px;width:118px;flex-shrink:0}
+  .mapcol .maplink{width:52px;height:46px}
+  .lugar{max-width:118px;font-size:11px;font-weight:700;line-height:1.2;text-align:center;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .lugar.in{color:#08603E} .lugar.fora{color:#9A4A0C} .lugar.outra{color:#1E4E8C} .lugar.sem{color:#8A5A00}
   .pk{display:flex;flex-direction:column;gap:6px;max-height:55vh;overflow:auto;margin-top:12px}
   .pk .op{border:1px solid var(--ln2);border-radius:12px}
   .pk .op .h{font-family:var(--mono);font-weight:700;min-width:56px}
@@ -226,7 +235,8 @@
     .stat{order:3}
     .acts{order:5;flex-basis:100%;padding-left:12px}
     .acts .lib,.acts .out{flex:1;width:auto}
-    .acts .maplink{height:auto;min-height:56px}
+    .acts .maplink{height:auto;min-height:46px}
+    .mapcol{width:auto;flex-direction:row;gap:8px} .lugar{text-align:left}
   }
 </style>
 </head>
@@ -437,7 +447,7 @@ var ICO_CLOCK='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" strok
 var ICO_PIN='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>';
 var ICO_LOCK='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/></svg>';
 var ICO_OK='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>';
-var TABS=[['pend','Pendentes'],['interd','Com O.S.'],['lib','Liberados']];
+var TABS=[['pend','Escalados'],['interd','Com O.S.'],['lib','Liberados']];
 var SUBLIB=[['conferir','A conferir'],['conferidos','Conferidos'],['todos','Todos']];
 
 function render(){
@@ -484,7 +494,6 @@ function render(){
       h+='<div class="grupo g0">'+ICO_PIN.replace('currentColor','#FFFFFF')+'<span>Saíram sem liberação</span><span class="n">'+saiuSem.length+'</span><small>a telemetria viu o carro sair · confirme</small></div>';
       saiuSem.forEach(function(it){ h+=linhaPend(it); });
     }
-    if(S.dia.frota) h+='<div class="grupo">'+ICO_CLOCK.replace('#5B6B7E','#FFFFFF')+'<span>Escalados</span><span class="n">'+nEsc+'</span><small>com escala programada</small></div>';
     if(!nEsc) h+='<div class="empty">Nenhum carro escalado aguardando soltura agora.</div>';
     pend.forEach(function(it){ h+=linhaPend(it); });
     if(sem.length){
@@ -575,18 +584,13 @@ function naoEscalados(q){
   return L.sort(function(a,b){ return ord(a)-ord(b) || a.prefixo.localeCompare(b.prefixo); });
 }
 function linhaLivre(c){
-  var lc=c._loc, t=c.tel, chips='';
-  if(lc) chips+=ch(lc.k==='in'?'in':lc.k==='outra'?'outra':'fora',ICO_PIN13,lc.txt);
-  if(t){
-    chips+=ch(t.ignicao==='ON'?'on':'',ICO_IGN,'Ignição '+(t.ignicao==='ON'?'ligada':'desligada'));
-    if(t.quando) chips+=ch(t.semSinal?'ns':'',ICO_SIG,'Última transmissão '+t.quando+(t.semSinal?' (sem sinal)':''));
-  }
+  var lc=c._loc, t=c.tel;
   var mp=(t&&t.lat&&t.lng)?'<button type="button" class="maplink" data-act="mapcar" data-car="'+esc(c.prefixo)+'" title="Ver onde o carro está" aria-label="Ver no mapa onde está '+esc(c.prefixo)+'">'+ICO_PIN.replace('width="16" height="16"','width="22" height="22"')+'</button>':'';
   return '<div class="row livre">'+tbox('free','LIVRE','não escalado')+
     '<div class="bus" role="img" aria-label="Ônibus"></div>'+
-    '<div class="ident"><div class="pref">'+esc(c.prefixo)+'</div><div class="esc">Sem escala hoje</div></div>'+
-    '<div class="info" style="cursor:default"><div class="chs">'+chips+'</div></div>'+
-    '<div class="acts">'+mp+'<button type="button" class="out" data-act="escalar" data-car="'+esc(c.prefixo)+'">Escalar</button></div>'+
+    '<div class="ident"><div class="pref">'+esc(c.prefixo)+'</div><div class="esc">Sem escala hoje</div>'+telMini(t,false)+'</div>'+
+    '<div class="info" style="cursor:default"></div>'+
+    '<div class="acts">'+mapCol(mp,lc)+'<button type="button" class="out" data-act="escalar" data-car="'+esc(c.prefixo)+'">Escalar</button></div>'+
   '</div>';
 }
 function carroFrota(p){ return (S.dia.frota||[]).filter(function(c){return c.prefixo===p;})[0]||null; }
@@ -623,6 +627,21 @@ function sugerir(lista){
   });
 }
 
+/* ignição (símbolo) + hora da última transmissão, embaixo do prefixo */
+function telMini(t, sc){
+  if(sc || !telOk()) return '';
+  if(!t) return '<div class="tmini"><span class="ns">sem telemetria</span></div>';
+  var on=t.ignicao==='ON';
+  return '<div class="tmini"><span class="ig'+(on?' on':'')+'" title="Ignição '+(on?'ligada':'desligada')+'" aria-label="Ignição '+(on?'ligada':'desligada')+'">'+ICO_IGN+'</span>'+
+    (t.quando?'<span'+(t.semSinal?' class="ns"':'')+' title="Última transmissão'+(t.semSinal?' (sem sinal há mais de 24h)':'')+'">'+ICO_SIG+esc(t.quando)+'</span>':'')+'</div>';
+}
+/* botão do mapa com o local embaixo */
+function mapCol(btn, lc){
+  if(!lc && !btn) return '';
+  var k=lc?(lc.k==='in'?'in':lc.k==='outra'?'outra':'fora'):'';
+  return '<div class="mapcol">'+btn+(lc?'<div class="lugar '+k+'" title="'+esc(lc.txt)+'">'+esc(lc.txt)+'</div>':'')+'</div>';
+}
+
 function linhaPend(it,modoAtr){
   var st=it._st||statusPend(it), lc=it._loc!==undefined?it._loc:local(it), sc=semCarro(it), itd=it.interd, t=it.tel;
   var min=it._min!=null?it._min:Math.floor((agora()-it.prevMs)/60000);
@@ -630,20 +649,15 @@ function linhaPend(it,modoAtr){
   var chips='', sd=it.saida;
   if(it._sug) chips+='<button type="button" class="ch ch-sug" data-act="sug" data-id="'+it.id+'" data-car="'+esc(it._sug)+'" title="Liberar esta escala com o '+esc(it._sug)+'">↺ Usar '+esc(it._sug)+' (livre no pátio)</button>';
   if(itd) chips+=ch('os',ICO_WR,'O.S. aberta '+(itd.os||''));
-  if(lc) chips+=ch(lc.k==='in'?'in':lc.k==='outra'?'outra':(sc||!t)?'sem':'fora',ICO_PIN13,lc.txt);
-  if(lc && t && !sc){
-    chips+=ch(t.ignicao==='ON'?'on':'',ICO_IGN,'Ignição '+(t.ignicao==='ON'?'ligada':'desligada'));
-    if(t.quando) chips+=ch(t.semSinal?'ns':'',ICO_SIG,'Última transmissão '+t.quando+(t.semSinal?' (sem sinal)':''));
-  }
   return '<div class="row'+(sd?' saiu':it._aviso?' atencao':'')+'" id="r-'+it.id+'">'+
     (sd?tbox('out',sd.hora,'saiu · prev. '+it.hora_prevista):tbox(cls,it.hora_prevista,quando(min)))+
     '<div class="bus" role="img" aria-label="Ônibus"></div>'+
-    '<div class="ident"><div class="pref">'+(sc?'<span style="color:#B45309">'+(it.veiculo?esc(it.veiculo):'Sem carro')+'</span>':esc(it.veiculo))+'</div><div class="esc">'+esc(it.escala)+' · '+esc(it.linha)+'</div></div>'+
+    '<div class="ident"><div class="pref">'+(sc?'<span style="color:#B45309">'+(it.veiculo?esc(it.veiculo):'Sem carro')+'</span>':esc(it.veiculo))+'</div><div class="esc">'+esc(it.escala)+' · '+esc(it.linha)+'</div>'+telMini(t,sc)+'</div>'+
     '<div class="info" data-act="edit" data-id="'+it.id+'" title="Toque para alterar ou marcar que não saiu">'+
       '<div class="mot"><span>'+(it.motorista?esc(titulo(it.motorista)):'<span style="color:var(--amb-d)">Sem motorista</span>')+'</span></div>'+
       (chips?'<div class="chs">'+chips+'</div>':'')+
     '</div>'+
-    '<div class="acts">'+mapa(it)+(modoAtr?'<button type="button" class="out" data-act="nao" data-id="'+it.id+'">Não saiu</button>':'')+
+    '<div class="acts">'+mapCol(mapa(it),(sc||!t)?null:lc)+(modoAtr?'<button type="button" class="out" data-act="nao" data-id="'+it.id+'">Não saiu</button>':'')+
       (itd?'<button type="button" class="out" data-act="edit" data-id="'+it.id+'">Trocar carro</button>':'')+
       ('<button type="button" class="lib'+(modoAtr||itd||sd?' sm':'')+'" data-act="ok" data-id="'+it.id+'" aria-label="'+(sd?'Confirmar saída de ':'Liberar ')+esc(it.veiculo||it.escala)+'">'+(sd?ICO_OK.replace('width="20" height="20"','width="18" height="18"')+'Confirmar':ICO_ARROW+'Liberar')+'</button>')+'</div>'+
   '</div>';

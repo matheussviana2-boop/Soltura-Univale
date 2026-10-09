@@ -1229,22 +1229,25 @@ var Painel=(function(){
     var C=dados.carros||[], conta={rod:0,par:0,gar:0,os:0};
     C.forEach(function(c){ conta[c.sit]=(conta[c.sit]||0)+1; });
     var p=String(dados.data||'').split('-');
-    g('pnSub').textContent='Urbanos Cel Fab · '+C.length+' carros'+(p.length===3?' · '+p[2]+'/'+p[1]:'');
+    var es=dados.escala||{}, dbr=function(x){ var q=String(x||'').split('-'); return q.length===3?q[2]+'/'+q[1]:''; };
+    g('pnSub').innerHTML=e('Urbanos Cel Fab · '+C.length+' carros'+(p.length===3?' · '+p[2]+'/'+p[1]:''))+
+      (es.de?' · escala '+dbr(es.de)+' a '+dbr(es.ate)+' ('+es.setores+' setores)':'')+
+      (!es.de||es.ate<dados.data||es.setores<3?' <span style="color:#C2410C;font-weight:700">· carregue a escala semanal completa</span>':'');
     g('pnLeg').innerHTML=['rod','par','gar','os'].map(function(k){ var c=COR[k][0]; return '<div style="background:'+c+'14;color:'+c+'"><i style="background:'+c+'"></i><b>'+conta[k]+'</b>'+COR[k][1]+'</div>'; }).join('');
     var grupos={}, ordem=[];
     C.forEach(function(c){ var k=c.setor||'~'; if(!grupos[k]){ grupos[k]=[]; ordem.push(k); } grupos[k].push(c); });
-    ordem.sort();
+    ordem.sort(function(a,b){ if(a==='~') return 1; if(b==='~') return -1; return (parseInt(a,10)||0)-(parseInt(b,10)||0) || a.localeCompare(b); });
     g('pnMain').innerHTML=ordem.map(function(k){
-      var L=grupos[k].sort(function(a,b){ return (a.hora||'99').localeCompare(b.hora||'99') || a.prefixo.localeCompare(b.prefixo); });
-      var livre=k==='~', cod=livre?'LIVRES':String(k).split(' - ')[0], nome=livre?'Sem escala hoje':nomeCurto(String(k).split(' - ').slice(1).join(' - ')||k);
-      var rod=L.filter(function(c){return c.sit==='rod';}).length;
-      return '<section class="pn-grp'+(livre?' livre':'')+'"><div class="pn-gh"><b>'+e(cod)+'</b><span>'+e(nome)+'</span><small>'+L.length+' carros · '+rod+' rodando</small></div><div class="pn-grid">'+
+      var L=grupos[k].sort(function(a,b){ return (b.hojeNaEscala?1:0)-(a.hojeNaEscala?1:0) || (a.hora||'99').localeCompare(b.hora||'99') || a.prefixo.localeCompare(b.prefixo); });
+      var livre=k==='~', cod=livre?'SEM SETOR':String(k).split(' - ')[0], nome=livre?'Fora da escala da semana':nomeCurto(String(k).split(' - ').slice(1).join(' - ')||k);
+      var rod=L.filter(function(c){return c.sit==='rod';}).length, fora=L.filter(function(c){return !c.hojeNaEscala;}).length;
+      return '<section class="pn-grp'+(livre?' livre':'')+'"><div class="pn-gh"><b>'+e(cod)+'</b><span>'+e(nome)+'</span><small>'+L.length+' carros · '+rod+' rodando'+(fora&&!livre?'<br>'+fora+' sem escala hoje':'')+'</small></div><div class="pn-grid">'+
         L.map(function(c){
           var cor=COR[c.sit][0];
           var linha=c.linhaNum?'<b>'+e(c.linhaNum)+'</b> '+e(c.linhaNome):(c.sit==='gar'?'Na garagem':c.sit==='os'?'O.S. '+e(c.os):'Sem viagem aberta');
           var ponto=e(c.ponto||'sem posição')+(c.dist!==''&&c.dist!=null&&c.ponto?' · '+e(c.dist)+' m':'');
           return '<div class="pn-tile" style="border-left-color:'+cor+'" title="'+e(c.prefixo+' · '+(c.linhaNome||'')+' · '+(c.ponto||''))+'">'+
-            '<div class="l1"><i style="background:'+cor+'"></i><b>'+e(c.prefixo)+'</b><span>'+e(c.escala||'sem escala')+(c.hora?' · '+e(c.hora):'')+'</span></div>'+
+            '<div class="l1"><i style="background:'+cor+'"></i><b>'+e(c.prefixo)+'</b><span>'+(c.hojeNaEscala?e(c.escala)+(c.hora?' · '+e(c.hora):''):'<em style="font-style:normal;color:#9AA6B6">sem escala hoje</em>')+'</span></div>'+
             '<div class="mo">'+(c.motorista?e(nomeCurto(c.motorista)):'<span style="color:#9AA6B6;font-weight:500">Motorista não identificado</span>')+'</div>'+
             '<div class="li">'+linha+'</div>'+
             '<div class="po">⌖ '+ponto+(c.tx?' · <span'+(c.semSinal?' class="ns"':'')+'>'+e(c.tx)+'</span>':'')+'</div></div>';

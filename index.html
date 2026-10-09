@@ -1051,7 +1051,7 @@ function linhaPend(it,modoAtr){
       '<div class="mot"><span>'+(it.motorista?esc(titulo(it.motorista)):'<span style="color:var(--amb-d)">Sem motorista</span>')+'</span></div>'+
       (chips?'<div class="chs">'+chips+'</div>':'')+
     '</div>'+
-    '<div class="acts">'+mapCol(mapa(it),(sc||!t)?null:lc)+(modoAtr?'<button type="button" class="out" data-act="nao" data-id="'+it.id+'">Não saiu</button>':'')+
+    '<div class="acts">'+mapCol(mapa(it),(sc||!t)?null:lc)+
       (itd?'<button type="button" class="out" data-act="edit" data-id="'+it.id+'">Trocar carro</button>':'')+
       slideLib(it.id,sd?'Confirmar':'Liberar',!!(modoAtr||itd||sd))+'</div>'+
   '</div>';
@@ -1166,7 +1166,7 @@ function abrir(it, modo, focoMotivo, carro){
   if(c) selecionar(c,n); else limparSel();
   $('mMotivo').value=r?r.motivo||'':''; $('mObs').value=r?r.observacao||'':'';
   var bt='';
-  if(modo==='soltar') bt='<button class="btn dan" type="button" data-m="nao">Não saiu</button><div class="sp"></div><button class="btn" type="button" data-m="cancel">Cancelar</button><button class="btn pri" type="button" data-m="soltar">Liberar</button>';
+  if(modo==='soltar') bt='<div class="sp"></div><button class="btn" type="button" data-m="cancel">Cancelar</button><button class="btn pri" type="button" data-m="soltar">Liberar</button>';
   else bt='<button class="btn" type="button" data-m="voltar">Voltar para pendentes</button><div class="sp"></div><button class="btn" type="button" data-m="cancel">Cancelar</button><button class="btn pri" type="button" data-m="salvar">Salvar</button>';
   $('mAct').innerHTML=bt;
   validar(); $('ov').classList.add('on');
@@ -1604,7 +1604,7 @@ var PSol=(function(){
     var tot=L.length, lib=conta.ok, pct=tot?Math.round(lib/tot*100):0;
     var agora=Date.now()+offset, dia=dBR(dados.data);
     g('psSub').textContent=dados.data?'Dia '+dia:'';
-    g('psLeg').innerHTML=['pen','ok','nao'].map(function(k){ var c=P[k], on=filtro===k;
+    g('psLeg').innerHTML=['pen','ok'].concat(conta.nao?['nao']:[]).map(function(k){ var c=P[k], on=filtro===k;
       return '<div data-f="'+k+'" class="'+(on?'on':(filtro?'off':''))+'" title="'+(on?'Mostrar todas':'Filtrar: '+ROT[k])+'" style="border-color:'+c+(on?'':'55')+';box-shadow:inset 0 0 18px '+c+(on?'44':'22')+'"><i style="background:'+c+';box-shadow:0 0 10px '+c+'"></i><b style="color:'+c+'">'+conta[k]+'</b>'+ROT[k]+'</div>'; }).join('');
     g('psProg').innerHTML='<span><b>'+lib+'</b> de '+tot+' liberadas</span><div class="tr"><i style="width:'+pct+'%"></i></div><b>'+pct+'%</b>';
     var q=semAc(g('psQ').value).trim();

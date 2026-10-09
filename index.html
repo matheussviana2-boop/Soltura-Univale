@@ -268,11 +268,20 @@
   .pn-tit .k{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.32em;color:#22E6FF}
   .pn-tit b{display:block;font-size:20px;color:#FFFFFF} .pn-tit span{font-size:12px;color:#9FB0D6}
   .pn-tit .aviso{color:#FFC857;font-weight:700}
-  .pn-leg{display:flex;gap:10px;margin-left:auto;flex-wrap:wrap}
-  .pn-leg div{display:flex;align-items:center;gap:8px;padding:7px 14px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid;font-size:12px;color:#9FB0D6}
-  .pn-leg i{width:8px;height:8px;transform:rotate(45deg)}
-  .pn-leg b{font-family:var(--mono);font-size:22px}
+  .pn-leg{flex:1;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+  .pn-leg div{display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid;font-size:11px;color:#9FB0D6}
+  .pn-leg i{width:6px;height:6px;transform:rotate(45deg)}
+  .pn-leg b{font-family:var(--mono);font-size:16px}
+  .pn-busca{display:flex;align-items:center;gap:8px;width:290px;height:38px;padding:0 6px 0 12px;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid rgba(34,230,255,.3);color:#9FB0D6}
+  .pn-busca:focus-within{border-color:#22E6FF;box-shadow:0 0 12px rgba(34,230,255,.25)}
+  .pn-busca input{flex:1;min-width:0;border:0;outline:none;background:transparent;color:#FFFFFF;font-family:var(--sg);font-size:14px}
+  .pn-busca input::placeholder{color:#7C8BA6}
+  .pn-busca button{display:none;width:26px;height:26px;border:0;border-radius:6px;background:rgba(255,255,255,.08);color:#DDE8FF;font-size:16px;line-height:1}
+  .pn-busca.on button{display:block}
+  .pn-tile mark{background:rgba(34,230,255,.3);color:#FFFFFF;border-radius:3px;padding:0 1px}
   .pn-relogio{font-family:var(--mono);font-size:30px;font-weight:700;color:#22E6FF;text-shadow:0 0 14px rgba(34,230,255,.6);padding:0 6px}
+  .pn-relogio{display:flex;align-items:baseline;gap:12px;white-space:nowrap}
+  .pn-relogio small{font-size:16px;font-weight:500;letter-spacing:.04em;opacity:.8}
   .pn-relogio.off{color:#FF3D71;text-shadow:0 0 14px rgba(255,61,113,.6)}
   .pn-main{flex:1;display:flex;flex-direction:column;gap:12px;padding:14px 20px 20px}
   .pn-grp{display:flex;align-items:stretch;gap:10px;border-radius:16px;background:rgba(255,255,255,.035);border:1px solid rgba(159,176,214,.16);padding:10px}
@@ -307,9 +316,33 @@
   .pn-md .hd b{display:block;font-family:var(--mono);font-size:24px;color:#FFFFFF}
   .pn-md .hd span{display:block;font-size:13px;color:#9FB0D6;margin-top:2px}
   .pn-md .hd button{margin-left:auto;height:40px;padding:0 16px;border-radius:10px;border:1px solid rgba(34,230,255,.45);background:rgba(34,230,255,.08);color:#22E6FF;font-weight:700;font-family:var(--sg)}
-  .pn-md iframe{display:block;width:100%;height:min(62vh,560px);border:0;border-radius:12px;background:#0A1024}
-  .pn-md .ext{display:inline-block;margin-top:10px;font-size:13px;font-weight:700;color:#22E6FF}
-  @media (max-width:760px){ .pn-grp{flex-direction:column} .pn-gh{width:auto} .pn-top{padding:10px 14px} .pn-main{padding:12px} }
+  .pn-leaf{width:100%;height:min(66vh,600px);border-radius:12px;background:#0A1024;overflow:hidden}
+  .pn-mapleg{display:flex;align-items:center;gap:14px;margin-top:10px;font-size:12px;color:#9FB0D6;flex-wrap:wrap}
+  .pn-mapleg i{display:inline-block;width:8px;height:8px;transform:rotate(45deg);margin-right:6px}
+  .pn-mapleg .ext{margin-left:auto;font-size:13px;font-weight:700;color:#22E6FF}
+  /* marcadores e balão (Leaflet) */
+  .pn-mk{display:flex;align-items:center;justify-content:center;border-radius:50%;background:#0A1024;border:2px solid;box-shadow:0 0 12px currentColor}
+  .pn-mk svg{display:block;flex-shrink:0}
+  .pn-mk.sel{animation:pnPulse 1.6s ease-out infinite}
+  @keyframes pnPulse{0%{box-shadow:0 0 0 0 currentColor}70%{box-shadow:0 0 0 14px rgba(0,0,0,0)}100%{box-shadow:0 0 0 0 rgba(0,0,0,0)}}
+  .leaflet-popup.pn-pop .leaflet-popup-content-wrapper{background:linear-gradient(180deg,#14203D,#0B1228);color:#DDE8FF;border:1px solid rgba(34,230,255,.35);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+  .leaflet-popup.pn-pop .leaflet-popup-tip{background:#0B1228;border:1px solid rgba(34,230,255,.35)}
+  .leaflet-popup.pn-pop .leaflet-popup-content{margin:12px 14px;width:250px!important;font-family:var(--sg)}
+  .leaflet-popup.pn-pop a.leaflet-popup-close-button{color:#9FB0D6}
+  .pp-h{display:flex;align-items:baseline;gap:8px;padding-bottom:8px;border-bottom:1px solid rgba(159,176,214,.18)}
+  .pp-h b{font-family:var(--mono);font-size:18px;color:#FFFFFF}
+  .pp-h span{font-family:var(--mono);font-size:12px;color:#9FB0D6}
+  .pp-h em{margin-left:auto;font-style:normal;font-family:var(--mono);font-size:10px;font-weight:700;color:#FF3D71;border:1px solid #FF3D71;padding:0 5px;border-radius:4px}
+  .pp-mot{margin:8px 0;font-size:13px;font-weight:700;color:#FFFFFF}
+  .pp-g{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .pp-c{padding:6px 8px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(159,176,214,.14)}
+  .pp-c small{display:block;font-size:9.5px;letter-spacing:.12em;color:#7C8BA6;font-weight:700}
+  .pp-c b{display:block;font-family:var(--mono);font-size:13px;color:#FFFFFF;margin-top:2px}
+  .pp-l{margin-top:6px;padding:7px 8px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(159,176,214,.14);font-size:12px;font-weight:600;line-height:1.35}
+  .pp-l small{display:block;font-size:10px;color:#9FB0D6;font-weight:500;margin-top:2px}
+  .pp-st{display:flex;align-items:center;gap:8px;margin-top:6px;padding:6px 8px;border-radius:8px;font-size:12px;font-weight:700}
+  .pp-st i{width:8px;height:8px;border-radius:50%}
+  @media (max-width:760px){ .pn-grp{flex-direction:column} .pn-gh{width:auto} .pn-top{padding:10px 14px} .pn-main{padding:12px} .pn-busca{width:100%;order:5} .pn-leg{order:4;flex-basis:100%} }
   @media (max-width:1100px){
     .hdata{display:none} .gseg button{padding:0 14px}
   }
@@ -474,16 +507,17 @@
 <div id="painel">
   <header class="pn-top">
     <div class="pn-logo"><img id="pnLogo" alt="Univale"></div>
-    <div class="pn-tit"><span class="k">// MONITORAMENTO AO VIVO</span><b>Frota por escala</b><span id="pnSub">—</span></div>
+    <div class="pn-tit"><span class="k">// MONITORAMENTO AO VIVO</span><b>Frota por escala</b><span id="pnSub"></span></div>
     <div class="pn-leg" id="pnLeg"></div>
+    <label class="pn-busca"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="pnQ" placeholder="Veículo, motorista, escala, placa…" aria-label="Pesquisar no painel" autocomplete="off"><button type="button" id="pnQx" aria-label="Limpar pesquisa">×</button></label>
     <div class="pn-relogio" id="pnHora">--:--</div>
   </header>
   <main class="pn-main" id="pnMain"><div class="empty">Carregando…</div></main>
   <div class="pn-ov" id="pnOv" role="dialog" aria-modal="true" aria-labelledby="pnMt">
     <div class="pn-md">
       <div class="hd"><div style="min-width:0"><b id="pnMt">—</b><span id="pnMs"></span></div><button type="button" id="pnMf">Fechar</button></div>
-      <iframe id="pnMap" title="Mapa com a posição do veículo" src="about:blank" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-      <a id="pnMx" class="ext" href="#" target="_blank" rel="noopener">Abrir no Google Maps</a>
+      <div id="pnLeaf" class="pn-leaf" aria-label="Mapa com a posição dos veículos"></div>
+      <div class="pn-mapleg"><span><i style="background:#2EF29A"></i>Rodando</span><span><i style="background:#FFC857"></i>Parado</span><span><i style="background:#8A9BB8"></i>Na garagem</span><span><i style="background:#FF3D71"></i>Com O.S.</span><a id="pnMx" class="ext" href="#" target="_blank" rel="noopener">Abrir no Google Maps</a></div>
     </div>
   </div>
 </div>
@@ -1246,8 +1280,10 @@ var Painel=(function(){
   var dados=null, offset=0;
   function g(id){ return document.getElementById(id); }
   function e(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  function semAc(x){ return String(x||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); }
   function nomeCurto(n){ var p=String(n||'').toLowerCase().replace(/(^|\s)\S/g,function(m){return m.toUpperCase();}).split(/\s+/).filter(String); return p.length>2?p[0]+' '+p[p.length-1]:p.join(' '); }
-  function relogio(){ var d=new Date(Date.now()+offset); g('pnHora').textContent=('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2); }
+  function relogio(){ var d=new Date(Date.now()+offset), z=function(n){ return ('0'+n).slice(-2); };
+    g('pnHora').innerHTML='<small>'+['dom','seg','ter','qua','qui','sex','sáb'][d.getDay()]+' '+z(d.getDate())+'/'+z(d.getMonth()+1)+'/'+d.getFullYear()+'</small>'+z(d.getHours())+':'+z(d.getMinutes()); }
   function buscar(){
     var q='acao=getPainel&chave='+encodeURIComponent((function(){ try{ return localStorage.getItem('soltura.chave')||''; }catch(x){ return ''; } })())+'&_='+Date.now(), t0=Date.now();
     return fetch(API_URL+'?'+q).then(function(r){ return r.json(); }).then(function(j){
@@ -1260,12 +1296,13 @@ var Painel=(function(){
     C.forEach(function(c){ conta[c.sit]=(conta[c.sit]||0)+1; if(c.os){ conta.os++; if(c.sit==='rod') osRod++; } });
     var p=String(dados.data||'').split('-');
     var es=dados.escala||{}, dbr=function(x){ var q=String(x||'').split('-'); return q.length===3?q[2]+'/'+q[1]:''; };
-    g('pnSub').innerHTML=e('Urbanos Cel Fab · '+C.length+' carros'+(p.length===3?' · '+p[2]+'/'+p[1]:''))+
-      (es.de?' · escala '+dbr(es.de)+' a '+dbr(es.ate)+' ('+es.setores+' setores)':'')+
-      (!es.de||es.ate<dados.data||es.setores<3?' <span class="aviso">· carregue a escala semanal completa</span>':'');
+    g('pnSub').innerHTML=(!es.de||es.ate<dados.data||es.setores<3?'<span class="aviso">carregue a escala semanal completa</span>':'');
     g('pnLeg').innerHTML=['rod','par','gar','os'].map(function(k){ var c=COR[k][0]; return '<div style="border-color:'+c+'55;box-shadow:inset 0 0 18px '+c+'22"><i style="background:'+c+';box-shadow:0 0 10px '+c+'"></i><b style="color:'+c+'">'+conta[k]+'</b>'+COR[k][1]+(k==='os'&&osRod?' · '+osRod+' rodando':'')+'</div>'; }).join('');
+    var q=semAc(g('pnQ').value).trim();
+    g('pnQ').parentNode.classList.toggle('on',!!q);
+    var visiveis=q?C.filter(function(c){ return semAc([c.prefixo,c.placa,c.motorista,c.escala,c.linhaNum,c.linhaNome].join(' ')).indexOf(q)>=0; }):C;
     var grupos={}, ordem=[];
-    C.forEach(function(c){ var k=c.setor||'~'; if(!grupos[k]){ grupos[k]=[]; ordem.push(k); } grupos[k].push(c); });
+    visiveis.forEach(function(c){ var k=c.setor||'~'; if(!grupos[k]){ grupos[k]=[]; ordem.push(k); } grupos[k].push(c); });
     ordem.sort(function(a,b){ if(a==='~') return 1; if(b==='~') return -1; return (parseInt(a,10)||0)-(parseInt(b,10)||0) || a.localeCompare(b); });
     g('pnMain').innerHTML=ordem.map(function(k){
       var L=grupos[k].sort(function(a,b){ return ORD[a.sit]-ORD[b.sit] || (b.hojeNaEscala?1:0)-(a.hojeNaEscala?1:0) || (a.hora||'99').localeCompare(b.hora||'99') || a.prefixo.localeCompare(b.prefixo); });
@@ -1287,20 +1324,71 @@ var Painel=(function(){
             linha+
             '<div class="po"><span>⌖ '+e(c.ponto||'—')+'</span>'+(c.tx?'<span class="hr'+(c.semSinal?' ns':'')+'">'+e(c.tx)+'</span>':'')+'</div></div>';
         }).join('')+'</div></section>';
-    }).join('')||'<div class="empty">Nenhum carro da frota na telemetria.</div>';
+    }).join('')||'<div class="empty">'+(q?'Nenhum veículo encontrado para “'+e(g('pnQ').value)+'”.':'Nenhum carro da frota na telemetria.')+'</div>';
+  }
+  /* mapa gratuito: Leaflet + imagem de satélite Esri (com nomes de ruas por cima) — carregado só quando abre */
+  var LF=null, mapa=null, camada=null, marcas={};
+  function carregaLeaflet(){
+    if(window.L) return Promise.resolve();
+    if(LF) return LF;
+    LF=new Promise(function(ok,erro){
+      var css=document.createElement('link'); css.rel='stylesheet'; css.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css'; document.head.appendChild(css);
+      var js=document.createElement('script'); js.src='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js'; js.onload=function(){ ok(); }; js.onerror=function(){ LF=null; erro(new Error('mapa indisponível')); }; document.head.appendChild(js);
+    });
+    return LF;
+  }
+  var ICO_BUS='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 10h16M8 20v-3M16 20v-3"/><circle cx="8" cy="14" r=".6"/><circle cx="16" cy="14" r=".6"/></svg>';
+  function corDe(c){ return c.os?'#FF3D71':COR[c.sit][0]; }
+  function icone(c, sel){
+    var t=sel?34:22;
+    return L.divIcon({className:'', iconSize:[t,t], iconAnchor:[t/2,t/2], popupAnchor:[0,-t/2],
+      html:'<div class="pn-mk'+(sel?' sel':'')+'" style="width:'+t+'px;height:'+t+'px;color:'+corDe(c)+';border-color:'+corDe(c)+'">'+ICO_BUS.replace('<svg ','<svg width="'+Math.round(t*.62)+'" height="'+Math.round(t*.62)+'" ')+'</div>'});
+  }
+  function balao(c){
+    var vel=(c.vel!=null&&c.vel!=='')?Math.round(c.vel)+' km/h':'—';
+    var ign=c.ign==='ON';
+    return '<div class="pp-h"><b>'+e(c.prefixo)+'</b><span>'+e(c.placa||'')+'</span>'+(c.os?'<em>O.S. '+e(c.os)+'</em>':'')+'</div>'+
+      '<div class="pp-mot">👤 '+(c.motorista?e(nomeCurto(c.motorista)):'Motorista não identificado')+'</div>'+
+      '<div class="pp-g"><div class="pp-c"><small>DATA / HORA</small><b>'+e(c.tx||'—')+'</b></div>'+
+      '<div class="pp-c"><small>VELOCIDADE</small><b style="color:'+(c.vel>0?'#2EF29A':'#FFFFFF')+'">'+vel+'</b></div></div>'+
+      '<div class="pp-l">'+(c.linhaNum?'<span style="color:'+COR.rod[0]+'">●</span> <b style="font-family:var(--mono)">'+e(c.linhaNum)+'</b> '+e(c.linhaNome)+(c.linhaStatus?'<small>'+e(c.linhaStatus)+'</small>':''):'<span style="opacity:.6">Sem linha em andamento</span>')+'</div>'+
+      '<div class="pp-l" style="font-weight:500">⌖ '+e(c.ponto||'—')+(c.escala?'<small>Escala '+e(c.escala)+(c.hora?' · '+e(c.hora):'')+'</small>':'')+'</div>'+
+      '<div class="pp-st" style="background:'+(ign?'rgba(46,242,154,.1)':'rgba(255,255,255,.05)')+';color:'+(ign?'#2EF29A':'#9FB0D6')+'"><i style="background:'+(ign?'#2EF29A':'#8A9BB8')+'"></i>Ignição '+(ign?'ligada':'desligada')+' · '+COR[c.sit][1]+'</div>';
   }
   function abrirMapa(p){
     var c=(dados&&dados.carros||[]).filter(function(x){return x.prefixo===p;})[0]; if(!c) return;
-    g('pnMt').textContent=c.prefixo+' · '+COR[c.sit][1]+(c.os?' · O.S. '+c.os:'');
-    g('pnMs').textContent=[c.motorista?nomeCurto(c.motorista):'', c.linhaNum?c.linhaNum+' '+c.linhaNome:'', c.ponto, c.tx].filter(String).join(' · ');
-    if(c.lat&&c.lng){
-      g('pnMap').src='https://maps.google.com/maps?q='+encodeURIComponent(c.lat+','+c.lng)+'&z=16&output=embed';
-      g('pnMx').href='https://www.google.com/maps?q='+encodeURIComponent(c.lat+','+c.lng); g('pnMx').style.display='';
-    } else { g('pnMap').src='about:blank'; g('pnMx').style.display='none'; g('pnMs').textContent+=' · sem posição no momento'; }
+    g('pnMt').textContent=c.prefixo+(c.placa?' · '+c.placa:'')+' · '+COR[c.sit][1];
+    g('pnMs').textContent=(c.motorista?nomeCurto(c.motorista):'Motorista não identificado')+(c.linhaNum?' · '+c.linhaNum+' '+c.linhaNome:'');
     g('pnOv').classList.add('on');
+    if(!c.lat||!c.lng){ g('pnLeaf').innerHTML='<div class="empty" style="padding:60px">Sem posição no momento para '+e(c.prefixo)+'.</div>'; g('pnMx').style.display='none'; mapa&&mapa.remove(); mapa=null; return; }
+    g('pnMx').href='https://www.google.com/maps?q='+encodeURIComponent(c.lat+','+c.lng); g('pnMx').style.display='';
+    carregaLeaflet().then(function(){
+      if(!mapa){
+        g('pnLeaf').innerHTML='';
+        mapa=L.map('pnLeaf',{zoomControl:true,attributionControl:true});
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Tiles © Esri'}).addTo(mapa);
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,opacity:.7}).addTo(mapa);
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,opacity:.85}).addTo(mapa);
+      }
+      if(camada) camada.remove();
+      camada=L.layerGroup().addTo(mapa); marcas={};
+      (dados.carros||[]).forEach(function(x){
+        if(!x.lat||!x.lng) return;
+        var sel=x.prefixo===c.prefixo;
+        var m=L.marker([+x.lat,+x.lng],{icon:icone(x,sel),zIndexOffset:sel?1000:0}).bindPopup(balao(x),{className:'pn-pop',maxWidth:280,autoPanPadding:[30,30]}).addTo(camada);
+        marcas[x.prefixo]=m;
+      });
+      mapa.setView([+c.lat,+c.lng],16);
+      setTimeout(function(){ mapa.invalidateSize(); marcas[c.prefixo]&&marcas[c.prefixo].openPopup(); },120);
+    }).catch(function(){
+      g('pnLeaf').innerHTML='<div class="empty" style="padding:60px">Não foi possível carregar o mapa. <a style="color:#22E6FF" target="_blank" rel="noopener" href="https://www.google.com/maps?q='+encodeURIComponent(c.lat+','+c.lng)+'">Abrir no Google Maps</a></div>';
+    });
   }
-  function fecharMapa(){ g('pnOv').classList.remove('on'); g('pnMap').src='about:blank'; }
+  function fecharMapa(){ g('pnOv').classList.remove('on'); }
   function iniciar(){
+    g('pnQ').addEventListener('input',function(){ if(dados) desenhar(); });
+    g('pnQ').addEventListener('keydown',function(ev){ if(ev.key==='Escape'){ this.value=''; if(dados) desenhar(); } });
+    g('pnQx').addEventListener('click',function(){ g('pnQ').value=''; g('pnQ').focus(); if(dados) desenhar(); });
     g('pnMain').addEventListener('click',function(ev){ var t=ev.target.closest('[data-car]'); if(t) abrirMapa(t.getAttribute('data-car')); });
     g('pnMf').addEventListener('click',fecharMapa);
     g('pnOv').addEventListener('click',function(ev){ if(ev.target===this) fecharMapa(); });

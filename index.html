@@ -89,8 +89,6 @@
   .tb-out{background:#E6F6F5;color:#007A75}
   .row.saiu{border-color:#9FDCD8;box-shadow:inset 4px 0 0 #00A19B}
   .row.atencao{border-color:#F0C46B;box-shadow:inset 4px 0 0 #E8A317}
-  .ch.ch-sug{background:#1B2F5C;color:#FFFFFF;border:0;cursor:pointer;font-family:inherit}
-  .ch.ch-sug:hover{background:#2A4478}
   .grupo.g0{background:#007A75}
   .tmini{display:flex;align-items:center;gap:10px;white-space:nowrap;margin-top:5px;font-size:12px;font-weight:600;color:#6B7A90}
   .tmini span{display:inline-flex;align-items:center;gap:4px}
@@ -183,6 +181,9 @@
   .op:hover,.op:focus{background:var(--bg);outline:none}
   .op .c{font-weight:800;color:var(--navy);min-width:70px}
   .op.novo{color:var(--blue-d);font-weight:700}
+  .ddh{padding:8px 14px 4px;font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--mut);background:var(--bg);position:sticky;top:0}
+  .op .vd{flex:1;min-width:0;font-size:13px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .op .vd.in{color:#08603E;font-weight:700} .op .vd.esc{color:#9A4A0C}
   .sel{display:flex;align-items:center;gap:10px;height:48px;padding:0 6px 0 12px;border-radius:10px;border:1px solid var(--green);background:var(--green-bg)}
   .sel .c{font-weight:800;color:var(--green-d)}
   .sel .n{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700}
@@ -278,7 +279,12 @@
     <div class="prevbox" id="mPrev"></div>
     <div class="fg">
       <label>Hora de saída <input type="time" id="mHora" class="mono"></label>
-      <label>Carro <input id="mVei" class="mono" list="dlVei" autocomplete="off" placeholder="Ex.: U0540" style="text-transform:uppercase"></label>
+      <div class="lb">Carro
+        <div class="combo" id="cbVei">
+          <input id="mVei" class="mono" autocomplete="off" placeholder="Toque para ver os disponíveis" style="text-transform:uppercase">
+          <div class="dd" id="vDD" role="listbox"></div>
+        </div>
+      </div>
 
       <div class="lb full">Motorista <span class="hint">digite a matrícula ou o nome</span>
         <div class="combo" id="cbMot">
@@ -593,6 +599,29 @@ function linhaLivre(c){
     '<div class="acts">'+mapCol(mp,lc)+'<button type="button" class="out" data-act="escalar" data-car="'+esc(c.prefixo)+'">Escalar</button></div>'+
   '</div>';
 }
+/* lista do campo Carro: livres (pátio primeiro) e carros escalados em outra escala pendente */
+function escalaDoCarro(v, exceto){
+  v=String(v||'').toUpperCase(); if(!v||v==='FOLGADOR') return null;
+  return S.dia.itens.filter(function(i){ return !i.reg && i.id!==exceto && (i.veiculo||'').toUpperCase()===v; })[0]||null;
+}
+function listaVei(){
+  var it=S.atual; if(!it) return;
+  var q=$('mVei').value.trim().toUpperCase(), h='';
+  var livres=naoEscalados('').filter(function(c){ return !q || c.prefixo.indexOf(q)>=0; });
+  var outros=S.dia.itens.filter(function(i){ return !i.reg && i.id!==it.id && !semCarro(i) && (!q || i.veiculo.toUpperCase().indexOf(q)>=0); })
+    .sort(function(a,b){ return a.veiculo.localeCompare(b.veiculo); });
+  if(!semCarro(it) && (!q || it.veiculo.toUpperCase().indexOf(q)>=0)) h+='<div class="ddh">CARRO DA ESCALA</div><button type="button" class="op" data-v="'+esc(it.veiculo)+'"><span class="c">'+esc(it.veiculo)+'</span><span class="vd">previsto para esta escala</span></button>';
+  if(livres.length) h+='<div class="ddh">DISPONÍVEIS ('+livres.length+')</div>'+livres.map(function(c){
+    var lc=c._loc; return '<button type="button" class="op" data-v="'+esc(c.prefixo)+'"><span class="c">'+esc(c.prefixo)+'</span><span class="vd'+(lc&&lc.k==='in'?' in':'')+'">'+esc(lc?lc.txt:'sem telemetria')+'</span></button>';
+  }).join('');
+  if(outros.length) h+='<div class="ddh">ESCALADOS EM OUTRA ESCALA</div>'+outros.map(function(i){
+    return '<button type="button" class="op" data-v="'+esc(i.veiculo)+'"><span class="c">'+esc(i.veiculo)+'</span><span class="vd esc">'+esc(i.hora_prevista+' · '+i.escala+' · '+titulo(i.motorista))+'</span></button>';
+  }).join('');
+  if(!h) h='<div class="op" style="color:var(--mut)">Nenhum carro na lista com "'+esc(q)+'" — pode digitar o prefixo assim mesmo.</div>';
+  $('vDD').innerHTML=h; $('vDD').classList.add('on');
+}
+function fecharVei(){ $('vDD').classList.remove('on'); }
+
 function carroFrota(p){ return (S.dia.frota||[]).filter(function(c){return c.prefixo===p;})[0]||null; }
 function abrirEscalar(p){
   var lim=S.dia.cfg.limiteAtraso||60, G=getGar();
@@ -612,19 +641,11 @@ function abrirEscalar(p){
 }
 function fecharEscalar(){ $('ovPick').classList.remove('on'); S.pickCar=null; }
 
-/* carro com problema (O.S., sem carro, fora do pátio/sem telemetria) e saída em até 20 min ou já atrasada:
-   destaca a linha e sugere um carro livre no pátio (um carro diferente para cada escala) */
+/* carro com problema (O.S., sem carro, fora do pátio/sem telemetria) e saída em até 20 min ou já atrasada: destaca a linha */
 var JANELA_AVISO=20;
 function problema(it){ var lc=it._loc; return !!(it.interd || semCarro(it) || (telOk() && (!it.tel || (lc && lc.k!=='in')))); }
 function sugerir(lista){
-  var livres=(S.dia.frota?naoEscalados(''):[]).filter(function(c){ return c._loc && c._loc.k==='in'; });
-  livres.sort(function(a,b){ return (b.tel&&b.tel.ignicao==='ON'?1:0)-(a.tel&&a.tel.ignicao==='ON'?1:0); });
-  lista.slice().sort(function(a,b){return a.prevMs-b.prevMs;}).forEach(function(it){
-    it._aviso=false; it._sug=null;
-    if(it.saida || it._min < -JANELA_AVISO || !problema(it)) return;
-    it._aviso=true;
-    if(livres.length) it._sug=livres.shift().prefixo;
-  });
+  lista.forEach(function(it){ it._aviso=!it.saida && it._min>=-JANELA_AVISO && problema(it); });
 }
 
 /* ignição (símbolo) + hora da última transmissão, embaixo do prefixo */
@@ -647,7 +668,6 @@ function linhaPend(it,modoAtr){
   var min=it._min!=null?it._min:Math.floor((agora()-it.prevMs)/60000);
   var cls=(itd||st.k==='crit')?'late':st.k==='tol'?'warn':st.k==='soon'?'soon':'later';
   var chips='', sd=it.saida;
-  if(it._sug) chips+='<button type="button" class="ch ch-sug" data-act="sug" data-id="'+it.id+'" data-car="'+esc(it._sug)+'" title="Liberar esta escala com o '+esc(it._sug)+'">↺ Usar '+esc(it._sug)+' (livre no pátio)</button>';
   if(itd) chips+=ch('os',ICO_WR,'O.S. aberta '+(itd.os||''));
   return '<div class="row'+(sd?' saiu':it._aviso?' atencao':'')+'" id="r-'+it.id+'">'+
     (sd?tbox('out',sd.hora,'saiu · prev. '+it.hora_prevista):tbox(cls,it.hora_prevista,quando(min)))+
@@ -772,7 +792,7 @@ function abrir(it, modo, focoMotivo, carro){
   validar(); $('ov').classList.add('on');
   setTimeout(function(){ if(focoMotivo){ $('mMotivo').focus(); return; } (!$('mVei').value?$('mVei'):(!S.sel?$('mBusca'):null)||{focus:function(){}}).focus(); },60);
 }
-function fechar(){ $('ov').classList.remove('on'); $('mDD').classList.remove('on'); S.atual=null; S.modo=null; render(); }
+function fechar(){ $('ov').classList.remove('on'); $('mDD').classList.remove('on'); fecharVei(); S.atual=null; S.modo=null; render(); }
 
 /* combo de motorista: matrícula ou nome */
 function selecionar(c,n){
@@ -818,6 +838,8 @@ function validar(){
   var precisa = false; // sem conferência: motivo só é obrigatório em "Não saiu"
   $('mReq').style.display=precisa?'inline':'none';
   var w=[]; if(atrasada) w.push('Saída '+d+' min após o previsto.'); if(trocaV) w.push('Carro diferente do escalado.'); if(trocaM) w.push('Motorista diferente do escalado.');
+  var outra=trocaV?escalaDoCarro(v,it.id):null;
+  if(outra) w.unshift(v+' está escalado na '+outra.escala+' ('+outra.hora_prevista+' · '+titulo(outra.motorista)+'). Ao liberar, essa escala fica sem carro.');
   var bloq=interdNome(v); if(bloq) w.unshift('Atenção: '+v+' está com a O.S. '+(bloq.os||'—')+' aberta. Pode liberar, mas fica registrado.');
   $('mAlerta').style.display=w.length?'block':'none'; $('mAlerta').textContent=w.join(' ');
   return {h:h,v:v,m:m,precisa:precisa};
@@ -831,6 +853,8 @@ function salvar(acao){
     if(!x.v||x.v==='FOLGADOR') return toast('Informe o carro.',true);
     var osV=interdNome(x.v);
     if(osV && !confirmSafe(x.v+' está com a O.S. '+(osV.os||'')+' aberta. Liberar mesmo assim?')) return;
+    var outraEsc=(x.v!==(it.veiculo||'').toUpperCase())?escalaDoCarro(x.v,it.id):null;
+    if(outraEsc && !confirmSafe(x.v+' está escalado na escala '+outraEsc.escala+' ('+outraEsc.hora_prevista+' · '+titulo(outraEsc.motorista)+').\n\nConfirmar a troca? A escala '+outraEsc.escala+' vai ficar SEM CARRO para você definir outro depois.')) return;
     if(!x.m.c) return toast('Escolha o motorista.',true);
     if(S.novo && !x.m.n) return toast('Informe o nome do motorista novo.',true);
     if(x.precisa && !mot){ $('mMotivo').focus(); return toast('Selecione o motivo.',true); }
@@ -838,13 +862,16 @@ function salvar(acao){
   var conferir=false;
   var obsTxt=$('mObs').value.trim(), osSel=acao==='SAIU'?interdNome(x.v):null;
   if(osSel && obsTxt.indexOf('O.S. aberta')<0) obsTxt=(obsTxt?obsTxt+' · ':'')+'Liberado com O.S. aberta '+(osSel.os||'');
-  var p={id:it.id,acao:acao,hora_real:x.h,veiculo:x.v,cracha:x.m.c,motorista:x.m.n,motivo:mot,observacao:obsTxt,responsavel:getResp(),conferir:conferir,garagem:(it.reg&&it.reg.garagem)||getGar()};
+  var liberarDe=(acao==='SAIU'&&typeof outraEsc!=='undefined'&&outraEsc)?outraEsc.id:'';
+  var p={id:it.id,acao:acao,liberarDe:liberarDe,hora_real:x.h,veiculo:x.v,cracha:x.m.c,motorista:x.m.n,motivo:mot,observacao:obsTxt,responsavel:getResp(),conferir:conferir,garagem:(it.reg&&it.reg.garagem)||getGar()};
   S.busy=true; loading(true);
   api('registrar',p,true).then(function(reg){
     it.reg=reg;
+    if(reg.liberou){ var o=item(reg.liberou); if(o){ o.veiculo=''; o.tel=null; o.saida=null; } }
     if(S.novo && x.m.c) S.cad.motoristas[x.m.c]=x.m.n;
     var eraEdicao=S.modo==='editar';
     fechar();
+    if(reg.liberou){ var oe=item(reg.liberou); toast(x.v+' liberado. A escala '+(oe?oe.escala+' ('+oe.hora_prevista+')':'')+' ficou sem carro.'); return; }
     toast(acao==='NAO_SAIU'?it.escala+' marcada como não saiu':(eraEdicao?(it.veiculo||it.escala)+' corrigido':(it.veiculo||it.escala)+' liberado às '+reg.hora_real));
   }).catch(function(e){ toast(e.message,true); }).then(function(){ S.busy=false; loading(false); });
 }
@@ -858,7 +885,6 @@ function pedirResp(){
 /* ===================== eventos ===================== */
 $('list').addEventListener('click',function(e){
   var b=e.target.closest('[data-act]'); if(!b||b.disabled) return;
-  if(b.getAttribute('data-act')==='sug'){ var si=item(b.getAttribute('data-id')); if(si) abrir(si,'soltar',false,b.getAttribute('data-car')); return; }
   if(b.getAttribute('data-act')==='escalar'){ abrirEscalar(b.getAttribute('data-car')); return; }
   if(b.getAttribute('data-act')==='mapcar'){ var c=carroFrota(b.getAttribute('data-car')); if(c) abrirMapa({veiculo:c.prefixo,escala:'não escalado',tel:c.tel}); return; }
   var it=item(b.getAttribute('data-id')); if(!it) return;
@@ -887,6 +913,13 @@ $('mBusca').addEventListener('keydown',function(e){ if(e.key==='Enter'){ var f=$
 $('mDD').addEventListener('click',function(e){ var o=e.target.closest('.op'); if(!o) return; if(o.getAttribute('data-novo')) abrirNovo(); else selecionar(o.getAttribute('data-c'),o.getAttribute('data-n')); });
 $('mTroca').addEventListener('click',function(){ limparSel(); $('mBusca').focus(); });
 ['mHora','mVei','mNovoC','mNovoN'].forEach(function(id){ $(id).addEventListener('input',validar); });
+$('mVei').addEventListener('focus',listaVei);
+$('mVei').addEventListener('click',listaVei);
+$('mVei').addEventListener('input',listaVei);
+$('mVei').addEventListener('keydown',function(e){ if(e.key==='Escape'||e.key==='Tab') fecharVei(); if(e.key==='Enter'){ e.preventDefault(); fecharVei(); validar(); } });
+$('vDD').addEventListener('mousedown',function(e){ e.preventDefault(); });
+$('vDD').addEventListener('click',function(e){ var o=e.target.closest('[data-v]'); if(!o) return; $('mVei').value=o.getAttribute('data-v'); fecharVei(); validar(); });
+document.addEventListener('click',function(e){ if(!e.target.closest('#cbVei')) fecharVei(); });
 $('ov').addEventListener('click',function(e){ if(e.target===this) fechar(); });
 $('mapFechar').addEventListener('click',fecharMapa);
 $('pkFechar').addEventListener('click',fecharEscalar);

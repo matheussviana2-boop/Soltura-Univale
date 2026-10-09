@@ -1182,7 +1182,7 @@ function linhaPend(it,modoAtr){
   var chips='', sd=it.saida;
   if(itd) chips+=ch('os',ICO_WR,'O.S. aberta '+(itd.os||''));
   return '<div class="row'+(sd?' saiu':it._aviso?' atencao':'')+'" id="r-'+it.id+'">'+
-    (sd?tbox('out',sd.hora,'saiu · prev. '+it.hora_prevista):tbox(cls,it.hora_prevista,quando(min)))+
+    tbox(cls,it.hora_prevista,quando(min))+
     '<div class="bus" role="img" aria-label="Ônibus"></div>'+
     '<div class="ident"><div class="pref">'+(sc?'<span style="color:#B45309">'+(it.veiculo?esc(it.veiculo):'Sem carro')+'</span>':esc(it.veiculo))+'</div><div class="esc">'+esc(it.escala)+' · '+esc(it.linha)+'</div>'+(it.remanejado_para?'<div class="esc" style="color:#9A4A0C">'+esc(it.veiculo_original||'carro')+' foi para '+esc(it.remanejado_para)+'</div>':telMini(t,sc))+'</div>'+
     '<div class="info" data-act="edit" data-id="'+it.id+'" title="Toque para alterar ou marcar que não saiu">'+

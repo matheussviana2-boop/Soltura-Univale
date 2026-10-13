@@ -788,12 +788,12 @@
 <div class="ov" id="ovEsc" role="dialog" aria-modal="true" aria-labelledby="esTit">
   <div class="md">
     <h2 id="esTit">Escala semanal</h2>
-    <div class="sub">Relatório semanal do TransNet em Excel (.xlsx)</div>
+    <div class="sub">Relatório semanal do TransNet em Excel (.xlsx) ou CSV (.csv)</div>
     <div class="esinfo" id="esInfo">Carregando…</div>
     <label class="esdrop" id="esDrop">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
-      <b id="esDropTx">Escolher o arquivo da escala</b><span>ou arraste o .xlsx para cá</span>
-      <input type="file" id="esFile" accept=".xlsx" hidden>
+      <b id="esDropTx">Escolher o arquivo da escala</b><span>ou arraste o .xlsx ou .csv para cá</span>
+      <input type="file" id="esFile" accept=".xlsx,.csv" hidden>
     </label>
     <div id="esRes"></div>
     <div class="mact" id="esAct"><div class="sp"></div><button type="button" class="btn" id="esFechar">Fechar</button></div>
@@ -1621,7 +1621,7 @@ function abrirEscala(){
 function fecharEscala(){ $('ovEsc').classList.remove('on'); }
 function lerArquivoEscala(f){
   if(!f) return;
-  if(!/\.xlsx$/i.test(f.name)){ toast('Envie o relatório em Excel (.xlsx).',true); return; }
+  if(!/\.(xlsx|csv)$/i.test(f.name)){ toast('Envie o relatório em Excel (.xlsx) ou CSV (.csv).',true); return; }
   ESC.arq=f; $('esDropTx').textContent=f.name; $('esRes').innerHTML='<div class="esinfo">Lendo o arquivo…</div>'; $('esAct').innerHTML='';
   var rd=new FileReader();
   rd.onload=function(){

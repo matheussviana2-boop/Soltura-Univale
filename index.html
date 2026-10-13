@@ -828,6 +828,7 @@
   #psol.claro .ps-card .hs small,#psol.claro .ps-card .hs span em,#psol.claro .ps-card .ft{color:#24324A}
   #psol.claro .ps-card .l1 .es{background:rgba(255,255,255,.65)}
   #psol.claro .ps-card::after{border-color:rgba(15,27,51,.25)}
+  #painel.claro .pn-todos{padding:10px} #painel.claro .pn-todos .pn-grid{align-content:start}
 </style>
 </head>
 <body>
@@ -1831,12 +1832,6 @@ var Painel=(function(){
     }).catch(function(){ g('pnHora').classList.add('off'); if(dados) desenhar(); });
   }
   var A1C={rod:'#10A36A',par:'#E8930C',gar:'#8A96A8',os:'#E0324F'};
-  function gaugeA1(ct,n){
-    var R=30, P=2*Math.PI*R, off=0, arcs='';
-    [['rod','#10C2A0'],['par','#F5A524'],['gar','#8A96A8']].forEach(function(x){ var f=n?ct[x[0]]/n:0; if(f){ arcs+='<circle cx="40" cy="40" r="30" fill="none" stroke="'+x[1]+'" stroke-width="6" stroke-dasharray="'+Math.max(P*f-2,1).toFixed(1)+' '+P.toFixed(1)+'" stroke-dashoffset="'+(-off).toFixed(1)+'" transform="rotate(-90 40 40)"/>'; off+=P*f; } });
-    return '<svg class="a1g" width="64" height="64" viewBox="0 0 80 80"><circle cx="40" cy="40" r="30" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="6"/><circle cx="40" cy="40" r="22" fill="none" stroke="rgba(0,191,200,.35)" stroke-dasharray="2 3"/>'+arcs+
-      '<text x="40" y="38" text-anchor="middle" fill="#fff" font-size="15" font-weight="700">'+(n?Math.round(ct.rod/n*100):0)+'%</text><text x="40" y="51" text-anchor="middle" fill="#94A3B8" font-size="7.5" letter-spacing="1">RODANDO</text></svg>';
-  }
   function sinalA1(c){
     var tx=String(c.tx||''), m=tx.match(/(\d{1,2}):(\d{2})(?!.*\d:\d)/), dm=tx.match(/(\d{2})\/(\d{2})/), b=0, d=new Date(Date.now()+offset);
     if(!c.semSinal&&m){ var ida=(d.getHours()*60+d.getMinutes())-(+m[1]*60+ +m[2]); if(ida<0) ida+=1440; b=ida<=2?4:ida<=5?3:ida<=15?2:1;
@@ -1861,19 +1856,10 @@ var Painel=(function(){
     var q=semAc(g('pnQ').value).trim();
     g('pnQ').parentNode.classList.toggle('on',!!q);
     var visiveis=C.filter(function(c){ if(filtro==='os'?!c.os:(filtro&&c.sit!==filtro)) return false; return !q||semAc([c.prefixo,c.placa,c.motorista,c.escala,c.linhaNum,c.linhaNome].join(' ')).indexOf(q)>=0; });
-    var grupos={}, ordem=[];
-    visiveis.forEach(function(c){ var k=c.setor||'~'; if(!grupos[k]){ grupos[k]=[]; ordem.push(k); } grupos[k].push(c); });
-    ordem.sort(function(a,b){ if(a==='~') return 1; if(b==='~') return -1; return (parseInt(a,10)||0)-(parseInt(b,10)||0) || a.localeCompare(b); });
-    g('pnMain').innerHTML=ordem.map(function(k){
-      var L=grupos[k].sort(function(a,b){ return ORD[a.sit]-ORD[b.sit] || (b.hojeNaEscala?1:0)-(a.hojeNaEscala?1:0) || (a.hora||'99').localeCompare(b.hora||'99') || a.prefixo.localeCompare(b.prefixo); });
-      var livre=k==='~', cod=livre?'SEM SETOR':String(k).split(' - ')[0], nome=livre?'Fora da escala da semana':nomeCurto((String(k).split(' - ').slice(1).join(' - ')||k).replace(/\s+ESCALAS?\s*$/i,''));
-      var rod=L.filter(function(c){return c.sit==='rod';}).length, fora=L.filter(function(c){return !c.hojeNaEscala;}).length;
-      var ct={rod:0,par:0,gar:0}; L.forEach(function(c){ ct[c.sit]++; });
-      var barra=['rod','par','gar'].filter(function(s){return ct[s];}).map(function(s){ return '<span style="width:'+(ct[s]/L.length*100)+'%;background:'+COR[s][0]+'"></span>'; }).join('');
-      var nOs=L.filter(function(c){return !!c.os;}).length;
-      return '<section class="pn-grp'+(livre?' livre':'')+'"><div class="pn-gh"><b>'+e(cod)+'</b><span>'+e(nome)+'</span>'+gaugeA1(ct,L.length)+''+
-        '<small>'+rod+'/'+L.length+' rodando'+(fora&&!livre?'<br>'+fora+' sem escala hoje':'')+'</small>'+
-        (nOs?'<div class="pn-mini"><em style="color:'+COR.os[0]+';border-color:'+COR.os[0]+'">'+nOs+' O.S.</em></div>':'')+'</div><div class="pn-grid">'+
+    /* todos os carros juntos: ignição ligada primeiro, depois rodando > parado > garagem */
+    var lig=function(c){ return (c.ign==='ON'||c.sit==='rod')?0:1; };
+    var L=visiveis.slice().sort(function(a,b){ return lig(a)-lig(b) || ORD[a.sit]-ORD[b.sit] || a.prefixo.localeCompare(b.prefixo); });
+    g('pnMain').innerHTML=L.length?'<section class="pn-grp pn-todos"><div class="pn-grid">'+
         L.map(function(c){
           var cor=COR[c.sit][0];
           var linha=c.linhaNum?'<div class="li" style="color:'+cor+'"><b>'+e(c.linhaNum)+'</b> '+e(c.linhaNome)+'</div>':'<div class="li vz">—</div>';
@@ -1883,8 +1869,8 @@ var Painel=(function(){
             '<div class="mo'+(c.motorista?'':' vz')+'" title="'+e(c.motorista||'')+'">'+(c.motorista?e(nomeComp(c.motorista)):'—')+'</div>'+
             linha+
             '<div class="po"><span>⌖ '+e(c.ponto||'—')+'</span>'+(c.tx?'<span class="hr'+(c.semSinal?' ns':'')+'">'+e(c.tx)+'</span>':'')+'</div></div>';
-        }).join('')+'</div></section>';
-    }).join('')||'<div class="empty">'+(q||filtro?'Nenhum veículo encontrado'+(filtro?' em “'+COR[filtro][1]+'”':'')+(q?' para “'+e(g('pnQ').value)+'”':'')+'.':'Nenhum carro da frota na telemetria.')+'</div>';
+        }).join('')+'</div></section>'
+      :'<div class="empty">'+(q||filtro?'Nenhum veículo encontrado'+(filtro?' em “'+COR[filtro][1]+'”':'')+(q?' para “'+e(g('pnQ').value)+'”':'')+'.':'Nenhum carro da frota na telemetria.')+'</div>';
   }
   /* mapa gratuito: Leaflet + imagem de satélite Esri (com nomes de ruas por cima) — carregado só quando abre */
   var LF=null, mapa=null, camada=null, marcas={};

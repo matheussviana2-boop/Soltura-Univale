@@ -1564,14 +1564,12 @@ function motoristaAtual(){
 
 function validar(){
   var it=S.atual; if(!it) return {};
-  var tol=S.dia.cfg.tolerancia, h=$('mHora').value, v=$('mVei').value.trim().toUpperCase(), m=motoristaAtual();
-  var d=null; if(h){ var p=it.hora_prevista.split(':'), q=h.split(':'); d=(+q[0]*60+ +q[1])-(+p[0]*60+ +p[1]); if(d<-720) d+=1440; if(d>720) d-=1440; }
+  var h=$('mHora').value, v=$('mVei').value.trim().toUpperCase(), m=motoristaAtual();
   var trocaV=!semCarro(it) && v && v!==it.veiculo.toUpperCase();
   var trocaM=m.c && m.c!==it.cracha;
-  var atrasada=d!==null && d>tol;
   var precisa = false; // sem conferência: motivo só é obrigatório em "Não saiu"
   $('mReq').style.display=precisa?'inline':'none';
-  var w=[]; if(atrasada) w.push('Saída '+d+' min após o previsto.'); if(trocaV) w.push('Carro diferente do escalado.'); if(trocaM) w.push('Motorista diferente do escalado.');
+  var w=[]; if(trocaV) w.push('Carro diferente do escalado.'); if(trocaM) w.push('Motorista diferente do escalado.');
   var outra=trocaV?escalaDoCarro(v,it.id):null;
   if(outra) w.unshift(v+' está escalado na '+outra.escala+' ('+outra.hora_prevista+' · '+titulo(outra.motorista)+'). Ao liberar, essa escala fica sem carro.');
   var bloq=interdNome(v); if(bloq) w.unshift('Atenção: '+v+' está com a O.S. '+(bloq.os||'—')+' aberta. Pode liberar, mas fica registrado.');

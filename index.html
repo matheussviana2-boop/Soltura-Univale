@@ -717,13 +717,6 @@
   #painel.claro .pn-tile .l1 .a1sig i{width:2.5px;transform:none;box-shadow:none!important;flex-shrink:0} .a1sig i.on{background:#0E9C93} .a1sig.fraco i.on{background:#E0324F}
 
   /* ===== Histórico · modelo HS1 (visão do dia) ===== */
-  .h1-wk{display:flex;gap:6px}
-  .h1-wk[hidden]{display:none}
-  .h1-wk button{width:70px;padding:6px 0 8px;border-radius:12px;border:1px solid #D9E1EA;background:#fff;text-align:center;font:500 12px var(--sg);color:#4A5A72;cursor:pointer}
-  .h1-wk button b{display:block;font:600 13px var(--mono);color:#13203A;margin:1px 0 6px}
-  .h1-wk button i{display:block;height:4px;margin:0 12px;border-radius:2px;background:#E1E7EF;overflow:hidden} .h1-wk button i em{display:block;height:100%;background:#047A45}
-  .h1-wk button:hover{border-color:#00778A}
-  .h1-wk button.on{background:#0F1B33;border-color:#0F1B33;color:#9FB0D6} .h1-wk button.on b{color:#fff} .h1-wk button.on i{background:rgba(255,255,255,.15)} .h1-wk button.on i em{background:#2EF29A}
   .h1-main{display:grid;grid-template-columns:minmax(380px,420px) minmax(0,1fr);gap:16px}
   .h1-card{background:#fff;border:1px solid #D9E1EA;border-radius:16px;padding:18px 20px;min-width:0}
   .h1-card h3{margin:0 0 12px;font:600 11.5px var(--mono);letter-spacing:.16em;color:#56657C;text-transform:uppercase;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
@@ -769,7 +762,7 @@
   .h1-p.nao{background:#FDECEF;color:#A3102F} .h1-p.nao i{background:#C8143C}
   #hist.claro .pn-tit b#hsTit{font-size:21px}
   @media (max-width:1100px){ .h1-main{grid-template-columns:minmax(0,1fr)} }
-  @media (max-width:760px){ .h1-wk{order:-1;width:100%;overflow-x:auto;padding-bottom:2px} .h1-wk button{flex:0 0 62px} .h1-res{flex-direction:column;align-items:stretch} .h1-res svg{align-self:center} .h1-card{padding:14px} .h1-fis{grid-template-columns:minmax(0,1fr)} .h1-tbh input{flex-basis:100%} .h1-tbh .cnt{margin-left:0} }
+  @media (max-width:760px){ .h1-res{flex-direction:column;align-items:stretch} .h1-res svg{align-self:center} .h1-card{padding:14px} .h1-fis{grid-template-columns:minmax(0,1fr)} .h1-tbh input{flex-basis:100%} .h1-tbh .cnt{margin-left:0} }
 
   /* ===== Painel de soltura · moldura A1 ===== */
   #psol.claro{background-color:#EEF2F6;background-image:radial-gradient(800px 380px at 85% -10%,rgba(0,191,200,.13),transparent 60%),radial-gradient(700px 400px at -5% 110%,rgba(61,123,255,.08),transparent 60%),radial-gradient(rgba(17,26,43,.09) 1px,transparent 1.2px);background-size:auto,auto,18px 18px}
@@ -819,6 +812,20 @@
   #psol.claro .ps-card::after{border-color:rgba(15,27,51,.25)}
   #painel.claro .pn-todos{padding:10px} #painel.claro .pn-todos .pn-grid{align-content:start}
   .pn-mk{box-sizing:border-box;line-height:0;padding:0} .pn-mk svg{display:block;margin:auto}
+
+  /* tabela do histórico: centralizada, mais contraste e fonte maior */
+  #hist .h1-t{font-size:15px}
+  #hist .h1-t th{text-align:center;font:700 12px var(--sg);letter-spacing:.06em;color:#1A2540;background:#E9EEF5;padding:12px 12px;border-bottom:2px solid #CBD5E1}
+  #hist .h1-t td{text-align:center;padding:11px 12px;color:#0B1630;border-top:1px solid #E3E9F1}
+  #hist .h1-t td.r,#hist .h1-t th.r{text-align:center}
+  #hist .h1-t td.m b{font-weight:800}
+  #hist .h1-t td.obs{text-align:center;color:#24324A}
+  #hist .h1-t td small{color:#3A4A62}
+  #hist .h1-t tr.hh td{text-align:left;font:700 13px var(--mono);letter-spacing:.06em;color:#004E5A;background:#DDF0F3;padding:8px 14px}
+  #hist .h1-t tr:not(.hh):nth-child(even) td{background:#FAFBFD}
+  #hist .h1-t tr:not(.hh):hover td{background:#EEF5FA}
+  #hist .h1-t td.dv-atr{color:#8A4F00;font-weight:700} #hist .h1-t td.dv-adi{color:#00606F;font-weight:700} #hist .h1-t td.dv-ok{color:#05683B;font-weight:600}
+  #hist .h1-p{font-size:13px;padding:4px 12px}
 </style>
 </head>
 <body>
@@ -971,7 +978,6 @@
     <div class="hs-bar">
       <div class="hs-seg" role="group" aria-label="Ver por"><button type="button" data-modo="dia" class="on">Dia</button><button type="button" data-modo="mes">Mês</button></div>
       <button type="button" class="hs-btn" data-n="-1" aria-label="Anterior" title="Anterior">‹</button>
-      <div class="h1-wk" id="hsWk" aria-label="Últimos dias"></div>
       <label><span class="sr">Dia</span><input type="date" id="hsDia"></label>
       <label hidden id="hsMesL"><span class="sr">Mês</span><input type="month" id="hsMes"></label>
       <button type="button" class="hs-btn" data-n="1" aria-label="Próximo dia" title="Próximo dia">›</button>
@@ -1005,6 +1011,8 @@ function cacheGrava(k,v){ try{ localStorage.setItem('soltura.cache.'+k,JSON.stri
 function titulo(n){ return String(n||'').toLowerCase().replace(/(^|\s)\S/g,function(m){return m.toUpperCase();}).replace(/\s(De|Da|Do|Dos|Das|E)\s/g,function(m){return m.toLowerCase();}); }
 function semAcento(s){ return String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase(); }
 function fmtData(iso){ var p=iso.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+/* minutos → texto fácil: 26 min · 2h 10 min · 3h */
+function tempoTx(a){ a=Math.round(Math.abs(a||0)); if(a<60) return a+' min'; var h=Math.floor(a/60), m=a%60; return h+'h'+(m?' '+m+' min':''); }
 function semCarro(it){ return !it.veiculo || it.veiculo.toUpperCase()==='FOLGADOR'; }
 
 var _tt;
@@ -1037,7 +1045,7 @@ function api(acao, params, post){
 function statusPend(it){
   var tol=S.dia.cfg.tolerancia, ant=S.dia.cfg.antecedencia;
   var min=Math.floor((agora()-it.prevMs)/60000);
-  if(min>tol) return {k:'crit',txt:'Atrasada +'+min+' min',crit:true};
+  if(min>tol) return {k:'crit',txt:'Atrasada +'+tempoTx(min),crit:true};
   if(min>=0) return {k:'tol',txt:'Na tolerância +'+min};
   if(-min<=ant) return {k:'soon',txt:'Sai em '+(-min)+' min'};
   return {k:'prev',txt:'Prevista'};
@@ -1259,7 +1267,7 @@ function confirmaTroca(v, o){
 }
 function interdNome(v){ v=String(v||'').toUpperCase(); return (S.dia.interditados||[]).filter(function(x){return x.prefixo===v;})[0]||null; }
 function fmtLim(m){ return m%60===0? (m/60)+'h' : m+' min'; }
-function fmtAtraso(m){ return m<60? m+' min' : Math.floor(m/60)+'h'+('0'+(m%60)).slice(-2); }
+function fmtAtraso(m){ return tempoTx(m); }
 
 /* motivo vem como "Corretiva: descrição | Preventiva: descrição" */
 function osPartes(x){ return String(x.motivo||'').split(' | ').map(function(p){ var i=p.indexOf(':'); return i>0?{tipo:p.slice(0,i).trim(),desc:p.slice(i+1).trim()}:{tipo:p.trim(),desc:''}; }).filter(function(o){return o.tipo||o.desc;}); }
@@ -1894,7 +1902,7 @@ var PSol=(function(){
   var ICO_REL='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 2"/></svg>';
   var ICO_X='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M7 7l10 10M17 7L7 17"/></svg>';
   function dBR(iso){ var p=String(iso||'').split('-'); return p.length===3?p[2]+'/'+p[1]:''; }
-  function desvio(m){ m=Math.round(m||0); if(!m) return 'no horário'; var a=Math.abs(m), t=a>=60?Math.floor(a/60)+'h'+('0'+a%60).slice(-2):a+' min'; return (m>0?'+':'−')+t; }
+  function desvio(m){ m=Math.round(m||0); if(!m) return 'no horário'; return (m>0?'+':'−')+tempoTx(m); }
   function aplicarTema(t){
     tema=t==='cla'?'cla':'esc'; g('psol').classList.toggle('claro',tema==='cla');
     var b=g('psTema'); b.innerHTML=tema==='cla'?ICO_LUA+'<span>Escuro</span>':ICO_SOL+'<span>Claro</span>'; b.title='Mudar para o tema '+(tema==='cla'?'escuro':'claro');
@@ -1981,7 +1989,7 @@ var Hist=(function(){
     if(modo==='mes'){ if(mdados) desenharMes(); } else if(dia) desenhar();
   }
   function pct(a,b){ return b?Math.round(a/b*100):0; }
-  function desvio(m){ m=Math.round(m||0); return m>0?'+'+m:String(m); }
+  function desvio(m){ m=Math.round(m||0); if(!m) return '0 min'; return (m>0?'+':'−')+tempoTx(m); }
   function fiscais(){
     var f={};
     dia.itens.forEach(function(x){ if(x.status==='PENDENTE'||x.status==='NAO_SAIU') return; var k=x.responsavel||'—'; if(!f[k]) f[k]={nome:k,qtd:0,atr:0,ini:'',fim:''}; var o=f[k]; o.qtd++; if(x.status==='ATRASADA') o.atr++; if(x.hora_real){ if(!o.ini||x.hora_real<o.ini) o.ini=x.hora_real; if(!o.fim||x.hora_real>o.fim) o.fim=x.hora_real; } });
@@ -2003,23 +2011,6 @@ var Hist=(function(){
   var COR1={ok:'#047A45',adi:'#00778A',atr:'#C77700',pen:'#B8C3D1',nao:'#C8143C'}, MESES1=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
   function stK(x){ return (ST[x.status]||[0,'ok'])[1]; }
   function dataLonga(s){ var p=String(s).split('-'), w=semana(s); return w.charAt(0).toUpperCase()+w.slice(1)+', '+p[2]+' de '+MESES1[+p[1]-1]; }
-  /* faixa da semana: % liberadas de cada dia (vem do resumo do mês, guardado na memória) */
-  var mesMemo={}, pctDia={};
-  function mesResumo(m){ if(!mesMemo[m]) mesMemo[m]=api('getHistoricoMes',{mes:m}).then(function(r){ (r.dias||[]).forEach(function(d){ if(d.programadas) pctDia[d.data]=pct(d.liberadas,d.programadas); }); }).catch(function(){ delete mesMemo[m]; }); return mesMemo[m]; }
-  function semanaDias(){
-    var p=dia.data.split('-'), sel=new Date(+p[0],+p[1]-1,+p[2]), hoje=new Date(), fim=new Date(sel); fim.setDate(fim.getDate()+3);
-    hoje.setHours(0,0,0,0); if(fim>hoje) fim=hoje; if(fim<sel) fim=sel;
-    var L=[]; for(var i=6;i>=0;i--){ var d=new Date(fim); d.setDate(d.getDate()-i); L.push(iso(d)); } return L;
-  }
-  function semanaHtml(){
-    var W=['dom','seg','ter','qua','qui','sex','sáb'];
-    g('hsWk').innerHTML=semanaDias().map(function(d){ var p=d.split('-'), pc=d===dia.data&&dia.programadas?pct(dia.liberadas,dia.programadas):pctDia[d];
-      return '<button type="button" data-wk="'+d+'" class="'+(d===dia.data?'on':'')+'" title="'+br(d)+(pc!=null?' · '+pc+'% liberadas':'')+'">'+W[new Date(+p[0],+p[1]-1,+p[2]).getDay()]+'<b>'+p[2]+'/'+p[1]+'</b><i><em style="width:'+(pc||0)+'%"></em></i></button>'; }).join(''); var wk=g('hsWk'); wk.scrollLeft=wk.scrollWidth;
-  }
-  function semana7(){
-    semanaHtml(); var ms={}; semanaDias().forEach(function(d){ ms[d.slice(0,7)]=1; });
-    Promise.all(Object.keys(ms).map(mesResumo)).then(function(){ if(modo==='dia'&&dia) semanaHtml(); });
-  }
   function donut(d){
     var R=62, P=2*Math.PI*R, off=0, segs=[[d.no_horario,COR1.ok],[d.adiantadas,COR1.adi],[d.atrasadas,COR1.atr],[d.pendentes,COR1.pen],[d.nao_saiu||0,COR1.nao]], n=d.programadas||1;
     var s='<svg width="160" height="160" viewBox="0 0 160 160" aria-hidden="true"><circle cx="80" cy="80" r="62" stroke="#EEF2F6" stroke-width="16" fill="none"/>';
@@ -2053,21 +2044,21 @@ var Hist=(function(){
         return r+'<tr data-i><td class="m s-'+s[1]+'">'+e(x.hora_prevista)+'</td><td class="m">'+e(x.escala)+'</td>'+
           '<td class="m"><b>'+e(x.veiculo||'—')+'</b>'+(x.troca_veiculo&&x.veiculo_prev?' <small>(prev. '+e(x.veiculo_prev)+')</small>':'')+'</td>'+
           '<td>'+e(nome(x.motorista)||'—')+(x.troca_motorista?' <small>(troca)</small>':'')+'</td>'+
-          '<td class="m">'+e(x.hora_real||'—')+'</td><td class="m r">'+(x.hora_real?desvio(x.desvio):'—')+'</td>'+
+          '<td class="m">'+e(x.hora_real||'—')+'</td><td class="m r dv-'+s[1]+'">'+(x.hora_real?desvio(x.desvio):'—')+'</td>'+
           '<td><span class="h1-p '+s[1]+'"><i></i>'+s[0]+'</span></td><td>'+e(nome(x.responsavel)||'—')+'</td><td class="obs">'+e(x.motivo||'')+'</td></tr>'; }).join('')
       :'<tr><td colspan="9">Nenhuma escala encontrada.</td></tr>';
   }
   function desenhar(){
     var d=dia, F=fiscais();
     g('hsTit').textContent=dataLonga(d.data); g('hsSub').textContent='';
-    g('hsXls').disabled=!d.itens.length; semana7();
+    g('hsXls').disabled=!d.itens.length; 
     if(!d.itens.length){ g('hsMain').innerHTML='<div class="empty">Sem escala carregada para '+br(d.data)+'.</div>'; return; }
     var atr=d.itens.filter(function(x){ return x.status==='ATRASADA'; }), med=atr.length?Math.round(atr.reduce(function(a,x){ return a+Math.max(x.desvio||0,0); },0)/atr.length):0;
     var lin=function(rot,n,c,cls){ return '<span'+(cls?' class="'+cls+'"':'')+'>'+(c?'<i style="background:'+c+'"></i>':'')+rot+'</span><b'+(cls?' class="'+cls+'"':'')+'>'+n+'</b>'; };
     var chip=function(k,rot,n){ return '<button type="button" class="h1-chip'+(fSt===k?' on':'')+'" data-st="'+k+'">'+rot+' · '+n+'</button>'; };
     var h='<div class="h1-main"><div class="h1-card"><h3>Resultado do dia</h3><div class="h1-res">'+donut(d)+'<div class="h1-stl">'+
         lin('No horário',d.no_horario,COR1.ok)+(d.adiantadas?lin('Adiantadas',d.adiantadas,COR1.adi):'')+lin('Atrasadas',d.atrasadas,COR1.atr)+lin('Sem registro',d.pendentes,COR1.pen)+(d.nao_saiu?lin('Não saiu',d.nao_saiu,COR1.nao):'')+lin('Programadas',d.programadas,'','tt')+'</div></div>'+
-        '<div class="h1-mini"><div><small>Pontualidade</small><b>'+pct(d.no_horario+d.adiantadas,d.liberadas)+'%</b></div><div><small>Atraso médio</small><b>'+(med>=60?Math.floor(med/60)+'h'+('0'+med%60).slice(-2):med+' min')+'</b></div><div><small>Trocas de carro</small><b>'+d.trocas+'</b></div></div></div>'+
+        '<div class="h1-mini"><div><small>Pontualidade</small><b>'+pct(d.no_horario+d.adiantadas,d.liberadas)+'%</b></div><div><small>Atraso médio</small><b>'+tempoTx(med)+'</b></div><div><small>Trocas de carro</small><b>'+d.trocas+'</b></div></div></div>'+
       '<div class="h1-card"><h3>Saídas por hora <small><span><i style="background:'+COR1.ok+'"></i>no horário</span><span><i style="background:#E09A1F"></i>atrasada</span><span><i style="background:#C3CCD8"></i>sem registro</span></small></h3><div class="h1-gr">'+porHora()+'</div></div></div>';
     h+='<div class="h1-fis">'+(F.length?F.map(function(f){ var nm=f.nome==='—'?'Sem fiscal informado':nome(f.nome);
         return '<div class="h1-fc"><div class="h1-av">'+(f.nome==='—'?'?':e(nm.split(' ').map(function(p){return p[0];}).slice(0,2).join('')))+'</div><div><b>'+e(nm)+'</b><small>'+(f.ini?f.ini+' – '+f.fim:'—')+' · '+f.atr+' atrasada'+(f.atr===1?'':'s')+'</small></div><div class="n">'+f.qtd+'<small>liberaç'+(f.qtd===1?'ão':'ões')+'</small></div></div>'; }).join(''):'<div class="h1-fc"><small>Nenhuma liberação neste dia.</small></div>')+'</div>';
@@ -2150,7 +2141,7 @@ var Hist=(function(){
       '<div class="hs-ring">'+ring(pct(t.liberadas,t.programadas),P.ok)+'<div><small>LIBERADAS NO MÊS</small><b>'+t.liberadas+'<em> / '+t.programadas+'</em></b><span>programadas no mês</span></div></div>'+
       '<div class="hs-ring">'+ring(pct(t.no_horario+t.adiantadas,t.liberadas),P.adi)+'<div><small>PONTUALIDADE</small><b>'+(t.no_horario+t.adiantadas)+'</b><span>no horário (até '+(mdados.tolerancia||5)+' min)</span></div></div>'+
       '<div class="hs-ring">'+ring(pct(t.pendentes,t.programadas),P.pen)+'<div><small>SEM REGISTRO</small><b>'+t.pendentes+'</b><span>não liberadas no sistema</span></div></div>'+
-      '<div class="hs-ring">'+ring(pct(t.atrasadas,t.liberadas),P.atr)+'<div><small>ATRASADAS</small><b>'+t.atrasadas+'</b><span>média '+t.med+' min · '+t.trocas+' troca'+(t.trocas===1?'':'s')+'</span></div></div></div>';
+      '<div class="hs-ring">'+ring(pct(t.atrasadas,t.liberadas),P.atr)+'<div><small>ATRASADAS</small><b>'+t.atrasadas+'</b><span>média '+tempoTx(t.med)+' · '+t.trocas+' troca'+(t.trocas===1?'':'s')+'</span></div></div></div>';
     h+='<div class="hs-mid"><div class="hs-box"><h3>RESULTADO POR DIA <small>toque numa barra para abrir o dia</small></h3><div class="hs-gr">'+graficoMes(P)+'</div>'+
       '<div class="hs-lg"><span><i style="background:'+P.ok+'"></i>No horário</span><span><i style="background:'+P.atr+'"></i>Atrasada</span><span><i style="background:'+P.pen+'"></i>Sem registro</span></div></div>'+
       '<div class="hs-box hs-fis"><h3>FISCAIS DO MÊS</h3><div class="hs-fl">'+
@@ -2185,7 +2176,7 @@ var Hist=(function(){
     modo=m;
     [].forEach.call(document.querySelectorAll('#hist [data-modo]'),function(b){ b.classList.toggle('on',b.getAttribute('data-modo')===m); });
     g('hsDia').parentNode.hidden=m==='mes'; g('hsMesL').hidden=m!=='mes';
-    g('hsK').textContent=m==='mes'?'// RESULTADO DO MÊS':'// HISTÓRICO DE SOLTURA'; g('hsWk').hidden=m==='mes'; if(m==='mes') g('hsTit').textContent='Histórico de soltura';
+    g('hsK').textContent=m==='mes'?'// RESULTADO DO MÊS':'// HISTÓRICO DE SOLTURA'; if(m==='mes') g('hsTit').textContent='Histórico de soltura';
     if(m==='mes'){ if(!g('hsMes').value) g('hsMes').value=(g('hsDia').value||iso(new Date())).slice(0,7); buscarMes(); } else buscar();
   }
   function iniciar(){
@@ -2197,7 +2188,6 @@ var Hist=(function(){
     g('hsDia').addEventListener('change',buscar);
     g('hsXls').addEventListener('click',function(){ if(modo==='mes') exportarMes(); else exportar(); });
     g('hsMes').addEventListener('change',buscarMes);
-    g('hsWk').addEventListener('click',function(ev){ var b=ev.target.closest('[data-wk]'); if(!b||b.classList.contains('on')) return; g('hsDia').value=b.getAttribute('data-wk'); buscar(); });
     [].forEach.call(document.querySelectorAll('#hist [data-modo]'),function(b){ b.addEventListener('click',function(){ if(b.getAttribute('data-modo')!==modo) setModo(b.getAttribute('data-modo')); }); });
     g('hsMain').addEventListener('click',function(ev){
       var dd=ev.target.closest('[data-dia]'); if(dd&&modo==='mes'){ g('hsDia').value=dd.getAttribute('data-dia'); setModo('dia'); return; }

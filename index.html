@@ -1477,12 +1477,12 @@ function okSoltura(it){
     return;
   }
   var obsOS=it.interd?'Liberado com O.S. aberta '+(it.interd.os||''):''; it._osOk=false;
-  var h=it.saida?it.saida.hora:hhmm(agora());
+  var h=hhmm(agora());   // a hora da liberação é sempre a que o fiscal registra
   var pp=it.hora_prevista.split(':'), qq=h.split(':'), d=(+qq[0]*60+ +qq[1])-(+pp[0]*60+ +pp[1]), tol=S.dia.cfg.tolerancia;
   if(d<-720) d+=1440; if(d>720) d-=1440;
   it.reg={_pend:true,status:d>tol?'ATRASADA':(d<-tol?'ADIANTADA':'NO_HORARIO'),hora_real:h,desvio_min:d,responsavel:getResp(),veiculo_real:it.veiculo,cracha_real:it.cracha,motorista_real:it.motorista,troca_veiculo:'',troca_motorista:'',motivo:'',conferido:''};
   render();
-  api('registrar',{id:it.id,acao:'SAIU',origem:it.saida?'TELEMETRIA':'FISCAL',hora_real:it.saida?h:'',responsavel:getResp(),garagem:(it.saida&&it.saida.de)||getGar(),observacao:[obsOS,it.saida?'Saída pela telemetria '+h:''].filter(String).join(' · ')},true).then(function(reg){
+  api('registrar',{id:it.id,acao:'SAIU',origem:'FISCAL',hora_real:h,responsavel:getResp(),garagem:(it.saida&&it.saida.de)||getGar(),observacao:obsOS},true).then(function(reg){
     it.reg=reg; render();
     toast((it.veiculo||it.escala)+' liberado às '+reg.hora_real,false,function(){ voltarSoltura(it); });
   }).catch(function(e){ it.reg=null; render(); toast(it.escala+': '+e.message,true); });
@@ -1512,7 +1512,7 @@ function abrir(it, modo, focoMotivo, carro){
   $('mSub').textContent=it.setor+' · '+it.linhas;
   $('mPrev').innerHTML='Previsto: <b class="mono">'+esc(it.hora_prevista)+'</b> · carro <b class="mono">'+esc(it.veiculo||'—')+'</b> · '+(it.motorista?'<b>'+esc(titulo(it.motorista))+'</b> <span class="mono">'+esc(it.cracha)+'</span>':'<b>sem motorista</b>');
   var hoje=S.dia.data===S.dia.hoje;
-  $('mHora').value=r&&r.hora_real?r.hora_real:(it.saida?it.saida.hora:(hoje?hhmm(agora()):''));
+  $('mHora').value=r&&r.hora_real?r.hora_real:(hoje?hhmm(agora()):'');
   if(!r && it.saida) $('mPrev').innerHTML+=' · <b style="color:#007A75">saiu da garagem às '+esc(it.saida.hora)+' (telemetria)</b>';
   $('mVei').value=carro||(r&&r.veiculo_real?r.veiculo_real:(semCarro(it)?'':it.veiculo));
   var c=r&&r.cracha_real?r.cracha_real:it.cracha, n=r&&r.motorista_real?r.motorista_real:it.motorista;

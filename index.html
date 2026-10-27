@@ -828,6 +828,10 @@
   #hist .h1-t tr:not(.hh):hover td{background:#EEF5FA}
   #hist .h1-t td.dv-atr{color:#8A4F00;font-weight:700} #hist .h1-t td.dv-adi{color:#00606F;font-weight:700} #hist .h1-t td.dv-ok{color:#05683B;font-weight:600}
   #hist .h1-p{font-size:13px;padding:4px 12px}
+  #psol .ps-card .os-tag{font:700 10px var(--mono);color:#fff;background:#C8143C;padding:1px 6px;border-radius:4px}
+  #psol .ps-card .n2{font:700 10.5px var(--mono);color:#004E5A;background:#E0F4F6;padding:1px 6px;border-radius:4px;margin-left:4px}
+  #psol .ps-card.ps-pen .mo.vz{color:#3A4A62;font-weight:600;opacity:1}
+  #psol .ps-grid{grid-template-columns:repeat(auto-fill,minmax(250px,1fr));align-items:start}
 </style>
 </head>
 <body>
@@ -1163,7 +1167,7 @@ function render(){
   var vigentes=pendAll.filter(function(i){return i._min<=lim && !i.interd;});
   var nInterdPend=pendAll.filter(function(i){return i._min<=lim && i.interd;}).length;
   var pend=vigentes, sem=[], outra=0;
-  if(telOk() && G && !q){
+  if(telOk() && G && !q && vigentes.some(function(i){ return !!i.veiculo; })){   // só quando a escala traz carro
     pend=vigentes.filter(function(i){return i._loc.k==='in';});
     sem=vigentes.filter(function(i){return i._loc.k==='fora';});
     outra=vigentes.filter(function(i){return i._loc.k==='outra';}).length;
@@ -1184,7 +1188,7 @@ function render(){
   if(S.tab==='pend'){
     var atr=pend.concat(sem).filter(function(i){return i._st.k==='crit';}).length;
     if(atr) r.push('<b class="c">'+atr+' atrasado'+(atr>1?'s':'')+'</b>');
-    r.push('<b>'+pend.length+'</b> no pátio para sair');
+    r.push('<b>'+pend.length+'</b> escala'+(pend.length===1?'':'s')+' para sair');
     if(sem.length) r.push(sem.length+' fora do pátio'); if(outra) r.push(outra+' na outra garagem');
     if(nInterdPend) r.push(nInterdPend+' com carro em O.S. na aba Com O.S.');
     if(atrasados.length) r.push(atrasados.length+' com mais de '+fmtLim(lim)+' de atraso no fim da lista');
@@ -1204,9 +1208,9 @@ function render(){
     if(S.dia.frota){
       var livres=naoEscalados(q);
       var nOsLivre=(S.dia.frota||[]).filter(function(c){ return c.interd && !S.dia.itens.some(function(i){ return (i.veiculo||'').toUpperCase()===c.prefixo; }); }).length, semTel=S.dia.semTelemetria||[];
-      h+='<div class="grupo g2">'+ICO_PIN+'<span>Não escalados</span><span class="n">'+livres.length+'</span><small>disponíveis para substituir um carro da escala'+
+      h+='<div class="grupo g2">'+ICO_PIN+'<span>Carros disponíveis</span><span class="n">'+livres.length+'</span><small>livres para sair em qualquer escala'+
         (nOsLivre?' · <b>'+nOsLivre+'</b> com O.S. (aba Com O.S.)':'')+(semTel.length?' · <b title="'+esc(semTel.join(', '))+'">'+semTel.length+'</b> sem sinal na telemetria: '+esc(semTel.join(', ')):'')+'</small></div>';
-      if(!livres.length) h+='<div class="empty">Todos os carros da frota estão na escala de hoje.</div>';
+      if(!livres.length) h+='<div class="empty">Todos os carros da frota já saíram.</div>';
       livres.forEach(function(c){ h+=linhaLivre(c); });
     }
   }
@@ -1220,7 +1224,7 @@ function render(){
     var foraEsc=interd.filter(function(x){return chave(x)===null;});
     if(naEsc.length) h+='<div class="secao">'+ICO_CLOCK+'<span>Na escala de hoje</span><span class="n">'+naEsc.length+'</span></div>';
     naEsc.forEach(function(x){ h+=linhaInterd(x); });
-    if(foraEsc.length) h+='<div class="secao">'+ICO_CLOCK+'<span>Sem escala hoje</span><span class="n">'+foraEsc.length+'</span></div>';
+    if(foraEsc.length&&naEsc.length) h+='<div class="secao">'+ICO_CLOCK+'<span>Sem escala hoje</span><span class="n">'+foraEsc.length+'</span></div>';
     foraEsc.forEach(function(x){ h+=linhaInterd(x); });
   }
   else {
@@ -1320,9 +1324,9 @@ function naoEscalados(q){
 function linhaLivre(c){
   var lc=c._loc, t=c.tel;
   var mp=(t&&t.lat&&t.lng)?'<button type="button" class="maplink" data-act="mapcar" data-car="'+esc(c.prefixo)+'" title="Ver onde o carro está" aria-label="Ver no mapa onde está '+esc(c.prefixo)+'">'+ICO_PIN.replace('width="16" height="16"','width="22" height="22"')+'</button>':'';
-  return '<div class="row livre">'+tbox('free','LIVRE','não escalado')+
+  return '<div class="row livre">'+tbox('free','LIVRE','disponível')+
     '<div class="bus" role="img" aria-label="Ônibus"></div>'+
-    '<div class="ident"><div class="pref">'+esc(c.prefixo)+'</div><div class="esc">Sem escala hoje</div>'+telMini(t,false)+'</div>'+
+    '<div class="ident"><div class="pref">'+esc(c.prefixo)+'</div><div class="esc">Disponível</div>'+telMini(t,false)+'</div>'+
     '<div class="info" style="cursor:default"></div>'+
     '<div class="acts">'+mapCol(mp,lc)+'<button type="button" class="out" data-act="escalar" data-car="'+esc(c.prefixo)+'">Escalar</button></div>'+
   '</div>';
@@ -1391,7 +1395,8 @@ function fecharEscalar(){ $('ovPick').classList.remove('on'); S.pickCar=null; }
 
 /* carro com problema (O.S., sem carro, fora do pátio/sem telemetria) e saída em até 20 min ou já atrasada: destaca a linha */
 var JANELA_AVISO=20;
-function problema(it){ var lc=it._loc; return !!(it.interd || semCarro(it) || (telOk() && (!it.tel || (lc && lc.k!=='in')))); }
+function problema(it){ if(!it.veiculo) return false;   // escala sem carro é o normal: o carro é escolhido na liberação
+  var lc=it._loc; return !!(it.interd || semCarro(it) || (telOk() && (!it.tel || (lc && lc.k!=='in')))); }
 function sugerir(lista){
   lista.forEach(function(it){ it._aviso=!it.saida && it._min>=-JANELA_AVISO && problema(it); });
 }
@@ -1426,7 +1431,7 @@ function linhaPend(it,modoAtr){
   return '<div class="row'+(sd?' saiu':it._aviso?' atencao':'')+'" id="r-'+it.id+'">'+
     tbox(cls,it.hora_prevista,quando(min))+
     '<div class="bus" role="img" aria-label="Ônibus"></div>'+
-    '<div class="ident"><div class="pref">'+(sc?'<span style="color:#B45309">'+(it.veiculo?esc(it.veiculo):'Sem carro')+'</span>':esc(it.veiculo))+'</div><div class="esc">'+esc(it.escala)+' · '+esc(it.linha)+'</div>'+(it.remanejado_para?'<div class="esc" style="color:#9A4A0C">'+esc(it.veiculo_original||'carro')+' foi para '+esc(it.remanejado_para)+'</div>':telMini(t,sc))+'</div>'+
+    '<div class="ident"><div class="pref">'+(it.veiculo&&!sc?esc(it.veiculo):esc(it.escala))+'</div><div class="esc">'+(it.veiculo&&!sc?esc(it.escala)+' · ':'')+esc(it.linha)+'</div>'+(it.remanejado_para?'<div class="esc" style="color:#9A4A0C">'+esc(it.veiculo_original||'carro')+' foi para '+esc(it.remanejado_para)+'</div>':telMini(t,sc))+'</div>'+
     '<div class="info" data-act="edit" data-id="'+it.id+'" title="Toque para alterar ou marcar que não saiu">'+
       '<div class="mot"><span>'+(it.motorista?esc(titulo(it.motorista)):'<span style="color:var(--amb-d)">Sem motorista</span>')+'</span></div>'+
       (chips?'<div class="chs">'+chips+'</div>':'')+
@@ -1940,39 +1945,41 @@ var PSol=(function(){
       dados=d; offset=(d.agoraMs||Date.now())-Math.round((t0+Date.now())/2); g('psHora').classList.remove('off'); cacheGrava('psol',d); desenhar();
     }).catch(function(err){ g('psHora').classList.add('off'); if(!dados) g('psMain').innerHTML='<div class="empty">Não consegui carregar: '+e(err.message)+'</div>'; });
   }
+  /* painel por CARRO: os carros da frota começam aguardando e ficam verdes quando são liberados (em qualquer escala) */
+  function carros(){
+    var L=dados.itens||[], por={}, lista=(dados.frota||[]).slice();
+    L.forEach(function(x){ var v=String(x.veiculo||'').toUpperCase(); if(!v||cl(x)!=='ok') return; (por[v]=por[v]||[]).push(x); });
+    Object.keys(por).forEach(function(v){ if(lista.indexOf(v)<0) lista.push(v); });   // liberado com carro fora do cadastro
+    return lista.sort().map(function(v){ var s=(por[v]||[]).sort(function(a,b){ return String(a.hora_real).localeCompare(String(b.hora_real)); });
+      return { prefixo:v, saidas:s, ult:s[s.length-1]||null, os:(dados.os||{})[v]||'' }; });
+  }
   function desenhar(){
-    var P=PAL[tema], L=dados.itens||[], conta={pen:0,ok:0,atr:0,adi:0,nao:0};
-    L.forEach(function(x){ conta[cl(x)]++; });
-    var tot=L.length, lib=conta.ok, pct=tot?Math.round(lib/tot*100):0;
-    var agora=Date.now()+offset, dia=dBR(dados.data);
+    var P=PAL[tema], C=carros(), conta={pen:0,ok:0};
+    C.forEach(function(c){ conta[c.ult?'ok':'pen']++; });
+    var tot=C.length, lib=conta.ok, pct=tot?Math.round(lib/tot*100):0, dia=dBR(dados.data);
     g('psSub').textContent='';
-    g('psLeg').innerHTML=['pen','ok'].concat(conta.nao?['nao']:[]).map(function(k){ var c=P[k], on=filtro===k;
-      return '<div data-f="'+k+'" class="'+(on?'on':(filtro?'off':''))+'" title="'+(on?'Mostrar todas':'Filtrar: '+ROT[k])+'" style="border-color:'+c+(on?'':'55')+';box-shadow:inset 0 0 18px '+c+(on?'44':'22')+'"><i style="background:'+c+';box-shadow:0 0 10px '+c+'"></i><b style="color:'+c+'">'+conta[k]+'</b>'+ROT[k]+'</div>'; }).join('');
-    g('psProg').innerHTML='<span><b>'+lib+'</b> de '+tot+' liberadas</span><div class="tr"><i style="width:'+pct+'%"></i></div><b>'+pct+'%</b>';
+    var ROTc={pen:'Aguardando',ok:'Liberados'};
+    g('psLeg').innerHTML=['pen','ok'].map(function(k){ var c=P[k], on=filtro===k;
+      return '<div data-f="'+k+'" class="'+(on?'on':(filtro?'off':''))+'" title="'+(on?'Mostrar todos':'Filtrar: '+ROTc[k])+'" style="border-color:'+c+(on?'':'55')+';box-shadow:inset 0 0 18px '+c+(on?'44':'22')+'"><i style="background:'+c+';box-shadow:0 0 10px '+c+'"></i><b style="color:'+c+'">'+conta[k]+'</b>'+ROTc[k]+'</div>'; }).join('');
+    g('psProg').innerHTML='<span><b>'+lib+'</b> de '+tot+' carros liberados</span><div class="tr"><i style="width:'+pct+'%"></i></div><b>'+pct+'%</b>';
     var q=semAc(g('psQ').value).trim();
     g('psQ').parentNode.classList.toggle('on',!!g('psQ').value);
-    var V=L.filter(function(x){ if(filtro && cl(x)!==filtro) return false; return !q||semAc([x.veiculo,x.veiculo_prev,x.motorista,x.cracha,x.escala,x.responsavel,x.garagem].join(' ')).indexOf(q)>=0; });
-    if(!V.length){ g('psMain').innerHTML='<div class="empty">'+(L.length?'Nenhuma escala encontrada'+(filtro?' em “'+ROT[filtro]+'”':'')+(q?' para “'+e(g('psQ').value)+'”':'')+'.':'Nenhuma escala carregada para hoje.')+'</div>'; return; }
-    // agrupa pela hora programada
-    var grupos={}, ordem=[];
-    V.forEach(function(x){ var h=x.hora_prevista.slice(0,2); if(!grupos[h]){ grupos[h]=[]; ordem.push(h); } grupos[h].push(x); });
-    g('psMain').innerHTML=ordem.map(function(h){
-      var G=grupos[h], nl=G.filter(function(x){ var k=cl(x); return k!=='pen'&&k!=='nao'; }).length;
-      return '<section><div class="ps-h"><b>'+h+':00 – '+h+':59</b><small>'+nl+' de '+G.length+' liberada'+(G.length>1?'s':'')+'</small></div><div class="ps-grid">'+
-        G.map(function(x){
-          var k=cl(x), c=P[k], pen=k==='pen', min=0;
-          if(pen){ var p=String(x.hora_prevista).split(':'), dd=String(dados.data).split('-'); min=Math.floor((agora-new Date(+dd[0],+dd[1]-1,+dd[2],+p[0],+p[1]).getTime())/60000); }
-          var dv=pen?(min>0?'<span class="dv" title="Aguardando liberação, '+desvio(min)+' do horário" style="color:'+P.atr+';background:'+P.atr+'1F">'+desvio(min)+'</span>':'<span class="dv" style="color:'+c+';background:'+c+'1F">aguardando</span>')
-                    :(k==='nao'?'<span class="dv" style="color:'+c+';background:'+c+'1F">não saiu</span>':'<span class="dv" style="color:'+c+';background:'+c+'1F">'+desvio(x.desvio)+'</span>');
-          return '<div class="ps-card ps-'+k+'" style="border-color:'+c+(pen?(tema==='cla'?'55':'33'):(tema==='cla'?'88':'55'))+'" title="'+e(x.veiculo+' · '+x.escala+' · '+ROT1[k])+'">'+
-            '<div class="ck" style="background:'+(pen?'transparent;color:'+c+';border:2px solid '+c+'88':c+(tema==='cla'?'':';box-shadow:0 0 12px '+c+'88'))+'">'+(pen?ICO_REL:(k==='nao'?ICO_X:ICO_OK))+'</div><div class="bd">'+
-            '<div class="l1">'+(!x.veiculo||x.veiculo==='FOLGADOR'?'<b class="vz" style="font-size:15px">'+(x.veiculo?'Folgador':'Sem carro')+'</b>':'<b>'+e(x.veiculo)+'</b>')+(x.troca_veiculo&&x.veiculo_prev?'<span class="tr" title="Carro previsto: '+e(x.veiculo_prev)+'">troca '+e(x.veiculo_prev)+'</span>':'')+'<span class="es">'+e(x.escala)+'</span></div>'+
-            '<div class="mo" title="'+e(x.motorista)+'">'+(x.motorista?e(nome(x.motorista)):'Sem motorista')+(x.troca_motorista?' <span style="opacity:.7;font-weight:500">(troca)</span>':'')+'</div>'+
-            '<div class="hs"><div><small>PROGRAMADA</small><span><em>'+dia+'</em>'+e(x.hora_prevista||'—')+'</span></div><div><small>LIBERADA</small><span>'+(x.hora_real?'<em>'+dia+'</em>'+e(x.hora_real):'—')+'</span></div>'+dv+'</div>'+
-            (pen?'':'<div class="ft">'+(x.responsavel?'Fiscal '+e(nome(x.responsavel)):'')+(x.garagem?' · '+e(x.garagem):'')+(x.motivo?' · '+e(x.motivo):'')+'</div>')+
-          '</div></div>';
-        }).join('')+'</div></section>';
-    }).join('');
+    var V=C.filter(function(c){ if(filtro && (c.ult?'ok':'pen')!==filtro) return false; if(!q) return true;
+      return semAc([c.prefixo].concat(c.saidas.map(function(x){ return [x.escala,x.motorista,x.cracha,x.responsavel,x.garagem].join(' '); })).join(' ')).indexOf(q)>=0; });
+    if(!V.length){ g('psMain').innerHTML='<div class="empty">'+(C.length?'Nenhum carro encontrado'+(filtro?' em “'+ROTc[filtro]+'”':'')+(q?' para “'+e(g('psQ').value)+'”':'')+'.':'Frota da soltura não cadastrada (aba VEICULOS).')+'</div>'; return; }
+    g('psMain').innerHTML='<div class="ps-grid">'+V.map(function(c){
+      var x=c.ult, k=x?'ok':'pen', col=P[k], pen=!x;
+      var os=c.os?'<span class="os-tag">O.S.</span>':'';
+      var mais=c.saidas.length>1?' <span class="n2">'+c.saidas.length+'ª saída</span>':'';
+      return '<div class="ps-card ps-'+k+'" title="'+e(c.prefixo+(x?' · '+x.escala+' · liberado às '+x.hora_real:' · aguardando soltura'))+'">'+
+        '<div class="ck" style="background:'+(pen?'transparent;color:'+col+';border:2px solid '+col+'88':col)+'">'+(pen?ICO_REL:ICO_OK)+'</div><div class="bd">'+
+        '<div class="l1"><b>'+e(c.prefixo)+'</b>'+os+(x?'<span class="es">'+e(x.escala)+'</span>':'')+'</div>'+
+        (x?'<div class="mo" title="'+e(x.motorista)+'">'+(x.motorista?e(nome(x.motorista)):'Sem motorista')+mais+'</div>'+
+           '<div class="hs"><div><small>PROGRAMADA</small><span><em>'+dia+'</em>'+e(x.hora_prevista||'—')+'</span></div><div><small>LIBERADA</small><span><em>'+dia+'</em>'+e(x.hora_real||'—')+'</span></div><span class="dv" style="color:'+col+'">'+desvio(x.desvio)+'</span></div>'+
+           '<div class="ft">'+(x.responsavel?'Fiscal '+e(nome(x.responsavel)):'')+(x.garagem?' · '+e(x.garagem):'')+'</div>'
+          :'<div class="mo vz">Aguardando soltura</div>')+
+      '</div></div>';
+    }).join('')+'</div>';
   }
   function iniciar(){
     document.body.classList.add('modo-psol'); document.title='Painel de soltura · Univale';

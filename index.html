@@ -208,7 +208,7 @@
   .req{color:var(--red)}
   .hint{font-size:12px;font-weight:500;color:var(--mut)}
   .combo{position:relative}
-  .dd{position:absolute;left:0;right:0;top:100%;margin-top:4px;z-index:3;background:var(--card);border:1px solid var(--ln2);border-radius:12px;display:none;max-height:300px;overflow-y:auto;box-shadow:0 12px 30px rgba(17,28,44,.18)}
+  .dd{position:absolute;left:0;right:0;top:100%;margin-top:4px;z-index:5;background:var(--card);border:1px solid var(--ln2);border-radius:12px;display:none;max-height:300px;overflow-y:auto;box-shadow:0 12px 30px rgba(17,28,44,.18)}
   .dd.on{display:block}
   .op{display:flex;gap:12px;align-items:center;width:100%;text-align:left;padding:12px 14px;border:0;border-bottom:1px solid var(--ln);background:transparent;color:var(--tx);min-height:48px}
   .op:hover,.op:focus{background:var(--bg);outline:none}
@@ -216,7 +216,9 @@
   .op.novo{color:var(--blue-d);font-weight:700}
   .ddh{padding:8px 14px 4px;font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--mut);background:var(--bg);position:sticky;top:0}
   .op .vd{flex:1;min-width:0;font-size:13px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .op .vd.in{color:#08603E;font-weight:700} .op .vd.esc{color:#9A4A0C}
+  .op.sel{background:#E6F4F1;box-shadow:inset 3px 0 0 var(--teal)}
+  .ddh.tot{position:static;background:var(--card);color:var(--tx);font-size:12px} .dd{max-height:340px!important}
+  .op .vd.in{color:#08603E;font-weight:700} .op .vd.esc{color:#9A4A0C} .op .vd.lib{color:#33435C} .op .vd.os{color:#B0122F;font-weight:700}
   .sel{display:flex;align-items:center;gap:10px;height:48px;padding:0 6px 0 12px;border-radius:10px;border:1px solid var(--green);background:var(--green-bg)}
   .sel .c{font-weight:800;color:var(--green-d)}
   .sel .n{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700}
@@ -1308,7 +1310,7 @@ function linhaInterd(x){
 /* carros da frota (telemetria) sem escala hoje, sem O.S. e que não saíram como substitutos */
 function naoEscalados(q){
   var usados={};
-  S.dia.itens.forEach(function(i){ usados[(i.veiculo||'').toUpperCase()]=true; if(i.reg&&i.reg.status!=='NAO_SAIU'&&i.reg.veiculo_real) usados[String(i.reg.veiculo_real).toUpperCase()]=true; });
+  var U=usoCarros(); Object.keys(U).forEach(function(p){ usados[p]=true; });
   var G=getGar(), qq=semAcento(q||'');
   var L=(S.dia.frota||[]).filter(function(c){ return !usados[c.prefixo] && !c.interd && (!qq || semAcento(c.prefixo+' '+(c.tel&&c.tel.ponto||'')).indexOf(qq)>=0); });
   L.forEach(function(c){ c._loc=local({veiculo:c.prefixo,tel:c.tel}); });
@@ -1325,25 +1327,45 @@ function linhaLivre(c){
     '<div class="acts">'+mapCol(mp,lc)+'<button type="button" class="out" data-act="escalar" data-car="'+esc(c.prefixo)+'">Escalar</button></div>'+
   '</div>';
 }
-/* lista do campo Carro: livres (pátio primeiro) e carros escalados em outra escala pendente */
+/* uso de cada carro hoje — os carros não são fixos na escala:
+   liberado (carro real de uma escala já liberada) ou escalado (carro previsto de uma escala ainda pendente) */
+function usoCarros(){
+  var U={};
+  S.dia.itens.forEach(function(i){ if(i.reg&&i.reg.status!=='NAO_SAIU'&&i.reg.veiculo_real) U[String(i.reg.veiculo_real).toUpperCase()]={k:'lib',it:i}; });
+  S.dia.itens.forEach(function(i){ var v=(i.veiculo||'').toUpperCase(); if(!i.reg && v && v!=='FOLGADOR' && !U[v]) U[v]={k:'esc',it:i}; });
+  return U;
+}
+/* lista do campo Carro: TODA a frota — carro da escala, disponíveis (pátio primeiro), escalados em outra escala, já liberados e com O.S. */
 function escalaDoCarro(v, exceto){
   v=String(v||'').toUpperCase(); if(!v||v==='FOLGADOR') return null;
   return S.dia.itens.filter(function(i){ return !i.reg && i.id!==exceto && (i.veiculo||'').toUpperCase()===v; })[0]||null;
 }
-function listaVei(){
+function listaVei(ev){
   var it=S.atual; if(!it) return;
-  var q=$('mVei').value.trim().toUpperCase(), h='';
-  var livres=naoEscalados('').filter(function(c){ return !q || c.prefixo.indexOf(q)>=0; });
-  var outros=S.dia.itens.filter(function(i){ return !i.reg && i.id!==it.id && !semCarro(i) && (!q || i.veiculo.toUpperCase().indexOf(q)>=0); })
-    .sort(function(a,b){ return a.veiculo.localeCompare(b.veiculo); });
-  if(!semCarro(it) && (!q || it.veiculo.toUpperCase().indexOf(q)>=0)) h+='<div class="ddh">CARRO DA ESCALA</div><button type="button" class="op" data-v="'+esc(it.veiculo)+'"><span class="c">'+esc(it.veiculo)+'</span><span class="vd">previsto para esta escala</span></button>';
-  if(livres.length) h+='<div class="ddh">DISPONÍVEIS ('+livres.length+')</div>'+livres.map(function(c){
-    var lc=c._loc; return '<button type="button" class="op" data-v="'+esc(c.prefixo)+'"><span class="c">'+esc(c.prefixo)+'</span><span class="vd'+(lc&&lc.k==='in'?' in':'')+'">'+esc(lc?lc.txt:'sem telemetria')+'</span></button>';
-  }).join('');
-  if(outros.length) h+='<div class="ddh">ESCALADOS EM OUTRA ESCALA</div>'+outros.map(function(i){
-    return '<button type="button" class="op" data-v="'+esc(i.veiculo)+'"><span class="c">'+esc(i.veiculo)+'</span><span class="vd esc">'+esc(i.hora_prevista+' · '+i.escala+' · '+titulo(i.motorista))+'</span></button>';
-  }).join('');
-  if(!h) h='<div class="op" style="color:var(--mut)">Nenhum carro na lista com "'+esc(q)+'" — pode digitar o prefixo assim mesmo.</div>';
+  var q=ev&&ev.type==='input'?$('mVei').value.trim().toUpperCase():'',   // ao abrir mostra a frota toda; ao digitar, filtra
+      U=usoCarros(), meu=semCarro(it)?'':it.veiculo.toUpperCase();
+  var G={esc:[],livre:[],outra:[],lib:[],os:[]};
+  (S.dia.frota||[]).forEach(function(c){
+    var p=c.prefixo; if(q && p.indexOf(q)<0) return;
+    var u=U[p];
+    if(p===meu) G.esc.push(c);
+    else if(c.interd) G.os.push(c);
+    else if(u&&u.k==='lib') G.lib.push({c:c,it:u.it});
+    else if(u&&u.k==='esc'&&u.it.id!==it.id) G.outra.push({c:c,it:u.it});
+    else { c._loc=local({veiculo:p,tel:c.tel}); G.livre.push(c); }
+  });
+  var ord=function(c){ var k=c._loc&&c._loc.k; return k==='in'?0:k==='fora'?1:2; };
+  G.livre.sort(function(a,b){ return ord(a)-ord(b) || a.prefixo.localeCompare(b.prefixo); });
+  G.outra.sort(function(a,b){ return a.c.prefixo.localeCompare(b.c.prefixo); }); G.lib.sort(function(a,b){ return a.c.prefixo.localeCompare(b.c.prefixo); }); G.os.sort(function(a,b){ return a.prefixo.localeCompare(b.prefixo); });
+  var atual=$('mVei').value.trim().toUpperCase(), op=function(v,txt,cls){ return '<button type="button" class="op'+(v.toUpperCase()===atual?' sel':'')+'" data-v="'+esc(v)+'"><span class="c">'+esc(v)+'</span><span class="vd'+(cls?' '+cls:'')+'">'+esc(txt)+'</span></button>'; };
+  var n=G.esc.length+G.livre.length+G.outra.length+G.lib.length+G.os.length, tot=(S.dia.frota||[]).length;
+  var h='<div class="ddh tot">'+(q?n+' de '+tot+' carros da frota':'FROTA · '+tot+' carros')+'</div>';
+  if(meu && (!q || meu.indexOf(q)>=0)) h+='<div class="ddh">CARRO DA ESCALA</div>'+op(it.veiculo,'previsto para esta escala','in');
+  if(G.livre.length) h+='<div class="ddh">DISPONÍVEIS ('+G.livre.length+')</div>'+G.livre.map(function(c){ var lc=c._loc; return op(c.prefixo,lc?lc.txt:'sem telemetria',lc&&lc.k==='in'?'in':''); }).join('');
+  if(G.outra.length) h+='<div class="ddh">ESCALADOS EM OUTRA ESCALA ('+G.outra.length+')</div>'+G.outra.map(function(x){ return op(x.c.prefixo,x.it.hora_prevista+' · '+x.it.escala+' · '+titulo(x.it.motorista),'esc'); }).join('');
+  if(G.lib.length) h+='<div class="ddh">JÁ LIBERADOS HOJE ('+G.lib.length+')</div>'+G.lib.map(function(x){ return op(x.c.prefixo,'saiu na '+x.it.escala+(x.it.reg.hora_real?' às '+x.it.reg.hora_real:''),'lib'); }).join('');
+  if(G.os.length) h+='<div class="ddh">COM O.S. ABERTA ('+G.os.length+')</div>'+G.os.map(function(c){ return op(c.prefixo,'O.S. '+((c.interd&&c.interd.os)||''),'os'); }).join('');
+  if(!n) h+='<div class="op" style="color:var(--mut)">Nenhum carro da frota com "'+esc(q)+'" — pode digitar o prefixo assim mesmo.</div>';
   $('vDD').innerHTML=h; $('vDD').classList.add('on');
 }
 function fecharVei(){ $('vDD').classList.remove('on'); }
@@ -1578,6 +1600,7 @@ function validar(){
   var precisa = false; // sem conferência: motivo só é obrigatório em "Não saiu"
   $('mReq').style.display=precisa?'inline':'none';
   var w=[]; if(trocaV) w.push('Carro diferente do escalado.'); if(trocaM) w.push('Motorista diferente do escalado.');
+  var uso=trocaV?usoCarros()[v]:null; if(uso&&uso.k==='lib') w.unshift(v+' já saiu hoje na '+uso.it.escala+(uso.it.reg.hora_real?' às '+uso.it.reg.hora_real:'')+'. Confira se ele voltou antes de liberar.');
   var outra=trocaV?escalaDoCarro(v,it.id):null;
   if(outra) w.unshift(v+' está escalado na '+outra.escala+' ('+outra.hora_prevista+' · '+titulo(outra.motorista)+'). Ao liberar, essa escala fica sem carro.');
   var bloq=interdNome(v); if(bloq) w.unshift('Atenção: '+v+' está com a O.S. '+(bloq.os||'—')+' aberta. Pode liberar, mas fica registrado.');

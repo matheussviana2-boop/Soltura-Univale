@@ -2081,6 +2081,9 @@ var PSol=(function(){
     g('psQ').parentNode.classList.toggle('on',!!g('psQ').value);
     var V=C.filter(function(c){ if(filtro && tipo(c)!==filtro) return false; if(!q) return true;
       return semAc([c.prefixo].concat(c.saidas.map(function(x){ return [x.escala,x.motorista,x.cracha,x.responsavel,x.garagem].join(' '); })).join(' ')).indexOf(q)>=0; });
+    // mais recente primeiro (soltura do fiscal ou automática); depois os que aguardam, pelo prefixo
+    var hs=function(c){ var h=c.auto?c.auto.hora:(c.ult?c.ult.hora_real:''); return h?minHH(h):-1; };
+    V.sort(function(a,b){ return hs(b)-hs(a) || a.prefixo.localeCompare(b.prefixo); });
     if(!V.length){ g('psMain').innerHTML='<div class="empty">'+(C.length?'Nenhum carro encontrado'+(filtro?' em “'+ROTc[filtro]+'”':'')+(q?' para “'+e(g('psQ').value)+'”':'')+'.':'Frota da soltura não cadastrada (aba VEICULOS).')+'</div>'; return; }
     /* cores: verde = soltura do fiscal · azul = soltura automática (telemetria) · branco = aguardando */
     g('psMain').innerHTML='<div class="ps-grid">'+V.map(function(c){

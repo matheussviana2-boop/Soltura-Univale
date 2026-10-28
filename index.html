@@ -653,6 +653,7 @@
     .banner{padding:10px 12px}
     .list{padding:0 14px 32px}
     .row{flex-wrap:wrap;gap:8px 12px;padding:0 12px 12px 0}
+    .row.semtb{padding:12px}
     .tbox{width:74px;align-self:flex-start;height:72px;padding:6px 2px;border-radius:0 0 12px 0} .tbox b{font-size:18px} .tbox small{font-size:11px;margin-top:4px}
     .info{padding:0}
     .row .bar{align-self:stretch;height:auto}
@@ -881,6 +882,7 @@
   #psol .ps-card .n2.sub{background:#FDE7C8;color:#8A4F00;margin-left:6px}
   #psol .ps-card .esc-prev{color:#8A4F00;font-family:var(--sg);font-weight:600}
   .row.livre.rota{background:#F8FAFC}
+  .row.semtb{padding-left:16px}
 </style>
 </head>
 <body>
@@ -1404,11 +1406,10 @@ function carrosNoLocal(G,q){
 }
 function linhaCarroLocal(x){
   var c=x.c, t=c.tel||{}, l=x.l, u=x.u;
-  var TB={in:['free','NO PONTO','agora'],perto:['soon','PRÓXIMO','chegando'],fora:['later','EM ROTA','rodando'],sem:['late','SEM SINAL','telemetria']}[l.k];
   var mk=l.k==='in'?'in':(l.k==='perto'?'fora':'outra');
   var mp=(t.lat&&t.lng)?'<button type="button" class="maplink m-'+mk+'" data-act="mapcar" data-car="'+esc(c.prefixo)+'" title="Ver onde o carro está">'+ICO_PIN.replace('width="16" height="16"','width="22" height="22"')+'</button>':'';
   var saiu=u&&u.k==='lib'?'Saiu hoje na '+u.it.escala+(u.it.reg&&u.it.reg.hora_real?' às '+u.it.reg.hora_real:''):'';
-  return '<div class="row livre'+(l.k==='in'?'':l.k==='perto'?' perto':' rota')+'">'+tbox(TB[0],TB[1],TB[2])+
+  return '<div class="row livre semtb'+(l.k==='in'?'':l.k==='perto'?' perto':' rota')+'">'+
     '<div class="bus" role="img" aria-label="Ônibus"></div>'+
     '<div class="ident"><div class="pref">'+esc(c.prefixo)+(c.interd?' <span class="osb">O.S.</span>':'')+'</div><div class="esc">'+(t.motorista?esc(titulo(t.motorista)):'Motorista não identificado')+'</div>'+telMini(c.tel,false)+'</div>'+
     '<div class="info" style="cursor:default">'+(saiu?'<div class="chs">'+ch('outra',ICO_OK13,saiu)+'</div>':'')+'</div>'+

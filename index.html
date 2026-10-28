@@ -842,6 +842,9 @@
   #psol .ps-card .es.auto{background:#00606F!important;color:#fff!important}
   .row.auto{background:#F2FAF6}
   .h1-p.sem{background:#E3F3F6;color:#00606F} .h1-p.sem i{background:#00778A} .h1-t td.s-sem{box-shadow:inset 4px 0 0 #00778A}
+  .locn{font:600 13px var(--sg);color:#1B2F5C;white-space:nowrap;padding-right:6px} .locn b{font:800 18px var(--mono);color:#047A45;margin-right:3px}
+  .row.livre.perto{background:#FFFBF2}
+  .ident .pref .osb{font:700 11px var(--mono);color:#fff;background:#C8143C;padding:2px 7px;border-radius:5px;vertical-align:middle}
 </style>
 </head>
 <body>
@@ -854,7 +857,7 @@
     <div class="hsep"></div>
     <div><div class="titulo">Soltura de veículos</div><div class="hdata" id="hData">—</div></div>
   </div>
-  <label class="locsel" id="gSeg"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg><span class="lt">Localidade</span><select id="fGar" aria-label="Localidade dos carros"></select></label>
+  <label class="locsel" id="gSeg"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg><span class="lt">Localidade</span><select id="fGar" aria-label="Localidade dos carros"></select><span class="locn" id="locN" aria-live="polite"></span></label>
   <div class="hr">
     <button type="button" class="escbtn" id="btnTema" aria-label="Alternar tema claro/escuro" title="Tema claro/escuro"></button>
     <span class="net" id="net" title="Conexão"><i></i><span class="t1">Online</span><span class="t2">Sem conexão</span></span>
@@ -1076,7 +1079,7 @@ function precisaMotivo(it, r){
 /* ===================== render ===================== */
 function getGar(){ return $('fGar').value; }
 var ICO_CASA='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 21V9l9-6 9 6v12"/><path d="M9 21v-6h6v6"/></svg>';
-function renderGar(){ $('gSeg').style.display=$('fGar').options.length>1?'':'none'; }
+function renderGar(){ $('gSeg').style.display=$('fGar').options.length?'':'none'; }
 /* nome da localidade para exibir: "GARAGEM MATRIZ" → "Garagem Matriz", "PONTO DE APOIO - IAPU" → "Apoio · Iapu" */
 function nomeLocal(n){ n=String(n||''); var m=n.match(/^PONTO DE APOIO\s*-\s*(.+)$/i); return m?'Apoio · '+titulo(m[1]):titulo(n); }
 function mostrarResp(){
@@ -1192,7 +1195,16 @@ function render(){
   }).join('');
 
   var r=[], h='';
-  if(S.tab==='pend'){
+  var CL=(G&&telOk())?carrosNoLocal(G,q):null;
+  $('locN').innerHTML=CL?'<b>'+CL.length+'</b> carro'+(CL.length===1?'':'s'):'';
+  if(S.tab==='pend' && CL){
+    // localidade escolhida: só os carros que estão no ponto ou perto dele agora (telemetria)
+    var nIn=CL.filter(function(x){ return x.l.k==='in'; }).length;
+    r.push('<b>'+CL.length+'</b> carro'+(CL.length===1?'':'s')+' em '+esc(nomeLocal(G))+' agora'+(CL.length?' · '+nIn+' no ponto · '+(CL.length-nIn)+' próximo'+(CL.length-nIn===1?'':'s'):''));
+    r.push('arraste Liberar e escolha a escala');
+    h=CL.length?CL.map(linhaCarroLocal).join(''):'<div class="empty">Nenhum carro no ponto ou próximo de '+esc(nomeLocal(G))+' agora.</div>';
+  }
+  else if(S.tab==='pend'){
     var atr=pend.concat(sem).filter(function(i){return i._st.k==='crit';}).length;
     if(atr) r.push('<b class="c">'+atr+' atrasado'+(atr>1?'s':'')+'</b>');
     r.push('<b>'+pend.length+'</b> escala'+(pend.length===1?'':'s')+' para sair');
@@ -1339,6 +1351,30 @@ function naoEscalados(q){
   var ord=function(c){ var k=c._loc&&c._loc.k; return k==='in'?0:k==='fora'?1:2; };
   return L.sort(function(a,b){ return ord(a)-ord(b) || a.prefixo.localeCompare(b.prefixo); });
 }
+/* carro no ponto / perto do ponto escolhido (tempo real, pela telemetria) */
+function locCarro(c,G){
+  var t=c.tel; if(!t) return null;
+  if(t.garagem&&(!G||t.garagem===G)) return {k:'in',d:t.distLocal,txt:(G?'No ponto':nomeLocal(t.garagem))+(t.distLocal!==''&&t.distLocal!=null?' · '+t.distLocal+' m':'')};
+  if(G&&t.perto===G) return {k:'perto',d:t.distLocal,txt:'Próximo · '+(t.distLocal>=1000?(t.distLocal/1000).toFixed(1).replace('.',',')+' km':t.distLocal+' m')};
+  return null;
+}
+function carrosNoLocal(G,q){
+  var U=usoCarros(), qq=semAcento(q||'');
+  return (S.dia.frota||[]).map(function(c){ return {c:c,l:locCarro(c,G)}; }).filter(function(x){
+    if(!x.l) return false; var u=U[x.c.prefixo]; if(u&&(u.k==='lib'||u.k==='auto')) return false;
+    return !qq || semAcento(x.c.prefixo+' '+((x.c.tel&&x.c.tel.motorista)||'')).indexOf(qq)>=0;
+  }).sort(function(a,b){ return (a.l.k==='in'?0:1)-(b.l.k==='in'?0:1) || (+a.l.d||0)-(+b.l.d||0) || a.c.prefixo.localeCompare(b.c.prefixo); });
+}
+function linhaCarroLocal(x){
+  var c=x.c, t=c.tel||{}, l=x.l;
+  var mp=(t.lat&&t.lng)?'<button type="button" class="maplink m-'+(l.k==='in'?'in':'fora')+'" data-act="mapcar" data-car="'+esc(c.prefixo)+'" title="Ver onde o carro está">'+ICO_PIN.replace('width="16" height="16"','width="22" height="22"')+'</button>':'';
+  return '<div class="row livre'+(l.k==='in'?'':' perto')+'">'+tbox(l.k==='in'?'free':'soon',l.k==='in'?'NO PONTO':'PRÓXIMO',l.k==='in'?'agora':'chegando')+
+    '<div class="bus" role="img" aria-label="Ônibus"></div>'+
+    '<div class="ident"><div class="pref">'+esc(c.prefixo)+(c.interd?' <span class="osb">O.S.</span>':'')+'</div><div class="esc">'+(t.motorista?esc(titulo(t.motorista)):'Motorista não identificado')+'</div>'+telMini(t,false)+'</div>'+
+    '<div class="info" style="cursor:default"></div>'+
+    '<div class="acts">'+mapCol(mp,{k:l.k==='in'?'in':'fora',txt:l.txt})+slideLib('car:'+c.prefixo,'Liberar',false)+'</div>'+
+  '</div>';
+}
 function linhaLivre(c){
   var lc=c._loc, t=c.tel;
   var mp=(t&&t.lat&&t.lng)?'<button type="button" class="maplink" data-act="mapcar" data-car="'+esc(c.prefixo)+'" title="Ver onde o carro está" aria-label="Ver no mapa onde está '+esc(c.prefixo)+'">'+ICO_PIN.replace('width="16" height="16"','width="22" height="22"')+'</button>':'';
@@ -1418,11 +1454,12 @@ function abrirEscalar(p,hora){
   var pend=S.dia.itens.filter(function(i){return !i.reg;});
   pend.forEach(function(i){ i._loc=local(i); });
   // primeiro as escalas desta garagem (ou sem carro), depois as demais; dentro, pela hora
-  var peso=function(i){ var k=i._loc&&i._loc.k; return (k==='outra')?1:0; };
-  pend.sort(function(a,b){ return peso(a)-peso(b) || a.prevMs-b.prevMs; });
+  var cF=carroFrota(p), mt=cF&&cF.tel&&cF.tel.motorista?semAcento(cF.tel.motorista).split(/\s+/):[], ag=agora();
+  var doMot=function(i){ if(!mt.length||!i.motorista) return 1; var x=semAcento(i.motorista).split(/\s+/); return (x[0]===mt[0]&&x[x.length-1]===mt[mt.length-1])?0:1; };
+  pend.sort(function(a,b){ return doMot(a)-doMot(b) || Math.abs(a.prevMs-ag)-Math.abs(b.prevMs-ag); });
   S.pickCar=p;
-  $('pkTit').textContent='Escalar '+p;
-  $('pkSub').textContent='Escolha a escala que vai sair com o '+p+' no lugar do carro previsto';
+  $('pkTit').textContent='Liberar '+p;
+  $('pkSub').textContent='Escolha a escala que vai sair com o '+p+(mt.length?' · motorista no carro: '+titulo(cF.tel.motorista):'');
   $('pkList').innerHTML=pend.length?pend.map(function(i){
     var min=Math.floor((agora()-i.prevMs)/60000), info=semCarro(i)?'sem carro definido':'carro previsto '+i.veiculo+(i.interd?' · com O.S.':'');
     return '<button type="button" class="op" data-id="'+i.id+'"><span class="h">'+esc(i.hora_prevista)+'</span><span style="flex:1;min-width:0"><b>'+esc(i.escala)+'</b> · '+esc(i.linha)+' · '+esc(titulo(i.motorista)||'sem motorista')+'<small>'+esc(info)+' · '+esc(quando(min))+'</small></span></button>';
@@ -1538,10 +1575,10 @@ function aplicarDia(d){
     // mantém registros otimistas que ainda estão salvando
     if(S.dia) S.dia.itens.forEach(function(o){ if(o.reg&&o.reg._pend){ d.itens.forEach(function(n){ if(n.id===o.id&&!n.reg) n.reg=o.reg; }); } });
     S.dia=d;
-    // localidade (garagem ou ponto de apoio): a última usada neste aparelho; "Todas" mostra os carros de qualquer lugar
+    // localidade (garagem ou ponto de apoio): sempre uma escolhida — a última usada neste aparelho, ou a primeira
     var sel=$('fGar'), gs=d.garagens||[], cur=sel.options.length?sel.value:ls(LS_GAR);
-    if(cur && gs.indexOf(cur)<0) cur='';
-    sel.innerHTML='<option value="">Todas as localidades</option>'+gs.map(function(g){return '<option value="'+esc(g)+'"'+(g===cur?' selected':'')+'>'+esc(nomeLocal(g))+'</option>';}).join('');
+    if(gs.indexOf(cur)<0) cur=gs[0]||'';
+    sel.innerHTML=gs.map(function(g){return '<option value="'+esc(g)+'"'+(g===cur?' selected':'')+'>'+esc(nomeLocal(g))+'</option>';}).join('');
     ls(LS_GAR,cur||'');
     renderGar();
     tick();
@@ -1742,8 +1779,8 @@ $('list').addEventListener('click',function(e){
     var c=cur; cur=null; S.arrasto=false; if(!c) return;
     if(ok){
       c.el.classList.add('ok'); c.knob.style.transform='translateX('+c.max+'px)'; c.fill.style.width='100%';
-      var it=item(c.el.getAttribute('data-slide'));
-      setTimeout(function(){ if(it) okSoltura(it); else render(); },160);
+      var sid=c.el.getAttribute('data-slide'), it=item(sid);
+      setTimeout(function(){ if(/^car:/.test(sid)){ render(); abrirEscalar(sid.slice(4)); } else if(it) okSoltura(it); else render(); },160);
     } else {
       c.el.classList.add('volta'); c.knob.style.transform='translateX(0)'; c.fill.style.width='0';
       if(!c.moveu){ c.el.classList.add('dica'); toast('Arraste o botão para a direita para liberar'); }
@@ -1767,7 +1804,7 @@ $('list').addEventListener('click',function(e){
   // teclado (computador): Enter/Espaço no botão libera
   $('list').addEventListener('keydown',function(e){
     var k=e.target.closest&&e.target.closest('.sl-knob'); if(!k||(e.key!=='Enter'&&e.key!==' ')) return;
-    e.preventDefault(); var it=item(k.parentNode.getAttribute('data-slide')); if(it) okSoltura(it);
+    e.preventDefault(); var sid=k.parentNode.getAttribute('data-slide'), it=item(sid); if(/^car:/.test(sid)) abrirEscalar(sid.slice(4)); else if(it) okSoltura(it);
   });
 })();
 $('avBtn').addEventListener('click',function(e){ e.stopPropagation(); var p=$('avPop'); p.classList.toggle('on'); this.setAttribute('aria-expanded',p.classList.contains('on')); });

@@ -878,6 +878,7 @@
   .hsp{flex:1}
   @media (max-width:760px){ .hsp{display:none} }
   .row.livre .lugar{max-width:170px}
+  #psol .ps-card .n2.sub{background:#FDE7C8;color:#8A4F00;margin-left:6px}
 </style>
 </head>
 <body>
@@ -1414,6 +1415,7 @@ function linhaLivre(c){
 /* SOLTURA AUTOMÁTICA: carro saiu do raio de uma localidade e nenhum fiscal liberou esse carro (até 1h antes da saída ou depois) */
 function minHH(h){ var p=String(h||'').split(':'); return p.length<2?-1:(+p[0])*60+(+p[1]); }
 function soltAuto(){
+  return [];   // saída do raio sem escala do motorista no horário não é soltura (a automática válida já chega registrada pelo servidor)
   var A=S.dia&&S.dia.saidasAuto||{}, out=[];
   Object.keys(A).forEach(function(p){
     var sa=A[p], ms=minHH(sa.hora);
@@ -1568,7 +1570,8 @@ function linhaReg(it){
     '<div class="info" data-act="editR" data-id="'+it.id+'" title="Toque para corrigir">'+
       '<div class="mot"><span'+(tm?' class="chg"':'')+'>'+esc(titulo(ns?it.motorista:r.motorista_real))+'</span></div>'+
       '<div class="chs">'+ch('',ICO_CLK13,'Programado '+dataHora(S.dia.data,it.hora_prevista))+
-        (ns?(r.motivo?ch('ns',null,r.motivo):''):ch('outra',ICO_OK13,(String(r.responsavel).toUpperCase()==='SOLTURA AUTOMÁTICA'?'Soltura automática ':'Liberado ')+dataHora(dLib,r.hora_real)))+'</div>'+
+        (ns?(r.motivo?ch('ns',null,r.motivo):''):ch('outra',ICO_OK13,(String(r.responsavel).toUpperCase()==='SOLTURA AUTOMÁTICA'?'Soltura automática ':'Liberado ')+dataHora(dLib,r.hora_real)))+
+        (!ns&&tm?ch('ns',null,'Outro motorista · escalado: '+titulo(it.motorista||'—')):'')+'</div>'+
     '</div>'+respBox(r.responsavel, ns)+
   '</div>';
 }
@@ -2064,7 +2067,7 @@ var PSol=(function(){
     return lista.sort().map(function(v){ var s=(por[v]||[]).sort(function(a,b){ return String(a.hora_real).localeCompare(String(b.hora_real)); });
       var ult=s[s.length-1]||null, sa=(dados.saidasAuto||{})[v], auto=null;
       // soltura automática: saiu do raio e não há soltura manual desse carro (até 1h antes da saída ou depois)
-      if(sa && !(ult && minHH(ult.hora_real)>=minHH(sa.hora)-60)) auto=sa;
+      // (saída sem escala correspondente não é soltura: só contam as solturas registradas)
       return { prefixo:v, saidas:s, ult:ult, auto:auto, os:(dados.os||{})[v]||'' }; });
   }
   function desenhar(){
@@ -2100,7 +2103,7 @@ var PSol=(function(){
       return '<div class="ps-card ps-'+k+'" title="'+e(c.prefixo+' · '+(esc||'')+' · '+(auto?'soltura automática':'liberado')+' às '+hr)+'">'+ck+'<div class="bd">'+
         '<div class="l1"><b>'+e(c.prefixo)+'</b>'+tag+os+(dv?'<span class="dv">'+e(dv)+'</span>':'')+'</div>'+
         '<div class="mo" title="'+e(mot||'')+'">'+(mot?e(nome(mot)):'<span class="vz">Motorista não identificado</span>')+'</div>'+
-        '<div class="es2">'+e(esc||'')+mais+'</div>'+
+        '<div class="es2">'+e(esc||'')+(x&&x.troca_motorista?'<span class="n2 sub">OUTRO MOTORISTA</span>':'')+mais+'</div>'+
         '<div class="hs"><div><small>PROGRAMADA</small><span><em>'+dia+'</em>'+e(hp)+'</span></div><div><small>'+(auto?'SAÍDA':'LIBERADA')+'</small><span><em>'+dia+'</em>'+e(hr)+'</span></div></div>'+
         '<div class="ft" title="'+e(rod)+'">'+e(rod)+'</div>'+
       '</div></div>';

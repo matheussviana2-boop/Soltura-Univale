@@ -1203,7 +1203,7 @@ var SUBLIB=[['conferir','A conferir'],['conferidos','Conferidos'],['todos','Todo
 
 function render(){
   if(!S.dia) return;
-  var G=getGar(), q=$('fBusca').value.trim(), todos=base(), lim=S.dia.cfg.limiteAtraso||60;
+  var GL=getGar(), G='', q=$('fBusca').value.trim(), todos=base(), lim=S.dia.cfg.limiteAtraso||60;
   var pendAll=todos.filter(function(i){return !i.reg;});
   pendAll.forEach(function(it){ it._st=statusPend(it); it._loc=local(it); it._min=Math.floor((agora()-it.prevMs)/60000); });
   // atrasados acima do limite saem da tela inicial
@@ -1224,9 +1224,9 @@ function render(){
   var aConf=feitas.filter(function(i){return i.reg.conferido!=='SIM';});
   var conf=feitas.filter(function(i){return i.reg.conferido==='SIM';});
   var interd=(S.dia.interditados||[]).filter(function(x){ return !q || semAcento(x.prefixo+' '+x.os+' '+x.motivo).indexOf(semAcento(q))>=0; });
-  var CL=telOk()?carrosNoLocal(G,q):null;
+  var CL=telOk()?carrosNoLocal(GL,q):null;
   $('locN').innerHTML=CL?'<b>'+CL.length+'</b> carro'+(CL.length===1?'':'s'):'';
-  if($('locHint')) $('locHint').textContent=G?'carros no ponto ou perto dele agora, pela telemetria':'todos os carros da frota e onde cada um está agora';
+  if($('locHint')) $('locHint').textContent=GL?'carros no ponto ou perto dele agora, pela telemetria':'todos os carros da frota e onde cada um está agora';
   var n={carros:CL?CL.length:0, pend:pend.length+sem.length+atrasados.length+saiuSem.length, interd:interd.length, lib:feitas.length+soltAuto().filter(function(a){ return !G || q || a.de===G; }).length+(S.dia.semEscala||[]).filter(function(x){ return !G || q || x.garagem===G; }).length};
 
   $('tabs').innerHTML=TABS.map(function(t){
@@ -1237,13 +1237,13 @@ function render(){
   var r=[], h='';
   $('locBar').style.display=S.tab==='carros'&&$('fGar').options.length?'':'none';   // localidade só na aba de veículos
   if(S.tab==='carros'){
-    if(!CL){ r.push('Telemetria indisponível agora'); h='<div class="empty">Sem telemetria no momento — não dá para saber quais carros estão em '+esc(nomeLocal(G))+'.</div>'; } else {
+    if(!CL){ r.push('Telemetria indisponível agora'); h='<div class="empty">Sem telemetria no momento — não dá para saber quais carros estão em '+esc(nomeLocal(GL))+'.</div>'; } else {
     // localidade escolhida: só os carros que estão no ponto ou perto dele agora (telemetria)
     var nIn=CL.filter(function(x){ return x.l.k==='in'; }).length, nPe=CL.filter(function(x){ return x.l.k==='perto'; }).length;
-    if(G) r.push('<b>'+CL.length+'</b> carro'+(CL.length===1?'':'s')+' em '+esc(nomeLocal(G))+' agora'+(CL.length?' · '+nIn+' no ponto · '+nPe+' próximo'+(nPe===1?'':'s'):''));
+    if(GL) r.push('<b>'+CL.length+'</b> carro'+(CL.length===1?'':'s')+' em '+esc(nomeLocal(GL))+' agora'+(CL.length?' · '+nIn+' no ponto · '+nPe+' próximo'+(nPe===1?'':'s'):''));
     else r.push('<b>'+CL.length+'</b> carros da frota · '+nIn+' em garagens/pontos · '+nPe+' próximos · '+(CL.length-nIn-nPe)+' em rota ou sem sinal');
     r.push('arraste Liberar e escolha a escala');
-    h=CL.length?CL.map(linhaCarroLocal).join(''):'<div class="empty">'+(G?'Nenhum carro no ponto ou próximo de '+esc(nomeLocal(G))+' agora.':'Nenhum carro encontrado.')+'</div>';
+    h=CL.length?CL.map(linhaCarroLocal).join(''):'<div class="empty">'+(GL?'Nenhum carro no ponto ou próximo de '+esc(nomeLocal(GL))+' agora.':'Nenhum carro encontrado.')+'</div>';
   } }
   else if(S.tab==='pend'){
     var atr=pend.concat(sem).filter(function(i){return i._st.k==='crit';}).length;

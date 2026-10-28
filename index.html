@@ -847,6 +847,31 @@
   .row.livre.perto{background:#FFFBF2}
   .ident .pref .osb{font:700 11px var(--mono);color:#fff;background:#C8143C;padding:2px 7px;border-radius:5px;vertical-align:middle}
   @media (max-width:760px){ .tabs{max-width:100%;overflow-x:auto;scrollbar-width:none} .tabs::-webkit-scrollbar{display:none} .tabs .tab{flex-shrink:0} }
+
+  /* painel de soltura: cartões alinhados (nada vaza) e cores por tipo de soltura */
+  #psol .ps-grid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;align-items:stretch}
+  #psol .ps-card{overflow:hidden;min-width:0;padding:10px 12px 10px 14px!important;gap:10px}
+  #psol .ps-card .bd{min-width:0;flex:1}
+  #psol .ps-card .l1{display:flex;align-items:center;gap:6px;min-width:0}
+  #psol .ps-card .l1 b{font:800 18px var(--mono);color:#0B1630}
+  #psol .ps-card .l1 .dv{margin-left:auto;flex-shrink:0;font:700 11.5px var(--mono);padding:2px 7px;border-radius:6px;background:#FFFFFF!important;color:#0B1630!important;box-shadow:0 0 0 1px rgba(15,27,51,.12)}
+  #psol .ps-card .tg-auto{font:700 10px var(--mono);color:#fff;background:#1D4ED8;padding:1px 6px;border-radius:4px}
+  #psol .ps-card .mo{margin-top:2px;font-size:13px;font-weight:700;color:#0B1630;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #psol .ps-card .es2{font:700 11px var(--mono);color:#33435C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+  #psol .ps-card .es2 .n2{margin-left:6px}
+  #psol .ps-card .hs{display:flex;gap:16px;margin-top:6px}
+  #psol .ps-card .hs span{font-size:13px}
+  #psol .ps-card .ft{margin-top:5px;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#24324A}
+  #psol .ps-card .ck{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;border:0!important}
+  #psol.claro .ps-card.ps-ok{background:#C6EAD6!important;border-color:#55B585!important} #psol.claro .ps-card.ps-ok::before{background:#047A45!important} #psol .ps-card.ps-ok .ck{background:#047A45!important}
+  #psol.claro .ps-card.ps-tel{background:#CFE0FA!important;border:1px solid #6B9BE6!important} #psol.claro .ps-card.ps-tel::before{background:#1D4ED8!important} #psol .ps-card.ps-tel .ck{background:#1D4ED8!important}
+  #psol.claro .ps-card.ps-pen{background:#FFFFFF!important;border-color:#D3DCE7!important} #psol.claro .ps-card.ps-pen::before{background:#B8C3D1!important} #psol .ps-card.ps-pen .ck{background:transparent!important;color:#7C8BA6;border:2px solid #C3CCD8!important}
+  #psol .ps-card .mo .vz,#psol .ps-card.ps-pen .mo.vz{color:#56657C;font-weight:600}
+  #psol .ps-card.ps-pen{align-items:center}
+  @media (max-width:1500px){ #psol .pn-busca{width:200px} #psol .pn-tit .k{display:none} #psol .a1-live{display:none!important} #psol .pn-relogio small{display:none} #psol .pn-leg{flex:0 1 auto} #psol .pn-top{gap:10px} }
+  #psol .pn-leg{flex-wrap:nowrap;gap:6px} #psol .pn-leg div{padding:5px 10px;font-size:12px;white-space:nowrap} #psol .pn-leg b{font-size:17px}
+  @media (max-width:1100px){ #psol .pn-leg{flex-wrap:wrap} }
+  @media (max-width:760px){ #psol .pn-busca{width:100%} }
 </style>
 </head>
 <body>
@@ -1245,16 +1270,14 @@ function render(){
     var lib=feitas.filter(function(i){return i.reg.status!=='NAO_SAIU';}).length, ns=feitas.length-lib, AU=soltAuto().filter(function(a){ return !G || q || a.de===G; });
     r.push('<b>'+lib+'</b> liberado'+(lib===1?'':'s')+(ns?' · '+ns+' não saiu':'')+(AU.length?' · <b>'+AU.length+'</b> soltura'+(AU.length===1?'':'s')+' automática'+(AU.length===1?'':'s'):''));
     var SE=(S.dia.semEscala||[]).filter(function(x){ return !G || q || x.garagem===G; });
-    if(SE.length){
-      h+='<div class="secao">'+ICO_PIN+'<span>Soltura automática sem escala</span><span class="n">'+SE.length+'</span><small>registradas pela telemetria — vincule a escala quando souber</small></div>';
-      SE.forEach(function(x){ h+=linhaAuto({prefixo:x.veiculo,hora:x.hora,de:x.garagem,motorista:x.motorista,motivo:x.motivo,id:x.id}); });
-    }
-    if(AU.length){
-      h+='<div class="secao">'+ICO_PIN+'<span>Soltura automática</span><span class="n">'+AU.length+'</span><small>saíram do raio sem soltura manual — vincule a escala</small></div>';
-      AU.forEach(function(a){ h+=linhaAuto(a); });
-    }
-    if(!feitas.length&&!AU.length&&!SE.length) h='<div class="empty">Nenhuma saída liberada ainda.</div>';
-    feitas.forEach(function(it){ h+=linhaReg(it); });
+    if(SE.length) r.push('<b>'+SE.length+'</b> sem escala');
+    // tudo numa lista só, do horário mais recente para o mais antigo
+    var hrReg=function(it){ var r0=it.reg; if(r0.hora_real) return minHH(r0.hora_real); var m=String(r0.registrado_em||'').match(/(\d{2}):(\d{2})/); return m?(+m[1])*60+(+m[2]):-1; };
+    var L=feitas.map(function(it){ return {t:hrReg(it),h:function(){ return linhaReg(it); }}; })
+      .concat(SE.map(function(x){ return {t:minHH(x.hora),h:function(){ return linhaAuto({prefixo:x.veiculo,hora:x.hora,de:x.garagem,motorista:x.motorista,motivo:x.motivo,id:x.id}); }}; }))
+      .concat(AU.map(function(a){ return {t:minHH(a.hora),h:function(){ return linhaAuto(a); }}; }));
+    L.sort(function(a,b){ return b.t-a.t; });
+    h=L.length?L.map(function(x){ return x.h(); }).join(''):'<div class="empty">Nenhuma saída liberada ainda.</div>';
   }
   $('list').innerHTML=h;
   avisos(saiuSem);
@@ -2037,36 +2060,38 @@ var PSol=(function(){
       return { prefixo:v, saidas:s, ult:ult, auto:auto, os:(dados.os||{})[v]||'' }; });
   }
   function desenhar(){
-    var P=PAL[tema], C=carros(), conta={pen:0,ok:0};
-    C.forEach(function(c){ conta[(c.ult||c.auto)?'ok':'pen']++; });
-    var tot=C.length, lib=conta.ok, pct=tot?Math.round(lib/tot*100):0, dia=dBR(dados.data);
+    var P={pen:'#7C8BA6',ok:'#047A45',tel:'#1D4ED8'}, C=carros(), conta={pen:0,ok:0,tel:0};
+    var tipo=function(c){ if(c.auto) return 'tel'; if(!c.ult) return 'pen'; return String(c.ult.responsavel).toUpperCase()==='SOLTURA AUTOMÁTICA'?'tel':'ok'; };
+    C.forEach(function(c){ conta[tipo(c)]++; });
+    var tot=C.length, lib=conta.ok+conta.tel, pct=tot?Math.round(lib/tot*100):0, dia=dBR(dados.data);
     g('psSub').textContent='';
-    var ROTc={pen:'Aguardando',ok:'Liberados'};
-    g('psLeg').innerHTML=['pen','ok'].map(function(k){ var c=P[k], on=filtro===k;
+    var ROTc={pen:'Aguardando',ok:'Soltura do fiscal',tel:'Soltura automática'};
+    g('psLeg').innerHTML=['pen','ok','tel'].map(function(k){ var c=P[k], on=filtro===k;
       return '<div data-f="'+k+'" class="'+(on?'on':(filtro?'off':''))+'" title="'+(on?'Mostrar todos':'Filtrar: '+ROTc[k])+'" style="border-color:'+c+(on?'':'55')+';box-shadow:inset 0 0 18px '+c+(on?'44':'22')+'"><i style="background:'+c+';box-shadow:0 0 10px '+c+'"></i><b style="color:'+c+'">'+conta[k]+'</b>'+ROTc[k]+'</div>'; }).join('');
     g('psProg').innerHTML='<span><b>'+lib+'</b> de '+tot+' carros liberados</span><div class="tr"><i style="width:'+pct+'%"></i></div><b>'+pct+'%</b>';
     var q=semAc(g('psQ').value).trim();
     g('psQ').parentNode.classList.toggle('on',!!g('psQ').value);
-    var V=C.filter(function(c){ if(filtro && ((c.ult||c.auto)?'ok':'pen')!==filtro) return false; if(!q) return true;
+    var V=C.filter(function(c){ if(filtro && tipo(c)!==filtro) return false; if(!q) return true;
       return semAc([c.prefixo].concat(c.saidas.map(function(x){ return [x.escala,x.motorista,x.cracha,x.responsavel,x.garagem].join(' '); })).join(' ')).indexOf(q)>=0; });
     if(!V.length){ g('psMain').innerHTML='<div class="empty">'+(C.length?'Nenhum carro encontrado'+(filtro?' em “'+ROTc[filtro]+'”':'')+(q?' para “'+e(g('psQ').value)+'”':'')+'.':'Frota da soltura não cadastrada (aba VEICULOS).')+'</div>'; return; }
+    /* cores: verde = soltura do fiscal · azul = soltura automática (telemetria) · branco = aguardando */
     g('psMain').innerHTML='<div class="ps-grid">'+V.map(function(c){
-      var x=c.auto?null:c.ult, k=(x||c.auto)?'ok':'pen', col=P[k], pen=k==='pen';
-      if(c.auto) return '<div class="ps-card ps-ok ps-auto" title="'+e(c.prefixo+' · soltura automática às '+c.auto.hora)+'">'+
-        '<div class="ck" style="background:'+col+'">'+ICO_OK+'</div><div class="bd">'+
-        '<div class="l1"><b>'+e(c.prefixo)+'</b>'+(c.os?'<span class="os-tag">O.S.</span>':'')+'<span class="es auto">AUTOMÁTICA</span></div>'+
-        '<div class="mo">'+(c.auto.motorista?e(nome(c.auto.motorista)):'Motorista não identificado')+'</div>'+
-        '<div class="hs"><div><small>SAIU DE</small><span>'+e(nomeLocal(c.auto.de))+'</span></div><div><small>SAÍDA</small><span><em>'+dia+'</em>'+e(c.auto.hora)+'</span></div></div>'+
-        '<div class="ft">Telemetria · escala a vincular</div></div></div>';
-      var os=c.os?'<span class="os-tag">O.S.</span>':'';
-      var mais=c.saidas.length>1?' <span class="n2">'+c.saidas.length+'ª saída</span>':'';
-      return '<div class="ps-card ps-'+k+'" title="'+e(c.prefixo+(x?' · '+x.escala+' · liberado às '+x.hora_real:' · aguardando soltura'))+'">'+
-        '<div class="ck" style="background:'+(pen?'transparent;color:'+col+';border:2px solid '+col+'88':col)+'">'+(pen?ICO_REL:ICO_OK)+'</div><div class="bd">'+
-        '<div class="l1"><b>'+e(c.prefixo)+'</b>'+os+(x&&String(x.responsavel).toUpperCase()==='SOLTURA AUTOMÁTICA'?'<span class="es auto">AUTO</span>':'')+(x?'<span class="es">'+e(x.escala)+'</span>':'')+'</div>'+
-        (x?'<div class="mo" title="'+e(x.motorista)+'">'+(x.motorista?e(nome(x.motorista)):'Sem motorista')+mais+'</div>'+
-           '<div class="hs"><div><small>PROGRAMADA</small><span><em>'+dia+'</em>'+e(x.hora_prevista||'—')+'</span></div><div><small>LIBERADA</small><span><em>'+dia+'</em>'+e(x.hora_real||'—')+'</span></div><span class="dv" style="color:'+col+'">'+desvio(x.desvio)+'</span></div>'+
-           '<div class="ft">'+(String(x.responsavel).toUpperCase()==='SOLTURA AUTOMÁTICA'?'Soltura automática (telemetria)':(x.responsavel?'Fiscal '+e(nome(x.responsavel)):''))+(x.garagem?' · '+e(nomeLocal(x.garagem)):'')+'</div>'
-          :'<div class="mo vz">Aguardando soltura</div>')+
+      var x=c.auto?null:c.ult, auto=!!c.auto||(x&&String(x.responsavel).toUpperCase()==='SOLTURA AUTOMÁTICA');
+      var k=(x||c.auto)?(auto?'tel':'ok'):'pen';
+      var os=c.os?'<span class="os-tag">O.S.</span>':'', tag=auto?'<span class="tg-auto">AUTO</span>':'';
+      var mais=c.saidas.length>1?'<span class="n2">'+c.saidas.length+'ª saída</span>':'';
+      var ck='<div class="ck">'+(k==='pen'?ICO_REL:ICO_OK)+'</div>';
+      if(k==='pen') return '<div class="ps-card ps-pen" title="'+e(c.prefixo+' · aguardando soltura')+'">'+ck+'<div class="bd"><div class="l1"><b>'+e(c.prefixo)+'</b>'+os+'</div><div class="mo vz">Aguardando soltura</div></div></div>';
+      var mot, esc, hp, hr, dv, rod;
+      if(c.auto){ mot=c.auto.motorista; esc='a vincular'; hp='—'; hr=c.auto.hora; dv=''; rod='Telemetria · saiu de '+nomeLocal(c.auto.de); }
+      else { mot=x.motorista; esc=x.escala; hp=x.hora_prevista||'—'; hr=x.hora_real||'—'; dv=x.status==='SEM_ESCALA'?'':desvio(x.desvio);
+        rod=(auto?'Soltura automática':(x.responsavel?'Fiscal '+nome(x.responsavel):'Fiscal'))+(x.garagem?' · '+nomeLocal(x.garagem):''); }
+      return '<div class="ps-card ps-'+k+'" title="'+e(c.prefixo+' · '+(esc||'')+' · '+(auto?'soltura automática':'liberado')+' às '+hr)+'">'+ck+'<div class="bd">'+
+        '<div class="l1"><b>'+e(c.prefixo)+'</b>'+tag+os+(dv?'<span class="dv">'+e(dv)+'</span>':'')+'</div>'+
+        '<div class="mo" title="'+e(mot||'')+'">'+(mot?e(nome(mot)):'<span class="vz">Motorista não identificado</span>')+'</div>'+
+        '<div class="es2">'+e(esc||'')+mais+'</div>'+
+        '<div class="hs"><div><small>PROGRAMADA</small><span><em>'+dia+'</em>'+e(hp)+'</span></div><div><small>'+(auto?'SAÍDA':'LIBERADA')+'</small><span><em>'+dia+'</em>'+e(hr)+'</span></div></div>'+
+        '<div class="ft" title="'+e(rod)+'">'+e(rod)+'</div>'+
       '</div></div>';
     }).join('')+'</div>';
   }

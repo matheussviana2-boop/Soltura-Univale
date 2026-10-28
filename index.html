@@ -1163,7 +1163,7 @@ var ICO_CLOCK='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" strok
 var ICO_PIN='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>';
 var ICO_LOCK='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/></svg>';
 var ICO_OK='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>';
-var TABS=[['pend','Escalados'],['carros','Carros no local'],['interd','Com O.S.'],['lib','Liberados']];
+var TABS=[['pend','Soltura'],['carros','Veículos disponíveis'],['interd','Veículos com O.S.'],['lib','Soltura realizada']];
 var SUBLIB=[['conferir','A conferir'],['conferidos','Conferidos'],['todos','Todos']];
 
 function render(){
@@ -1212,7 +1212,7 @@ function render(){
     if(atr) r.push('<b class="c">'+atr+' atrasado'+(atr>1?'s':'')+'</b>');
     r.push('<b>'+pend.length+'</b> escala'+(pend.length===1?'':'s')+' para sair');
     if(sem.length) r.push(sem.length+' fora do pátio'); if(outra) r.push(outra+' na outra garagem');
-    if(nInterdPend) r.push(nInterdPend+' com carro em O.S. na aba Com O.S.');
+    if(nInterdPend) r.push(nInterdPend+' com carro em O.S. na aba Veículos com O.S.');
     if(atrasados.length) r.push(atrasados.length+' com mais de '+fmtLim(lim)+' de atraso no fim da lista');
     var nEsc=pend.length+sem.length+atrasados.length;
     sugerir(pend.concat(sem,atrasados));

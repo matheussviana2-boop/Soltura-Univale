@@ -219,7 +219,7 @@
   .op .vd{flex:1;min-width:0;font-size:13px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .op.sel{background:#E6F4F1;box-shadow:inset 3px 0 0 var(--teal)}
   .ddh.tot{position:static;background:var(--card);color:var(--tx);font-size:12px} .dd{max-height:340px!important}
-  .op .vd.in{color:#08603E;font-weight:700} .op .vd.esc{color:#9A4A0C} .op .vd.lib{color:#33435C} .op .vd.os{color:#B0122F;font-weight:700}
+  .op .vd.in{color:#08603E;font-weight:700} .op .vd.esc{color:#9A4A0C} .op .vd.jl{color:#33435C} .op .vd.os{color:#B0122F;font-weight:700}
   .sel{display:flex;align-items:center;gap:10px;height:48px;padding:0 6px 0 12px;border-radius:10px;border:1px solid var(--green);background:var(--green-bg)}
   .sel .c{font-weight:800;color:var(--green-d)}
   .sel .n{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700}
@@ -1131,9 +1131,9 @@ var DSEM=['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira'
 function dataLonga(iso){ var p=String(iso||'').split('-'); if(p.length<3) return ''; var d=new Date(+p[0],+p[1]-1,+p[2]); return DSEM[d.getDay()]+', '+p[2]+' de '+MESES[+p[1]-1]; }
 function telOk(){ var t=S.dia&&S.dia.telemetria; return !!(t&&t.ativa&&!t.erro); }
 /* onde o carro está: 'in' (nesta garagem), 'outra', 'fora' (fora das garagens / sem sinal / sem carro), null (sem telemetria) */
-function local(it){
+function local(it,G){
   if(!telOk()) return null;
-  var G=getGar(), t=it.tel;
+  G=G||''; var t=it.tel;
   if(semCarro(it)) return {k:'fora',txt:'Sem carro definido',extra:''};
   if(!t) return {k:'fora',txt:'Carro não encontrado na telemetria',extra:''};
   var extra='Ignição '+(t.ignicao==='ON'?'ligada':'desligada')+(t.quando?' · Última transmissão '+t.quando:'')+(t.semSinal?' (sem sinal)':'');
@@ -1187,9 +1187,8 @@ function abrirMapa(it){
 }
 function fecharMapa(){ $('ovMap').classList.remove('on'); }
 function base(){
-  var G=getGar(), q=semAcento($('fBusca').value).trim();
+  var q=semAcento($('fBusca').value).trim();   // a localidade só filtra a aba Veículos disponíveis
   return S.dia.itens.filter(function(it){
-    if(G && it.reg && it.reg.garagem && it.reg.garagem!==G && !q) return false;
     if(q){ var r=it.reg||{}; var hay=semAcento([it.escala,it.veiculo,it.cracha,it.motorista,it.linha,r.veiculo_real,r.cracha_real,r.motorista_real].join(' ')); if(hay.indexOf(q)<0) return false; }
     return true;
   });
@@ -1381,7 +1380,7 @@ function naoEscalados(q){
   var G=getGar(), qq=semAcento(q||'');
   var L=(S.dia.frota||[]).filter(function(c){ return !usados[c.prefixo] && !c.interd && (!qq || semAcento(c.prefixo+' '+(c.tel&&c.tel.ponto||'')).indexOf(qq)>=0); });
   L.forEach(function(c){ c._loc=local({veiculo:c.prefixo,tel:c.tel}); });
-  var ord=function(c){ var k=c._loc&&c._loc.k; return k==='in'?0:k==='fora'?1:2; };
+  var ord=function(c){ var k=c._loc&&c._loc.k; return k==='in'?0:k==='outra'?1:k==='fora'?2:3; };
   return L.sort(function(a,b){ return ord(a)-ord(b) || a.prefixo.localeCompare(b.prefixo); });
 }
 /* carro no ponto / perto do ponto escolhido (tempo real, pela telemetria) */
@@ -1469,22 +1468,22 @@ function listaVei(ev){
     else if(u&&u.k==='lib') G.lib.push({c:c,it:u.it});
     else if(u&&u.k==='auto') G.auto.push({c:c,a:u.a});
     else if(u&&u.k==='esc'&&u.it.id!==it.id) G.outra.push({c:c,it:u.it});
-    else { c._loc=local({veiculo:p,tel:c.tel}); G.livre.push(c); }
+    else { c._loc=local({veiculo:p,tel:c.tel},getGar()); G.livre.push(c); }
   });
-  var ord=function(c){ var k=c._loc&&c._loc.k; return k==='in'?0:k==='fora'?1:2; };
+  var ord=function(c){ var k=c._loc&&c._loc.k; return k==='in'?0:k==='outra'?1:k==='fora'?2:3; };
   G.livre.sort(function(a,b){ return ord(a)-ord(b) || a.prefixo.localeCompare(b.prefixo); });
   G.outra.sort(function(a,b){ return a.c.prefixo.localeCompare(b.c.prefixo); }); G.lib.sort(function(a,b){ return a.c.prefixo.localeCompare(b.c.prefixo); }); G.os.sort(function(a,b){ return a.prefixo.localeCompare(b.prefixo); });
   var atual=$('mVei').value.trim().toUpperCase(), op=function(v,txt,cls){ return '<button type="button" class="op'+(v.toUpperCase()===atual?' sel':'')+'" data-v="'+esc(v)+'"><span class="c">'+esc(v)+'</span><span class="vd'+(cls?' '+cls:'')+'">'+esc(txt)+'</span></button>'; };
   var n=G.esc.length+G.livre.length+G.outra.length+G.lib.length+G.os.length+G.auto.length, tot=(S.dia.frota||[]).length;
   var h='<div class="ddh tot">'+(q?n+' de '+tot+' carros da frota':'FROTA · '+tot+' carros')+'</div>';
   if(meu && (!q || meu.indexOf(q)>=0)) h+='<div class="ddh">CARRO DA ESCALA</div>'+op(it.veiculo,'previsto para esta escala','in');
-  var GL=getGar(), aqui=GL?G.livre.filter(function(c){ return c._loc&&c._loc.k==='in'; }):G.livre, longe=GL?G.livre.filter(function(c){ return !(c._loc&&c._loc.k==='in'); }):[];
+  var GL=getGar(), aqui=G.livre.filter(function(c){ return c._loc&&c._loc.k==='in'; }), longe=G.livre.filter(function(c){ return !(c._loc&&c._loc.k==='in'); });
   var opL=function(c){ var lc=c._loc; return op(c.prefixo,lc?lc.txt:'sem telemetria',lc&&lc.k==='in'?'in':''); };
-  if(aqui.length) h+='<div class="ddh">'+(GL?'EM '+esc(nomeLocal(GL).toUpperCase()):'DISPONÍVEIS')+' ('+aqui.length+')</div>'+aqui.map(opL).join('');
-  if(longe.length) h+='<div class="ddh">DISPONÍVEIS EM OUTROS LOCAIS ('+longe.length+')</div>'+longe.map(opL).join('');
+  if(aqui.length) h+='<div class="ddh">'+(GL?'DISPONÍVEIS EM '+esc(nomeLocal(GL).toUpperCase()):'DISPONÍVEIS NOS PONTOS')+' ('+aqui.length+')</div>'+aqui.map(opL).join('');
+  if(longe.length) h+='<div class="ddh">'+(GL?'DISPONÍVEIS EM OUTROS LOCAIS':'DISPONÍVEIS FORA DOS PONTOS')+' ('+longe.length+')</div>'+longe.map(opL).join('');
   if(G.outra.length) h+='<div class="ddh">ESCALADOS EM OUTRA ESCALA ('+G.outra.length+')</div>'+G.outra.map(function(x){ return op(x.c.prefixo,x.it.hora_prevista+' · '+x.it.escala+' · '+titulo(x.it.motorista),'esc'); }).join('');
   if(G.auto.length) h+='<div class="ddh">SOLTURA AUTOMÁTICA ('+G.auto.length+')</div>'+G.auto.map(function(x){ return op(x.c.prefixo,'saiu de '+nomeLocal(x.a.de)+' às '+x.a.hora,'esc'); }).join('');
-  if(G.lib.length) h+='<div class="ddh">JÁ LIBERADOS HOJE ('+G.lib.length+')</div>'+G.lib.map(function(x){ return op(x.c.prefixo,'saiu na '+x.it.escala+(x.it.reg.hora_real?' às '+x.it.reg.hora_real:''),'lib'); }).join('');
+  if(G.lib.length) h+='<div class="ddh">JÁ LIBERADOS HOJE ('+G.lib.length+')</div>'+G.lib.map(function(x){ return op(x.c.prefixo,'saiu na '+x.it.escala+(x.it.reg.hora_real?' às '+x.it.reg.hora_real:''),'jl'); }).join('');
   if(G.os.length) h+='<div class="ddh">COM O.S. ABERTA ('+G.os.length+')</div>'+G.os.map(function(c){ return op(c.prefixo,'O.S. '+((c.interd&&c.interd.os)||''),'os'); }).join('');
   if(!n) h+='<div class="op" style="color:var(--mut)">Nenhum carro da frota com "'+esc(q)+'" — pode digitar o prefixo assim mesmo.</div>';
   $('vDD').innerHTML=h; $('vDD').classList.add('on');

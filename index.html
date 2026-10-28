@@ -877,6 +877,7 @@
   @media (max-width:760px){ .locbar{margin:0 14px 10px} .locbar .locsel{flex:1} .locbar .lochint{display:none} }
   .hsp{flex:1}
   @media (max-width:760px){ .hsp{display:none} }
+  .row.livre .lugar{max-width:170px}
 </style>
 </head>
 <body>
@@ -1377,8 +1378,8 @@ function naoEscalados(q){
 /* carro no ponto / perto do ponto escolhido (tempo real, pela telemetria) */
 function locCarro(c,G){
   var t=c.tel; if(!t) return null;
-  if(t.garagem&&(!G||t.garagem===G)) return {k:'in',d:t.distLocal,txt:(G?'No ponto':nomeLocal(t.garagem))+(t.distLocal!==''&&t.distLocal!=null?' · '+t.distLocal+' m':'')};
-  if(G&&t.perto===G) return {k:'perto',d:t.distLocal,txt:'Próximo · '+(t.distLocal>=1000?(t.distLocal/1000).toFixed(1).replace('.',',')+' km':t.distLocal+' m')};
+  if(t.garagem&&(!G||t.garagem===G)) return {k:'in',d:t.distLocal,txt:nomeLocal(t.garagem)+(t.distLocal!==''&&t.distLocal!=null?' · '+t.distLocal+' m':'')};
+  if(G&&t.perto===G) return {k:'perto',d:t.distLocal,txt:'Perto de '+nomeLocal(G)+' · '+(t.distLocal>=1000?(t.distLocal/1000).toFixed(1).replace('.',',')+' km':t.distLocal+' m')};
   return null;
 }
 function carrosNoLocal(G,q){

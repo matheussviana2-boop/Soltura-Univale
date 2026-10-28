@@ -1179,11 +1179,11 @@ function render(){
     outra=vigentes.filter(function(i){return i._loc.k==='outra';}).length;
     atrasados=atrasados.filter(function(i){return i._loc.k!=='outra';});
   }
-  var feitas=todos.filter(function(i){return !!i.reg;});
+  var feitas=todos.filter(function(i){return !!i.reg && (!G || q || !i.reg.garagem || i.reg.garagem===G);});
   var aConf=feitas.filter(function(i){return i.reg.conferido!=='SIM';});
   var conf=feitas.filter(function(i){return i.reg.conferido==='SIM';});
   var interd=(S.dia.interditados||[]).filter(function(x){ return !q || semAcento(x.prefixo+' '+x.os+' '+x.motivo).indexOf(semAcento(q))>=0; });
-  var n={pend:pend.length+sem.length+atrasados.length+saiuSem.length, interd:interd.length, lib:feitas.length+soltAuto().length};
+  var n={pend:pend.length+sem.length+atrasados.length+saiuSem.length, interd:interd.length, lib:feitas.length+soltAuto().filter(function(a){ return !G || q || a.de===G; }).length};
 
   $('tabs').innerHTML=TABS.map(function(t){
     var extra='';
@@ -1236,7 +1236,7 @@ function render(){
     foraEsc.forEach(function(x){ h+=linhaInterd(x); });
   }
   else {
-    var lib=feitas.filter(function(i){return i.reg.status!=='NAO_SAIU';}).length, ns=feitas.length-lib, AU=soltAuto();
+    var lib=feitas.filter(function(i){return i.reg.status!=='NAO_SAIU';}).length, ns=feitas.length-lib, AU=soltAuto().filter(function(a){ return !G || q || a.de===G; });
     r.push('<b>'+lib+'</b> liberado'+(lib===1?'':'s')+(ns?' · '+ns+' não saiu':'')+(AU.length?' · <b>'+AU.length+'</b> soltura'+(AU.length===1?'':'s')+' automática'+(AU.length===1?'':'s'):''));
     if(AU.length){
       h+='<div class="secao">'+ICO_PIN+'<span>Soltura automática</span><span class="n">'+AU.length+'</span><small>saíram do raio sem soltura manual — vincule a escala</small></div>';
@@ -1678,7 +1678,9 @@ function salvar(acao){
 function enviarModal(it, acao, x, mot, osV, outraEsc){
   var obsTxt=$('mObs').value.trim();
   if(osV && obsTxt.indexOf('O.S. aberta')<0) obsTxt=(obsTxt?obsTxt+' · ':'')+'Liberado com O.S. aberta '+(osV.os||'');
-  var garagem=(it.reg&&it.reg.garagem)||getGar();
+  // local da soltura: onde o carro está agora (telemetria) → local da soltura automática → localidade escolhida na tela
+  var cF=carroFrota(String(x.v||'').toUpperCase()), sa=(S.dia.saidasAuto||{})[String(x.v||'').toUpperCase()];
+  var garagem=(it.reg&&it.reg.garagem)||(cF&&cF.tel&&cF.tel.garagem)||(sa&&sa.hora===x.h?sa.de:'')||getGar();
   var p={id:it.id,acao:acao,liberarDe:outraEsc?outraEsc.id:'',hora_real:x.h,veiculo:x.v,cracha:x.m.c,motorista:x.m.n,motivo:mot,observacao:obsTxt,responsavel:getResp(),conferir:false,garagem:garagem};
   var ant=it.reg, antOutra=outraEsc?{veiculo:outraEsc.veiculo,tel:outraEsc.tel,saida:outraEsc.saida}:null;
   var eraEdicao=S.modo==='editar', modo=S.modo, novo=S.novo;

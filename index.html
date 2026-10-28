@@ -879,6 +879,7 @@
   @media (max-width:760px){ .hsp{display:none} }
   .row.livre .lugar{max-width:170px}
   #psol .ps-card .n2.sub{background:#FDE7C8;color:#8A4F00;margin-left:6px}
+  #psol .ps-card .esc-prev{color:#8A4F00;font-family:var(--sg);font-weight:600}
 </style>
 </head>
 <body>
@@ -2104,6 +2105,7 @@ var PSol=(function(){
         '<div class="l1"><b>'+e(c.prefixo)+'</b>'+tag+os+(dv?'<span class="dv">'+e(dv)+'</span>':'')+'</div>'+
         '<div class="mo" title="'+e(mot||'')+'">'+(mot?e(nome(mot)):'<span class="vz">Motorista não identificado</span>')+'</div>'+
         '<div class="es2">'+e(esc||'')+(x&&x.troca_motorista?'<span class="n2 sub">OUTRO MOTORISTA</span>':'')+mais+'</div>'+
+        (x&&x.troca_motorista&&x.motorista_prev?'<div class="es2 esc-prev" title="Motorista da escala">Escalado: '+e(nome(x.motorista_prev))+'</div>':'')+
         '<div class="hs"><div><small>PROGRAMADA</small><span><em>'+dia+'</em>'+e(hp)+'</span></div><div><small>'+(auto?'SAÍDA':'LIBERADA')+'</small><span><em>'+dia+'</em>'+e(hr)+'</span></div></div>'+
         '<div class="ft" title="'+e(rod)+'">'+e(rod)+'</div>'+
       '</div></div>';

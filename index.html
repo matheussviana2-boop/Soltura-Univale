@@ -1287,11 +1287,13 @@ function render(){
     var SE=(S.dia.semEscala||[]).filter(function(x){ return !G || q || x.garagem===G; });
     if(SE.length) r.push('<b>'+SE.length+'</b> sem escala');
     // tudo numa lista só, do horário mais recente para o mais antigo
-    var hrReg=function(it){ var r0=it.reg; if(r0.hora_real) return minHH(r0.hora_real); var m=String(r0.registrado_em||'').match(/(\d{2}):(\d{2})/); return m?(+m[1])*60+(+m[2]):-1; };
-    var L=feitas.map(function(it){ return {t:hrReg(it),h:function(){ return linhaReg(it); }}; })
-      .concat(SE.map(function(x){ return {t:minHH(x.hora),h:function(){ return linhaAuto({prefixo:x.veiculo,hora:x.hora,de:x.garagem,motorista:x.motorista,motivo:x.motivo,id:x.id}); }}; }))
-      .concat(AU.map(function(a){ return {t:minHH(a.hora),h:function(){ return linhaAuto(a); }}; }));
-    L.sort(function(a,b){ return b.t-a.t; });
+    // qualquer tipo de soltura (fiscal, automática, sem escala) entra pela hora da saída; empate: quem foi gravado por último
+    var mm=function(v){ var m=String(v||'').match(/(\d{1,2}):(\d{2})(?!.*\d{1,2}:\d{2})/); return m?(+m[1])*60+(+m[2]):-1; };
+    var hrReg=function(it){ var r0=it.reg, t=mm(r0.hora_real); return t>=0?t:mm(r0.registrado_em); };
+    var L=feitas.map(function(it){ return {t:hrReg(it),g:String(it.reg.registrado_em||''),h:function(){ return linhaReg(it); }}; })
+      .concat(SE.map(function(x){ return {t:mm(x.hora),g:'',h:function(){ return linhaAuto({prefixo:x.veiculo,hora:x.hora,de:x.garagem,motorista:x.motorista,motivo:x.motivo,id:x.id}); }}; }))
+      .concat(AU.map(function(a){ return {t:mm(a.hora),g:'',h:function(){ return linhaAuto(a); }}; }));
+    L.sort(function(a,b){ return (b.t-a.t) || (b.g<a.g?-1:b.g>a.g?1:0); });
     h=L.length?L.map(function(x){ return x.h(); }).join(''):'<div class="empty">Nenhuma saída liberada ainda.</div>';
   }
   $('list').innerHTML=h;

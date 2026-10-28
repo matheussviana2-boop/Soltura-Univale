@@ -66,6 +66,7 @@
   .tab.t-pend i{background:#0B8F5A} .tab.t-interd i{background:#C2410C} .tab.t-lib i{background:#2563A8}
   .tab.on i{background:#FFFFFF}
   .tab.t-pend.on{background:#0B8F5A;color:#FFFFFF}
+  .tab.t-carros i{background:#00778A} .tab.t-carros.on{background:#00778A;color:#FFFFFF} .tab.t-carros.on i{background:#FFFFFF}
   .tab.t-interd.on{background:#C2410C;color:#FFFFFF}
   .tab.t-lib.on{background:#2563A8;color:#FFFFFF}
   .resumo{padding:0 24px 10px;font-size:14px;color:var(--mut)} .resumo b{color:var(--tx)} .resumo .c{color:var(--red-d)}
@@ -845,6 +846,7 @@
   .locn{font:600 13px var(--sg);color:#1B2F5C;white-space:nowrap;padding-right:6px} .locn b{font:800 18px var(--mono);color:#047A45;margin-right:3px}
   .row.livre.perto{background:#FFFBF2}
   .ident .pref .osb{font:700 11px var(--mono);color:#fff;background:#C8143C;padding:2px 7px;border-radius:5px;vertical-align:middle}
+  @media (max-width:760px){ .tabs{max-width:100%;overflow-x:auto;scrollbar-width:none} .tabs::-webkit-scrollbar{display:none} .tabs .tab{flex-shrink:0} }
 </style>
 </head>
 <body>
@@ -1161,7 +1163,7 @@ var ICO_CLOCK='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" strok
 var ICO_PIN='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>';
 var ICO_LOCK='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/></svg>';
 var ICO_OK='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>';
-var TABS=[['pend','Escalados'],['interd','Com O.S.'],['lib','Liberados']];
+var TABS=[['pend','Escalados'],['carros','Carros no local'],['interd','Com O.S.'],['lib','Liberados']];
 var SUBLIB=[['conferir','A conferir'],['conferidos','Conferidos'],['todos','Todos']];
 
 function render(){
@@ -1187,7 +1189,9 @@ function render(){
   var aConf=feitas.filter(function(i){return i.reg.conferido!=='SIM';});
   var conf=feitas.filter(function(i){return i.reg.conferido==='SIM';});
   var interd=(S.dia.interditados||[]).filter(function(x){ return !q || semAcento(x.prefixo+' '+x.os+' '+x.motivo).indexOf(semAcento(q))>=0; });
-  var n={pend:pend.length+sem.length+atrasados.length+saiuSem.length, interd:interd.length, lib:feitas.length+soltAuto().filter(function(a){ return !G || q || a.de===G; }).length+(S.dia.semEscala||[]).filter(function(x){ return !G || q || x.garagem===G; }).length};
+  var CL=(G&&telOk())?carrosNoLocal(G,q):null;
+  $('locN').innerHTML=CL?'<b>'+CL.length+'</b> carro'+(CL.length===1?'':'s'):'';
+  var n={carros:CL?CL.length:0, pend:pend.length+sem.length+atrasados.length+saiuSem.length, interd:interd.length, lib:feitas.length+soltAuto().filter(function(a){ return !G || q || a.de===G; }).length+(S.dia.semEscala||[]).filter(function(x){ return !G || q || x.garagem===G; }).length};
 
   $('tabs').innerHTML=TABS.map(function(t){
     var extra='';
@@ -1195,15 +1199,14 @@ function render(){
   }).join('');
 
   var r=[], h='';
-  var CL=(G&&telOk())?carrosNoLocal(G,q):null;
-  $('locN').innerHTML=CL?'<b>'+CL.length+'</b> carro'+(CL.length===1?'':'s'):'';
-  if(S.tab==='pend' && CL){
+  if(S.tab==='carros'){
+    if(!CL){ r.push('Telemetria indisponível agora'); h='<div class="empty">Sem telemetria no momento — não dá para saber quais carros estão em '+esc(nomeLocal(G))+'.</div>'; } else {
     // localidade escolhida: só os carros que estão no ponto ou perto dele agora (telemetria)
     var nIn=CL.filter(function(x){ return x.l.k==='in'; }).length;
     r.push('<b>'+CL.length+'</b> carro'+(CL.length===1?'':'s')+' em '+esc(nomeLocal(G))+' agora'+(CL.length?' · '+nIn+' no ponto · '+(CL.length-nIn)+' próximo'+(CL.length-nIn===1?'':'s'):''));
     r.push('arraste Liberar e escolha a escala');
     h=CL.length?CL.map(linhaCarroLocal).join(''):'<div class="empty">Nenhum carro no ponto ou próximo de '+esc(nomeLocal(G))+' agora.</div>';
-  }
+  } }
   else if(S.tab==='pend'){
     var atr=pend.concat(sem).filter(function(i){return i._st.k==='crit';}).length;
     if(atr) r.push('<b class="c">'+atr+' atrasado'+(atr>1?'s':'')+'</b>');
@@ -1214,7 +1217,7 @@ function render(){
     var nEsc=pend.length+sem.length+atrasados.length;
     sugerir(pend.concat(sem,atrasados));
     saiuSem.forEach(function(it){ h+=linhaPend(it); });
-    if(!nEsc) h+='<div class="empty">Nenhum carro escalado aguardando soltura agora.</div>';
+    if(!nEsc) h+='<div class="empty">Nenhuma escala aguardando soltura agora.</div>';
     pend.forEach(function(it){ h+=linhaPend(it); });
     if(sem.length){
       h+='<div class="secao">'+ICO_PIN+'<span>Fora do pátio, sem sinal ou sem carro</span><span class="n">'+sem.length+'</span></div>';
@@ -1223,16 +1226,6 @@ function render(){
     if(atrasados.length){
       h+='<div class="secao">'+ICO_CLOCK+'<span>Atrasados há mais de '+fmtLim(lim)+'</span><span class="n">'+atrasados.length+'</span></div>';
       atrasados.forEach(function(it){ h+=linhaPend(it,true); });
-    }
-    if(S.dia.frota){
-      var todosLivres=naoEscalados(q), GL=getGar();
-      // com uma localidade escolhida: só os carros que estão nela agora (os demais ficam em "Todas as localidades")
-      var livres=GL&&telOk()?todosLivres.filter(function(c){ return c._loc&&c._loc.k==='in'; }):todosLivres, fora=todosLivres.length-livres.length;
-      var nOsLivre=(S.dia.frota||[]).filter(function(c){ return c.interd && !S.dia.itens.some(function(i){ return (i.veiculo||'').toUpperCase()===c.prefixo; }); }).length, semTel=S.dia.semTelemetria||[];
-      h+='<div class="grupo g2">'+ICO_PIN+'<span>Carros disponíveis'+(GL?' · '+esc(nomeLocal(GL)):'')+'</span><span class="n">'+livres.length+'</span><small>'+(GL?'carros neste local agora'+(fora?' · '+fora+' em outros locais (escolha “Todas as localidades”)':''):'livres para sair em qualquer escala')+
-        (nOsLivre?' · <b>'+nOsLivre+'</b> com O.S. (aba Com O.S.)':'')+(semTel.length?' · <b title="'+esc(semTel.join(', '))+'">'+semTel.length+'</b> sem sinal na telemetria: '+esc(semTel.join(', ')):'')+'</small></div>';
-      if(!livres.length) h+='<div class="empty">'+(GL&&fora?'Nenhum carro disponível em '+esc(nomeLocal(GL))+' agora.':'Todos os carros da frota já saíram.')+'</div>';
-      livres.forEach(function(c){ h+=linhaLivre(c); });
     }
   }
   else if(S.tab==='interd'){

@@ -144,6 +144,7 @@
   .ch-in{background:#DDF4EA;color:#08603E} .ch-fora{background:#FEF0E6;color:#9A4A0C} .ch-sem{background:#FDF3DC;color:#8A5A00}
   .ch-outra{background:#E7EEF8;color:#1E4E8C} .ch-on{background:#E2F5EF;color:#08603E} .ch-os{background:#FDECE7;color:#9A3412} .ch-ns{background:#FDF3DC;color:#8A5A00}
   .mot{font-size:16px;font-weight:600}
+  .maplink.msol{flex:none;margin-left:auto;margin-right:4px}
   .mot.dup{display:flex;align-items:baseline;gap:8px;line-height:1.35}
   .mot.dup .lb{min-width:64px;font:800 10px var(--mono,monospace);letter-spacing:.06em;text-transform:uppercase;color:#5B6B7E}
   .mot.dup small{font-size:12px;font-weight:600;color:#5B6B7E}
@@ -1191,6 +1192,22 @@ function abrirMapa(it){
     setTimeout(function(){ _mapaSol.invalidateSize(); _mapaSol.setView(pos,17); },150);
   }).catch(function(){ $('mapLeaf').innerHTML='<div class="empty">Não foi possível carregar o mapa. Use “Abrir no Google Maps”.</div>'; });
 }
+/* local onde a soltura foi registrada (posição do carro na hora; soltura antiga = ponto da localidade) */
+function abrirMapaSol(it){
+  var r=it.reg||{}; if(!r.lat||!r.lng) return;
+  var pos=[+r.lat,+r.lng], auto=String(r.responsavel||'').toUpperCase()==='SOLTURA AUTOMÁTICA';
+  $('mapTit').textContent=(r.veiculo_real||'')+' · '+it.escala+' · soltura '+(r.hora_real||'');
+  $('mapSub').textContent=(r.garagem?nomeLocal(r.garagem)+' · ':'')+(r.latLocal?'ponto da localidade (registro sem posição do carro)':(auto?'posição do carro na soltura automática':'posição do carro quando o fiscal liberou'));
+  $('mapExt').href='https://www.google.com/maps?q='+encodeURIComponent(r.lat+','+r.lng);
+  $('ovMap').classList.add('on');
+  leaflet_().then(function(){
+    if(!_mapaSol){ $('mapLeaf').innerHTML=''; _mapaSol=L.map('mapLeaf',{zoomControl:true}); camadasSatelite_(_mapaSol); }
+    if(_pinoSol) _pinoSol.remove();
+    _pinoSol=L.marker(pos,{icon:iconeBus_(auto?'#1D4ED8':'#047A45')}).bindPopup('<b style="font-size:15px">'+esc(r.veiculo_real||'')+'</b><br>'+esc(it.escala)+' · soltura '+esc(r.hora_real||'')+'<br>'+esc(titulo(r.motorista_real||''))+'<br><small>'+(auto?'Soltura automática':'Liberado por '+esc(titulo(r.responsavel||'')))+'</small>',{maxWidth:260}).addTo(_mapaSol);
+    _mapaSol.setView(pos,17);
+    setTimeout(function(){ _mapaSol.invalidateSize(); _mapaSol.setView(pos,17); _pinoSol.openPopup(); },150);
+  }).catch(function(){ $('mapLeaf').innerHTML='<div class="empty">Não foi possível carregar o mapa. Use “Abrir no Google Maps”.</div>'; });
+}
 function fecharMapa(){ $('ovMap').classList.remove('on'); }
 function base(){
   var q=semAcento($('fBusca').value).trim();   // a localidade só filtra a aba Veículos disponíveis
@@ -1597,7 +1614,7 @@ function linhaReg(it){
       '<div class="chs">'+ch('',ICO_CLK13,'Programado '+dataHora(S.dia.data,it.hora_prevista))+
         (ns?(r.motivo?ch('ns',null,r.motivo):''):ch('outra',ICO_OK13,(String(r.responsavel).toUpperCase()==='SOLTURA AUTOMÁTICA'?'Soltura automática ':'Liberado ')+dataHora(dLib,r.hora_real)))+
         (!ns&&tm?ch('ns',null,'Outro motorista'):'')+'</div>'+
-    '</div>'+respBox(r.responsavel, ns)+
+    '</div>'+(!ns&&r.lat&&r.lng?'<button type="button" class="maplink msol" data-act="mapsol" data-id="'+esc(it.id)+'" title="Ver no mapa onde a soltura foi registrada" aria-label="Ver no mapa o local da soltura de '+esc(r.veiculo_real||'')+'">'+ICO_PIN.replace('width="16" height="16"','width="22" height="22"')+'</button>':'')+respBox(r.responsavel, ns)+
   '</div>';
 }
 
@@ -1818,6 +1835,7 @@ function pedirResp(){
 $('list').addEventListener('click',function(e){
   var b=e.target.closest('[data-act]'); if(!b||b.disabled) return;
   if(b.getAttribute('data-act')==='escalar'){ S.subst=b.getAttribute('data-subst')||''; abrirEscalar(b.getAttribute('data-car'),b.getAttribute('data-hora')||''); return; }
+  if(b.getAttribute('data-act')==='mapsol'){ var iS=S.dia.itens.filter(function(i){ return i.id===b.getAttribute('data-id'); })[0]; if(iS) abrirMapaSol(iS); return; }
   if(b.getAttribute('data-act')==='mapcar'){ var c=carroFrota(b.getAttribute('data-car')); if(c) abrirMapa({veiculo:c.prefixo,escala:'não escalado',tel:c.tel}); return; }
   var it=item(b.getAttribute('data-id')); if(!it) return;
   var a=b.getAttribute('data-act');

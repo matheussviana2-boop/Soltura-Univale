@@ -1513,6 +1513,8 @@ function listaVei(ev){
 }
 function fecharVei(){ $('vDD').classList.remove('on'); }
 
+/* posição atual do carro (vai junto com a liberação para mostrar no mapa onde foi a soltura) */
+function posCarro(v){ var c=carroFrota(String(v||'').toUpperCase()), t=c&&c.tel; return t&&t.lat&&t.lng?{lat:t.lat,lng:t.lng}:{}; }
 function carroFrota(p){ return (S.dia.frota||[]).filter(function(c){return c.prefixo===p;})[0]||null; }
 function abrirEscalar(p,hora){
   S.pickHora=hora||'';
@@ -1673,7 +1675,7 @@ function okSoltura(it){
   if(d<-720) d+=1440; if(d>720) d-=1440;
   it.reg={_pend:true,status:d>tol?'ATRASADA':(d<-tol?'ADIANTADA':'NO_HORARIO'),hora_real:h,desvio_min:d,responsavel:getResp(),veiculo_real:it.veiculo,cracha_real:it.cracha,motorista_real:it.motorista,troca_veiculo:'',troca_motorista:'',motivo:'',conferido:''};
   render();
-  api('registrar',{id:it.id,acao:'SAIU',origem:'FISCAL',hora_real:h,responsavel:getResp(),garagem:(it.saida&&it.saida.de)||getGar(),observacao:obsOS},true).then(function(reg){
+  api('registrar',Object.assign({id:it.id,acao:'SAIU',origem:'FISCAL',hora_real:h,responsavel:getResp(),garagem:(it.saida&&it.saida.de)||getGar(),observacao:obsOS},posCarro(it.veiculo)),true).then(function(reg){
     it.reg=reg; render();
     toast((it.veiculo||it.escala)+' liberado às '+reg.hora_real,false,function(){ voltarSoltura(it); });
   }).catch(function(e){ it.reg=null; render(); toast(it.escala+': '+e.message,true); });
@@ -1803,6 +1805,7 @@ function enviarModal(it, acao, x, mot, osV, outraEsc){
   var p={id:it.id,acao:acao,substituir:acao==='SAIU'?(S.subst||''):'',liberarDe:outraEsc?outraEsc.id:'',hora_real:x.h,veiculo:x.v,cracha:x.m.c,motorista:x.m.n,motivo:mot,observacao:obsTxt,responsavel:getResp(),conferir:false,garagem:garagem};
   var ant=it.reg, antOutra=outraEsc?{veiculo:outraEsc.veiculo,tel:outraEsc.tel,saida:outraEsc.saida}:null;
   var eraEdicao=S.modo==='editar', modo=S.modo, novo=S.novo;
+  if(acao==='SAIU'&&!eraEdicao) Object.assign(p,posCarro(x.v));
   var d=0; if(x.h){ var pp=it.hora_prevista.split(':'), q=x.h.split(':'); d=(+q[0]*60+ +q[1])-(+pp[0]*60+ +pp[1]); if(d<-720) d+=1440; if(d>720) d-=1440; }
   var tol=S.dia.cfg.tolerancia, saiu=acao==='SAIU';
   it.reg={_pend:true,status:saiu?(d>tol?'ATRASADA':(d<-tol?'ADIANTADA':'NO_HORARIO')):'NAO_SAIU',hora_real:saiu?x.h:'',desvio_min:saiu?d:'',

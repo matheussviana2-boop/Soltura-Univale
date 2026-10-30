@@ -1631,6 +1631,7 @@ function tick(){
   var b=$('banner'), msgs=[];
   if(S.dia.data!==S.dia.hoje) msgs.push('Você está vendo '+fmtData(S.dia.data)+', não hoje. Ao liberar, a hora de saída precisa ser informada.');
   if(S.dia.telemetria&&S.dia.telemetria.erro) msgs.push(S.dia.telemetria.erro+' — mostrando todas as escalas.');
+  else if(S.dia.telemetria&&S.dia.telemetria.aviso) msgs.push(S.dia.telemetria.aviso+'.');
   b.style.display=msgs.length?'block':'none'; b.textContent=msgs.join(' ');
   if(!S.atual && !S.arrasto) render();
 }

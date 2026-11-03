@@ -1652,7 +1652,7 @@ function tick(){
   var tn=S.dia.escalaTN||{}, dm=function(iso){ var x=String(iso||'').split('-'); return x.length===3?x[2]+'/'+x[1]:''; }, eh='';
   if(tn.de){ var velha=S.dia.data>tn.ate;
     eh=' <span class="hesc'+(velha?' velha':'')+'" title="Escala semanal TransNet em uso'+(tn.em?' · importada em '+esc(tn.em):'')+'">Escala TransNet '+dm(tn.de)+' a '+dm(tn.ate)+
-      (velha?' · desatualizada'+(tn.repetidaDe?', repetindo '+dm(tn.repetidaDe):''):'')+'</span>'; }
+      (velha?' · desatualizada'+(tn.repetidaDe?', repetindo '+dm(tn.repetidaDe):''):'')+(tn.proxDe?' · próxima '+dm(tn.proxDe)+' a '+dm(tn.proxAte)+' recebida':'')+'</span>'; }
   $('hData').innerHTML=esc(dataLonga(S.dia.data))+eh;
   var b=$('banner'), msgs=[];
   if(S.dia.data!==S.dia.hoje) msgs.push('Você está vendo '+fmtData(S.dia.data)+', não hoje. Ao liberar, a hora de saída precisa ser informada.');

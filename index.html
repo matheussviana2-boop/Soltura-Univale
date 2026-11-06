@@ -2373,7 +2373,7 @@ var Hist=(function(){
     if(!D.length){ g('hsMain').innerHTML='<div class="empty">Nenhum dia consolidado em '+nomeMes(mdados.mes)+'.</div>'; return; }
     var h='<div class="hs-rings">'+
       '<div class="hs-ring">'+ring(pct(t.liberadas,t.programadas),P.ok)+'<div><small>LIBERADAS NO MÊS</small><b>'+t.liberadas+'<em> / '+t.programadas+'</em></b><span>programadas no mês</span></div></div>'+
-      '<div class="hs-ring">'+ring(pct(t.no_horario+t.adiantadas,t.liberadas),P.adi)+'<div><small>PONTUALIDADE</small><b>'+(t.no_horario+t.adiantadas)+'</b><span>no horário (até '+(mdados.tolerancia||5)+' min)</span></div></div>'+
+      '<div class="hs-ring">'+ring(pct(t.no_horario+t.adiantadas,t.liberadas),P.adi)+'<div><small>PONTUALIDADE</small><b>'+(t.no_horario+t.adiantadas)+'</b><span>no horário (até '+(mdados.tolerancia||20)+' min)</span></div></div>'+
       '<div class="hs-ring">'+ring(pct(t.pendentes,t.programadas),P.pen)+'<div><small>SEM REGISTRO</small><b>'+t.pendentes+'</b><span>não liberadas no sistema</span></div></div>'+
       '<div class="hs-ring">'+ring(pct(t.atrasadas,t.liberadas),P.atr)+'<div><small>ATRASADAS</small><b>'+t.atrasadas+'</b><span>média '+tempoTx(t.med)+' · '+t.trocas+' troca'+(t.trocas===1?'':'s')+'</span></div></div></div>';
     h+='<div class="hs-mid"><div class="hs-box"><h3>RESULTADO POR DIA <small>toque numa barra para abrir o dia</small></h3><div class="hs-gr">'+graficoMes(P)+'</div>'+

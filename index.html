@@ -934,6 +934,8 @@
   #psol .ps-card.ps-oc{box-shadow:inset 0 0 0 2px #C8143C}
   #psol .oc-tag{font:700 10px var(--mono);color:#FFFFFF;background:#C8143C;padding:2px 6px;border-radius:5px;margin-left:6px;white-space:nowrap}
   #psol .ps-card.edt{cursor:pointer}
+  #psol .ps-card.ps-pen.ps-atr{box-shadow:inset 0 0 0 1.5px #E3A008!important;background:#FFFBEB!important} #psol .ps-card.ps-atr .es2{color:#9A5700}
+  #psol .ps-card.ps-pen.ps-nao{box-shadow:inset 0 0 0 1.5px #C8143C!important;background:#FFF1F3!important} #psol .ps-card.ps-nao .es2{color:#C8143C}
   #psol .ps-card.edt:hover{filter:brightness(.98)}
   #ovForm{z-index:60}
 </style>
@@ -1627,7 +1629,8 @@ function formulario(o){
     if(c.tipo==='opcoes') return '<div class="lb full" data-c="'+c.id+'">'+r+'<div class="opc">'+c.ops.map(function(x){ return '<button type="button" data-op="'+esc(x[0])+'" class="'+(vals[c.id]===x[0]?'on':'')+'">'+esc(x[1])+'</button>'; }).join('')+'</div></div>';
     if(c.tipo==='texto') return '<label class="full" data-c="'+c.id+'">'+r+'<textarea data-in="'+c.id+'" placeholder="'+esc(c.ph||'')+'">'+esc(c.val||'')+'</textarea></label>';
     if(c.tipo==='hora') return '<label data-c="'+c.id+'">'+r+'<input type="time" class="mono" data-in="'+c.id+'" value="'+esc(c.val||'')+'"></label>';
-    return '<label data-c="'+c.id+'">'+r+'<input class="mono" data-in="'+c.id+'" value="'+esc(c.val||'')+'" placeholder="'+esc(c.ph||'')+'" style="text-transform:uppercase" autocomplete="off"></label>';
+    // carro: lista aparece ao digitar (frota)
+    var dl='dlF_'+c.id; return '<label data-c="'+c.id+'">'+r+'<input class="mono" data-in="'+c.id+'" list="'+dl+'" value="'+esc(c.val||'')+'" placeholder="'+esc(c.ph||'')+'" style="text-transform:uppercase" autocomplete="off" inputmode="text"><datalist id="'+dl+'">'+(c.lista||[]).map(function(v){ return '<option value="'+esc(v)+'">'; }).join('')+'</datalist></label>';
   }
   $('fmTit').textContent=o.titulo; $('fmSub').innerHTML=o.sub||''; $('fmBody').innerHTML=o.campos.map(campo).join('');
   $('fmErr').style.display='none'; $('fmSim').textContent=o.ok||'Salvar'; $('fmSim').disabled=false;
@@ -2269,15 +2272,19 @@ var PSol=(function(){
     }).catch(function(err){ g('psHora').classList.add('off'); if(!dados) g('psMain').innerHTML='<div class="empty">Não consegui carregar: '+e(err.message)+'</div>'; });
   }
   /* painel por CARRO: os carros da frota começam aguardando e ficam verdes quando são liberados (em qualquer escala) */
+  /* painel por ESCALA do dia: as pendentes aparecem desde cedo e vão sendo preenchidas conforme saem (só escalas com motorista escalado) */
   function carros(){
-    var L=dados.itens||[], por={}, lista=(dados.frota||[]).slice();
-    L.forEach(function(x){ var v=String(x.veiculo||'').toUpperCase(); if(!v||cl(x)!=='ok') return; (por[v]=por[v]||[]).push(x); });
-    Object.keys(por).forEach(function(v){ if(lista.indexOf(v)<0) lista.push(v); });   // liberado com carro fora do cadastro
-    return lista.sort().map(function(v){ var s=(por[v]||[]).sort(function(a,b){ return String(a.hora_real).localeCompare(String(b.hora_real)); });
-      var ult=s[s.length-1]||null, sa=(dados.saidasAuto||{})[v], auto=null;
-      // soltura automática: saiu do raio e não há soltura manual desse carro (até 1h antes da saída ou depois)
-      // (saída sem escala correspondente não é soltura: só contam as solturas registradas)
-      return { prefixo:v, saidas:s, ult:ult, auto:auto, os:(dados.os||{})[v]||'' }; });
+    var L=dados.itens||[], porCarro={};
+    L.forEach(function(x){ var v=String(x.veiculo||'').toUpperCase(); if(v&&cl(x)==='ok') (porCarro[v]=porCarro[v]||[]).push(x); });
+    Object.keys(porCarro).forEach(function(v){ porCarro[v].sort(function(a,b){ return String(a.hora_real).localeCompare(String(b.hora_real)); }); });
+    var out=[];
+    L.forEach(function(x){
+      if(x.status==='SEM_ESCALA') return;
+      if(cl(x)==='ok'){ var v=String(x.veiculo||'').toUpperCase(), s=porCarro[v]||[x]; out.push({ prefixo:v, saidas:s.slice(0,s.indexOf(x)+1), ult:x, auto:null, os:(dados.os||{})[v]||'' }); return; }
+      if(!String(x.motorista||'').trim()) return;                          // escala sem motorista escalado não entra
+      out.push({ prefixo:'', saidas:[], ult:null, auto:null, os:'', pend:x });
+    });
+    return out;
   }
   function desenhar(){
     var P={pen:'#7C8BA6',ok:'#047A45',tel:'#1D4ED8'}, C=carros(), conta={pen:0,ok:0,tel:0};
@@ -2288,15 +2295,15 @@ var PSol=(function(){
     var ROTc={pen:'Aguardando',ok:'Soltura do fiscal',tel:'Soltura automática'};
     g('psLeg').innerHTML=['pen','ok','tel'].map(function(k){ var c=P[k], on=filtro===k;
       return '<div data-f="'+k+'" class="'+(on?'on':(filtro?'off':''))+'" title="'+(on?'Mostrar todos':'Filtrar: '+ROTc[k])+'" style="border-color:'+c+(on?'':'55')+';box-shadow:inset 0 0 18px '+c+(on?'44':'22')+'"><i style="background:'+c+';box-shadow:0 0 10px '+c+'"></i><b style="color:'+c+'">'+conta[k]+'</b>'+ROTc[k]+'</div>'; }).join('');
-    g('psProg').innerHTML='<span><b>'+lib+'</b> de '+tot+' carros liberados</span><div class="tr"><i style="width:'+pct+'%"></i></div><b>'+pct+'%</b>';
+    g('psProg').innerHTML='<span><b>'+lib+'</b> de '+tot+' escalas liberadas</span><div class="tr"><i style="width:'+pct+'%"></i></div><b>'+pct+'%</b>';
     var q=semAc(g('psQ').value).trim();
     g('psQ').parentNode.classList.toggle('on',!!g('psQ').value);
     var V=C.filter(function(c){ if(filtro && tipo(c)!==filtro) return false; if(!q) return true;
-      return semAc([c.prefixo].concat(c.saidas.map(function(x){ return [x.escala,x.motorista,x.cracha,x.responsavel,x.garagem].join(' '); })).join(' ')).indexOf(q)>=0; });
-    // mais recente primeiro (soltura do fiscal ou automática); depois os que aguardam, pelo prefixo
-    var hs=function(c){ var h=c.auto?c.auto.hora:(c.ult?c.ult.hora_real:''); return h?minHH(h):-1; };
-    V.sort(function(a,b){ return hs(b)-hs(a) || a.prefixo.localeCompare(b.prefixo); });
-    if(!V.length){ g('psMain').innerHTML='<div class="empty">'+(C.length?'Nenhum carro encontrado'+(filtro?' em “'+ROTc[filtro]+'”':'')+(q?' para “'+e(g('psQ').value)+'”':'')+'.':'Frota da soltura não cadastrada (aba VEICULOS).')+'</div>'; return; }
+      var xs=c.pend?[c.pend]:c.saidas; return semAc([c.prefixo].concat(xs.map(function(x){ return [x.escala,x.motorista,x.cracha,x.responsavel,x.garagem].join(' '); })).join(' ')).indexOf(q)>=0; });
+    // dentro do grupo: pela hora programada (como a escala), as liberadas ficam no lugar delas
+    var hp_=function(c){ var x=c.pend||c.ult; return x&&x.hora_prevista?minHH(x.hora_prevista):9999; };
+    V.sort(function(a,b){ return hp_(a)-hp_(b) || String((a.pend||a.ult||{}).escala).localeCompare(String((b.pend||b.ult||{}).escala)); });
+    if(!V.length){ g('psMain').innerHTML='<div class="empty">'+(C.length?'Nenhuma escala encontrada'+(filtro?' em “'+ROTc[filtro]+'”':'')+(q?' para “'+e(g('psQ').value)+'”':'')+'.':'Frota da soltura não cadastrada (aba VEICULOS).')+'</div>'; return; }
     /* cores: verde = soltura do fiscal · azul = soltura automática (telemetria) · branco = aguardando */
     var cartao=function(c){
       var x=c.auto?null:c.ult, auto=!!c.auto||(x&&String(x.responsavel).toUpperCase()==='SOLTURA AUTOMÁTICA');
@@ -2304,7 +2311,14 @@ var PSol=(function(){
       var os=c.os?'<span class="os-tag">O.S.</span>':'', tag=auto?'<span class="tg-auto">AUTO</span>':'';
       var mais=c.saidas.length>1?'<span class="n2">'+c.saidas.length+'ª saída</span>':'';
       var ck='<div class="ck">'+(k==='pen'?ICO_REL:ICO_OK)+'</div>';
-      if(k==='pen') return '<div class="ps-card ps-pen" title="'+e(c.prefixo+' · aguardando soltura')+'">'+ck+'<div class="bd"><div class="l1"><b>'+e(c.prefixo)+'</b>'+os+'</div><div class="mo vz">Aguardando soltura</div></div></div>';
+      if(k==='pen'){ var p=c.pend||{}, ag=new Date(), mn=ag.getHours()*60+ag.getMinutes()-minHH(p.hora_prevista), nao=p.status==='NAO_SAIU';
+        var st=nao?'Não saiu'+(p.motivo?' · '+p.motivo:''):(mn>(dados.tolerancia||5)?'Atrasada +'+tempoTx(mn):(mn>=0?'Aguardando · no horário':'Aguardando · sai em '+tempoTx(-mn)));
+        return '<div class="ps-card ps-pen'+(nao?' ps-nao':(mn>(dados.tolerancia||5)?' ps-atr':''))+'" title="'+e((p.escala||'')+' · '+st)+'">'+ck+'<div class="bd">'+
+          '<div class="l1"><b>'+e(p.escala||'')+'</b></div>'+
+          '<div class="mo" title="'+e(p.motorista||'')+'">'+e(nome(p.motorista||''))+'</div>'+
+          '<div class="es2">'+e(st)+'</div>'+
+          '<div class="hs"><div><small>PROGRAMADA</small><span><em>'+dia+'</em>'+e(p.hora_prevista||'—')+'</span></div><div><small>SAÍDA</small><span>—</span></div></div>'+
+        '</div></div>'; }
       var mot, esc, hp, hr, dv, rod;
       if(c.auto){ mot=c.auto.motorista; esc='a vincular'; hp='—'; hr=c.auto.hora; dv=''; rod='Telemetria · saiu de '+nomeLocal(c.auto.de); }
       else { mot=x.motorista; esc=x.escala; hp=x.hora_prevista||'—'; hr=x.hora_real||'—'; dv=x.status==='SEM_ESCALA'?'':desvio(x.desvio);
@@ -2320,29 +2334,29 @@ var PSol=(function(){
       '</div></div>';
     };
     // separado por GRUPO DE ESCALA (prefixo da escala da última soltura do carro: GCE, STP, IPB…); quem aguarda fica no fim
-    var grupo=function(c){ var x=c.ult; if(!x||!x.escala) return c.auto?'~AUTO':'~PEN'; var m=String(x.escala).match(/^[A-Z]+/i); return m?m[0].toUpperCase():'~OUT'; };
-    var setorDe={}; V.forEach(function(c){ var k=grupo(c); if(c.ult&&c.ult.setor&&!setorDe[k]) setorDe[k]=String(c.ult.setor); });
+    var grupo=function(c){ var x=c.ult||c.pend; if(!x||!x.escala) return '~OUT'; var m=String(x.escala).match(/^[A-Z]+/i); return m?m[0].toUpperCase():'~OUT'; };
+    var setorDe={}; V.forEach(function(c){ var k=grupo(c), x=c.ult||c.pend; if(x&&x.setor&&!setorDe[k]) setorDe[k]=String(x.setor); });
     var G={}; V.forEach(function(c){ (G[grupo(c)]=G[grupo(c)]||[]).push(c); });
     var ord=Object.keys(G).sort(function(a,b){ return (a[0]==='~')-(b[0]==='~') || a.localeCompare(b); });
     var rot=function(k){ if(k==='~PEN') return ['Aguardando soltura','']; if(k==='~AUTO') return ['Soltura automática a vincular','']; if(k==='~OUT') return ['Outras','']; var st=(setorDe[k]||'').replace(/^\d+\s*-\s*/,''); return [k,st?nome(st):'']; };
     g('psMain').innerHTML=ord.map(function(k){ var r=rot(k), L=G[k], lib=L.filter(function(c){ return !!(c.ult||c.auto); }).length;
-      return '<section class="ps-grp"><div class="ps-gh"><b>'+e(r[0])+'</b>'+(r[1]?'<span>'+e(r[1])+'</span>':'')+'<em>'+L.length+' carro'+(L.length===1?'':'s')+(k[0]==='~'?'':' · '+lib+' liberado'+(lib===1?'':'s'))+'</em></div>'+
+      return '<section class="ps-grp"><div class="ps-gh"><b>'+e(r[0])+'</b>'+(r[1]?'<span>'+e(r[1])+'</span>':'')+'<em>'+lib+' de '+L.length+' liberada'+(L.length===1?'':'s')+'</em></div>'+
         '<div class="ps-grid">'+L.map(cartao).join('')+'</div></section>'; }).join('');
   }
   /* ocorrência depois da soltura: socorro, quebra, troca de veículo… fica na própria soltura (o realizado não muda) */
   function ocorrencia(x){
-    var TIPOS=[['SOCORRO','Socorro'],['QUEBRA','Quebra / defeito'],['TROCA DE VEÍCULO','Troca de veículo'],['ACIDENTE','Acidente'],['OUTROS','Outros']];
     var z=function(n){ return ('0'+n).slice(-2); }, d=new Date();
+    var frota=(dados.frota||[]).filter(function(v){ return v!==String(x.veiculo||'').toUpperCase(); });
     formulario({
       titulo:'Ocorrência · '+(x.veiculo||'')+' · '+(x.escala||''),
       sub:e(nome(x.motorista||''))+' · saiu às '+e(x.hora_real||'—')+(x.ocorrencia?'<br><b>Já registrada:</b> '+e(x.ocorrencia)+' '+e(x.ocorrencia_hora||'')+(x.veiculo_troca?' → '+e(x.veiculo_troca):'')+(x.ocorrencia_obs?' · '+e(x.ocorrencia_obs):''):''),
-      ok:'Salvar ocorrência',
-      campos:[{id:'tipo',tipo:'opcoes',rot:'O que aconteceu',req:true,ops:TIPOS,val:x.ocorrencia||''},
-              {id:'troca',tipo:'carro',rot:'Carro que assumiu a escala',ph:'Ex.: U1100',val:x.veiculo_troca||''},
-              {id:'hora',tipo:'hora',rot:'Hora da ocorrência',val:x.ocorrencia_hora||(z(d.getHours())+':'+z(d.getMinutes()))},
-              {id:'obs',tipo:'texto',rot:'Observação',ph:'Motivo, local, o que foi feito…',val:x.ocorrencia_obs||''}],
-      visivel:function(id,v){ return id!=='troca'||v.tipo==='TROCA DE VEÍCULO'||v.tipo==='SOCORRO'||!!v.troca; },
-      validar:function(v){ if(!v.tipo) return 'Escolha o que aconteceu.'; if(v.tipo==='TROCA DE VEÍCULO'&&!String(v.troca||'').trim()) return 'Informe o carro que assumiu a escala.'; if(v.tipo==='OUTROS'&&!String(v.obs||'').trim()) return 'Em “Outros”, descreva a ocorrência.'; return ''; },
+      ok:'Salvar',
+      campos:[{id:'tipo',tipo:'opcoes',rot:'Ocorrência',req:true,ops:[['SOCORRO','Socorro'],['OUTROS','Outros']],val:(x.ocorrencia==='OUTROS'?'OUTROS':(x.ocorrencia?'SOCORRO':''))},
+              {id:'troca',tipo:'carro',rot:'Carro substituto (se trocou)',ph:'Digite o prefixo',val:x.veiculo_troca||'',lista:frota},
+              {id:'hora',tipo:'hora',rot:'Hora',val:x.ocorrencia_hora||(z(d.getHours())+':'+z(d.getMinutes()))},
+              {id:'obs',tipo:'texto',rot:'Observação',ph:'O que aconteceu',val:x.ocorrencia_obs||''}],
+      validar:function(v){ if(!v.tipo) return 'Escolha Socorro ou Outros.'; if(v.tipo==='OUTROS'&&!String(v.obs||'').trim()) return 'Em “Outros”, descreva a ocorrência.';
+        var t=String(v.troca||'').trim().toUpperCase(); if(t&&(dados.frota||[]).length&&(dados.frota||[]).indexOf(t)<0) return 'Carro '+t+' não está na frota. Escolha da lista.'; return ''; },
       enviar:function(v){ return api('ocorrencia',{id:x.id,tipo:v.tipo,hora:v.hora,observacao:String(v.obs||'').trim(),veiculo_troca:String(v.troca||'').trim().toUpperCase(),responsavel:getResp()},true).then(function(r){ Object.assign(x,r); desenhar(); toast('Ocorrência registrada em '+(x.veiculo||'')); buscar(); }); }
     });
   }

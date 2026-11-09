@@ -2313,7 +2313,7 @@ var PSol=(function(){
       var ck='<div class="ck">'+(k==='pen'?ICO_REL:ICO_OK)+'</div>';
       if(k==='pen'){ var p=c.pend||{}, ag=new Date(), mn=ag.getHours()*60+ag.getMinutes()-minHH(p.hora_prevista), nao=p.status==='NAO_SAIU';
         var st=nao?'Não saiu'+(p.motivo?' · '+p.motivo:''):(mn>(dados.tolerancia||5)?'Atrasada +'+tempoTx(mn):(mn>=0?'Aguardando · no horário':'Aguardando · sai em '+tempoTx(-mn)));
-        return '<div class="ps-card ps-pen'+(nao?' ps-nao':(mn>(dados.tolerancia||5)?' ps-atr':''))+'" title="'+e((p.escala||'')+' · '+st)+'">'+ck+'<div class="bd">'+
+        return '<div class="ps-card ps-pen'+(nao?' ps-nao':'')+'" title="'+e((p.escala||'')+' · '+st)+'">'+ck+'<div class="bd">'+
           '<div class="l1"><b>'+e(p.escala||'')+'</b></div>'+
           '<div class="mo" title="'+e(p.motorista||'')+'">'+e(nome(p.motorista||''))+'</div>'+
           '<div class="es2">'+e(st)+'</div>'+

@@ -2313,7 +2313,8 @@ var PSol=(function(){
       var ck='<div class="ck">'+(k==='pen'?ICO_REL:ICO_OK)+'</div>';
       if(k==='pen'){ var p=c.pend||{}, ag=new Date(), mn=ag.getHours()*60+ag.getMinutes()-minHH(p.hora_prevista), nao=p.status==='NAO_SAIU';
         var st=nao?'Não saiu'+(p.motivo?' · '+p.motivo:''):(mn>(dados.tolerancia||5)?'Atrasada +'+tempoTx(mn):(mn>=0?'Aguardando · no horário':'Aguardando · sai em '+tempoTx(-mn)));
-        return '<div class="ps-card ps-pen'+(nao?' ps-nao':'')+'" title="'+e((p.escala||'')+' · '+st)+'">'+ck+'<div class="bd">'+
+        var ed=!nao&&mn>60&&p.id;   // pendente há mais de 1h: o fiscal resolve pelo painel
+        return '<div class="ps-card ps-pen'+(nao?' ps-nao':'')+(ed?' edt':'')+'"'+(ed?' data-pe="'+e(p.id)+'" role="button" tabindex="0"':'')+' title="'+e((p.escala||'')+' · '+st+(ed?' · toque para registrar':''))+'">'+ck+'<div class="bd">'+
           '<div class="l1"><b>'+e(p.escala||'')+'</b></div>'+
           '<div class="mo" title="'+e(p.motorista||'')+'">'+e(nome(p.motorista||''))+'</div>'+
           '<div class="es2">'+e(st)+'</div>'+
@@ -2343,6 +2344,45 @@ var PSol=(function(){
       return '<section class="ps-grp"><div class="ps-gh"><b>'+e(r[0])+'</b>'+(r[1]?'<span>'+e(r[1])+'</span>':'')+'<em>'+lib+' de '+L.length+' liberada'+(L.length===1?'':'s')+'</em></div>'+
         '<div class="ps-grid">'+L.map(cartao).join('')+'</div></section>'; }).join('');
   }
+  /* escala pendente há mais de 1h: registro manual pelo painel (saiu com carro e motorista, ou não saiu com o motivo) */
+  function registrarPend(x){
+    var cad=(S.cad&&S.cad.motoristas&&Object.keys(S.cad.motoristas).length)?S.cad:(cacheLe('cad')||{motoristas:{}});
+    var abre=function(cad){
+      var M=cad.motoristas||{}, z=function(n){ return ('0'+n).slice(-2); }, d=new Date();
+      var opM=Object.keys(M).map(function(c){ return c+' - '+M[c]; });
+      formulario({
+        titulo:'Registrar '+(x.escala||'')+' · programada '+(x.hora_prevista||''),
+        sub:'Escalado: '+e(nome(x.motorista||''))+(x.cracha?' ('+e(x.cracha)+')':''),
+        ok:'Registrar',
+        campos:[{id:'acao',tipo:'opcoes',rot:'Situação',req:true,ops:[['SAIU','Saiu'],['NAO_SAIU','Não saiu']]},
+                {id:'carro',tipo:'carro',rot:'Carro',req:true,ph:'Digite o prefixo',lista:dados.frota||[]},
+                {id:'hora',tipo:'hora',rot:'Hora da saída',req:true,val:z(d.getHours())+':'+z(d.getMinutes())},
+                {id:'mot',tipo:'carro',rot:'Motorista (matrícula ou nome)',req:true,ph:'Digite e escolha da lista',val:x.cracha?x.cracha+' - '+x.motorista:'',lista:opM},
+                {id:'obs',tipo:'texto',rot:'Observação',ph:'Obrigatória quando não saiu'}].concat(getResp()?[]:[{id:'resp',tipo:'carro',rot:'Seu nome (responsável)',req:true,ph:'Nome do fiscal'}]),
+        visivel:function(id,v){ return id==='acao'||id==='obs'||id==='resp'||v.acao==='SAIU'; },
+        validar:function(v){
+          if(!v.acao) return 'Escolha se a escala saiu ou não saiu.';
+          if(!getResp()&&!String(v.resp||'').trim()) return 'Informe seu nome (responsável).';
+          if(v.acao==='NAO_SAIU') return String(v.obs||'').trim()?'':'Informe o motivo de não ter saído.';
+          var c=String(v.carro||'').trim().toUpperCase(); if(!c) return 'Informe o carro.'; if((dados.frota||[]).length&&(dados.frota||[]).indexOf(c)<0) return 'Carro '+c+' não está na frota. Escolha da lista.';
+          if(!v.hora) return 'Informe a hora da saída.';
+          var m=motDe(v.mot,M); if(!m.c) return 'Escolha o motorista da lista (matrícula - nome).';
+          return '';
+        },
+        enviar:function(v){
+          if(!getResp()) ls(LS_RESP,String(v.resp).trim().toUpperCase());
+          var p={id:x.id,acao:v.acao,origem:'FISCAL',responsavel:getResp(),observacao:String(v.obs||'').trim()};
+          if(v.acao==='NAO_SAIU') p.motivo=p.observacao;
+          else { var m=motDe(v.mot,M); p.hora_real=v.hora; p.veiculo=String(v.carro).trim().toUpperCase(); p.cracha=m.c; p.motorista=m.n; p.observacao=(p.observacao?p.observacao+' · ':'')+'Registrada pelo painel de soltura'; }
+          return api('registrar',p,true).then(function(){ toast((x.escala||'')+(v.acao==='SAIU'?' registrada como saída':' registrada como não saiu')); buscar(); });
+        }
+      });
+    };
+    if(Object.keys(cad.motoristas||{}).length) abre(cad);
+    else api('getCadastros').then(function(c){ cacheGrava('cad',c); abre(c); }).catch(function(){ abre({motoristas:{}}); });
+  }
+  function motDe(t,M){ t=String(t||'').trim(); var m=t.match(/^(\d+)/); if(m) return {c:m[1],n:M[m[1]]||t.replace(/^\d+\s*-\s*/,'').toUpperCase()};
+    var k=Object.keys(M).filter(function(c){ return semAc(M[c])===semAc(t); })[0]; return k?{c:k,n:M[k]}:{c:'',n:''}; }
   /* ocorrência depois da soltura: socorro, quebra, troca de veículo… fica na própria soltura (o realizado não muda) */
   function ocorrencia(x){
     var z=function(n){ return ('0'+n).slice(-2); }, d=new Date();
@@ -2369,7 +2409,8 @@ var PSol=(function(){
     g('psQ').addEventListener('input',function(){ if(dados) desenhar(); });
     g('psQ').addEventListener('keydown',function(ev){ if(ev.key==='Escape'){ this.value=''; if(dados) desenhar(); } });
     g('psQx').addEventListener('click',function(){ g('psQ').value=''; g('psQ').focus(); if(dados) desenhar(); });
-    var abreOc=function(ev){ var t=ev.target.closest('[data-oc]'); if(!t||!dados) return; var id=t.getAttribute('data-oc'), x=(dados.itens||[]).filter(function(i){ return i.id===id; })[0]; if(x) ocorrencia(x); };
+    var abreOc=function(ev){ if(!dados) return; var pe=ev.target.closest('[data-pe]'); if(pe){ var y=(dados.itens||[]).filter(function(i){ return i.id===pe.getAttribute('data-pe'); })[0]; if(y) registrarPend(y); return; }
+      var t=ev.target.closest('[data-oc]'); if(!t) return; var id=t.getAttribute('data-oc'), x=(dados.itens||[]).filter(function(i){ return i.id===id; })[0]; if(x) ocorrencia(x); };
     g('psMain').addEventListener('click',abreOc);
     g('psMain').addEventListener('keydown',function(ev){ if(ev.key==='Enter') abreOc(ev); });
     var cs=cacheLe('psol'); if(cs&&cs.data===hojeISO_()){ dados=cs; try{ desenhar(); }catch(x){} }

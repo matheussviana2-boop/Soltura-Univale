@@ -861,6 +861,11 @@
 
   /* painel de soltura: cartões alinhados (nada vaza) e cores por tipo de soltura */
   #psol .ps-grid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;align-items:stretch}
+  #psol .ps-grp{margin-bottom:18px}
+  #psol .ps-gh{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:0 2px 8px;padding-bottom:6px;border-bottom:1px solid var(--ps-ln,#D9E0EA)}
+  #psol .ps-gh b{font:800 15px var(--mono,monospace);letter-spacing:.06em;color:#0F1B33}
+  #psol .ps-gh span{font-size:13px;font-weight:600;color:#4A5A70}
+  #psol .ps-gh em{font-style:normal;font-size:12px;color:#6B7A90;margin-left:auto}
   #psol .ps-card{overflow:hidden;min-width:0;padding:10px 12px 10px 14px!important;gap:10px}
   #psol .ps-card .bd{min-width:0;flex:1}
   #psol .ps-card .l1{display:flex;align-items:center;gap:6px;min-width:0}
@@ -884,8 +889,12 @@
   @media (max-width:1100px){ #psol .pn-leg{flex-wrap:wrap} }
   @media (max-width:760px){ #psol .pn-busca{width:100%} }
   .locbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0 24px 12px}
+  .vseg{display:inline-flex;background:#E6EBF2;border-radius:14px;padding:4px;gap:4px;height:50px;box-sizing:border-box}
+  .vseg button{border:0;background:none;border-radius:10px;padding:0 18px;font:700 14px var(--sg);color:#4A5A70;cursor:pointer}
+  .vseg button.on{background:#0E6E78;color:#fff;box-shadow:0 2px 6px rgba(14,110,120,.25)}
+  .vseg button:focus-visible{outline:2px solid #0E6E78;outline-offset:2px}
   .locbar .lochint{font-size:13px;color:#4A5A70}
-  @media (max-width:760px){ .locbar{margin:0 14px 10px} .locbar .locsel{flex:1} .locbar .lochint{display:none} }
+  @media (max-width:760px){ .locbar{margin:0 14px 10px} .locbar .locsel{flex:1} .locbar .lochint{display:none} .vseg{width:100%} .vseg button{flex:1;padding:0 8px} }
   .hsp{flex:1}
   @media (max-width:760px){ .hsp{display:none} }
   .row.livre .lugar{max-width:170px}
@@ -932,7 +941,7 @@
 
 
 <div class="banner" id="banner" style="display:none"></div>
-<div class="locbar" id="locBar" style="display:none"><label class="locsel" id="gSeg"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg><span class="lt">Localidade</span><select id="fGar" aria-label="Localidade dos carros"></select><span class="locn" id="locN" aria-live="polite"></span></label><span class="lochint" id="locHint">onde cada carro está agora, pela telemetria</span></div>
+<div class="locbar" id="locBar" style="display:none"><div class="vseg" id="vistaSeg" role="group" aria-label="Ver por"><button type="button" data-vista="esc" aria-pressed="true">Por escala</button><button type="button" data-vista="vei" aria-pressed="false">Por veículo</button></div><label class="locsel" id="gSeg"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg><span class="lt">Localidade</span><select id="fGar" aria-label="Localidade dos carros"></select><span class="locn" id="locN" aria-live="polite"></span></label><span class="lochint" id="locHint">onde cada carro está agora, pela telemetria</span></div>
 <div class="list" id="list"></div>
 
 <!-- modal: soltar com alteração / editar realizada -->
@@ -1063,7 +1072,7 @@
 // URL da implantação do Apps Script (termina em /exec)
 var API_URL = 'https://script.google.com/macros/s/AKfycbzv0y28Rhb-Iy27Y8Z5daelqH8uHbXDGKauEpNUfeuvSoDhQsKI4hmlJeK4eSrKsqh9Pw/exec';
 
-var S = { dia:null, cad:{motivos:[],veiculos:[],motoristas:{}}, offset:0, tab:'pend', subLib:'conferir', atual:null, modo:null, sel:null, novo:false, busy:false };
+var S = { vista:(function(){ try{ return localStorage.getItem('sol_vista')==='vei'?'vei':'esc'; }catch(e){ return 'esc'; } })(), dia:null, cad:{motivos:[],veiculos:[],motoristas:{}}, offset:0, tab:'pend', subLib:'conferir', atual:null, modo:null, sel:null, novo:false, busy:false };
 var LS_RESP='soltura.responsavel', LS_CHAVE='soltura.chave', LS_GAR='soltura.garagem';
 
 function $(id){ return document.getElementById(id); }
@@ -1248,7 +1257,7 @@ var ICO_CLOCK='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" strok
 var ICO_PIN='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>';
 var ICO_LOCK='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/></svg>';
 var ICO_OK='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>';
-var TABS=[['pend','Soltura'],['carros','Veículos disponíveis'],['interd','Veículos com O.S.'],['lib','Soltura realizada']];
+var TABS=[['pend','Soltura'],['interd','Veículos com O.S.'],['lib','Soltura realizada']];
 var SUBLIB=[['conferir','A conferir'],['conferidos','Conferidos'],['todos','Todos']];
 
 function render(){
@@ -1285,8 +1294,12 @@ function render(){
   }).join('');
 
   var r=[], h='';
-  $('locBar').style.display=S.tab==='carros'&&$('fGar').options.length?'':'none';   // localidade só na aba de veículos
-  if(S.tab==='carros'){
+  // aba Soltura: alterna entre ESCALA (escalas a sair) e VEÍCULO (frota, com o filtro de localidade)
+  var vei=S.tab==='pend'&&S.vista==='vei';
+  $('locBar').style.display=S.tab==='pend'?'':'none';
+  $('gSeg').style.display=vei&&$('fGar').options.length?'':'none'; if($('locHint')) $('locHint').style.display=vei?'':'none';
+  Array.prototype.forEach.call(document.querySelectorAll('#vistaSeg [data-vista]'),function(b){ var on=b.getAttribute('data-vista')===(S.vista); b.classList.toggle('on',on); b.setAttribute('aria-pressed',on?'true':'false'); });
+  if(vei){
     if(!CL){ r.push('Telemetria indisponível agora'); h='<div class="empty">Sem telemetria no momento — não dá para saber quais carros estão em '+esc(nomeLocal(GL))+'.</div>'; } else {
     // localidade escolhida: só os carros que estão no ponto ou perto dele agora (telemetria)
     var nIn=CL.filter(function(x){ return x.l.k==='in'; }).length, nPe=CL.filter(function(x){ return x.l.k==='perto'; }).length;
@@ -1408,11 +1421,12 @@ function linhaInterd(x){
     var st=i.reg?(i.reg.status==='NAO_SAIU'?'não saiu':'saiu '+i.reg.hora_real+(i.reg.troca_veiculo==='SIM'?' com '+i.reg.veiculo_real:'')):'pendente';
     return '<span class="esc-chip'+(i.reg?'':' pend')+'">'+esc(i.hora_prevista)+' '+esc(i.escala)+(i.motorista?' · '+esc(titulo(i.motorista)):'')+' · '+st+'</span>';
   }).join('');
-  var acts=prox?'<div class="acts"><button type="button" class="out" data-act="edit" data-id="'+prox.id+'">Trocar carro</button>'+slideLib(prox.id,'Liberar',true)+'</div>':'';
+  // carro com O.S. também pode ser escalado (o fiscal confirma na escolha da escala)
+  var acts='<div class="acts">'+slideLib('car:'+x.prefixo,'Escalar',true)+'</div>';
   return '<div class="row">'+
     tbox('os',x.os||'—','Nº da O.S.')+
     '<div class="bus" role="img" aria-label="Ônibus"></div>'+
-    '<div class="ident"><div class="pref">'+esc(x.prefixo)+'</div><div class="esc">'+(prox?'Próxima saída '+esc(prox.hora_prevista):'Sem escala pendente')+'</div></div>'+
+    '<div class="ident"><div class="pref">'+esc(x.prefixo)+'</div><div class="esc">'+(prox?'Próxima saída '+esc(prox.hora_prevista):'Com O.S. aberta')+'</div></div>'+
     '<div class="info" style="cursor:default">'+
       '<div><span>Tipo de O.S.: <b>'+esc(osTipo(x))+'</b></span></div>'+
       '<div class="chs">'+ch('os',ICO_WR,'Aberta '+(x.aberta_em||'—'))+(x.previsao?ch('',null,'Previsão '+x.previsao):'')+'</div>'+
@@ -1920,6 +1934,7 @@ $('avPop').addEventListener('click',function(e){
   r.scrollIntoView({behavior:'smooth',block:'center'}); r.classList.remove('pisca'); void r.offsetWidth; r.classList.add('pisca');
 });
 document.addEventListener('click',function(e){ if(!e.target.closest('#avWrap')) $('avPop').classList.remove('on'); });
+$('vistaSeg').addEventListener('click',function(e){ var b=e.target.closest('[data-vista]'); if(!b) return; S.vista=b.getAttribute('data-vista'); try{ localStorage.setItem('sol_vista',S.vista); }catch(x){} render(); window.scrollTo(0,0); });
 $('tabs').addEventListener('click',function(e){ var b=e.target.closest('[data-tab]'); if(b){ S.tab=b.getAttribute('data-tab'); render(); window.scrollTo(0,0); } });
 $('fBusca').addEventListener('input',render);
 $('fGar').addEventListener('change',function(){ ls(LS_GAR,this.value); renderGar(); tick(); });
@@ -2164,7 +2179,7 @@ var PSol=(function(){
     V.sort(function(a,b){ return hs(b)-hs(a) || a.prefixo.localeCompare(b.prefixo); });
     if(!V.length){ g('psMain').innerHTML='<div class="empty">'+(C.length?'Nenhum carro encontrado'+(filtro?' em “'+ROTc[filtro]+'”':'')+(q?' para “'+e(g('psQ').value)+'”':'')+'.':'Frota da soltura não cadastrada (aba VEICULOS).')+'</div>'; return; }
     /* cores: verde = soltura do fiscal · azul = soltura automática (telemetria) · branco = aguardando */
-    g('psMain').innerHTML='<div class="ps-grid">'+V.map(function(c){
+    var cartao=function(c){
       var x=c.auto?null:c.ult, auto=!!c.auto||(x&&String(x.responsavel).toUpperCase()==='SOLTURA AUTOMÁTICA');
       var k=(x||c.auto)?(auto?'tel':'ok'):'pen';
       var os=c.os?'<span class="os-tag">O.S.</span>':'', tag=auto?'<span class="tg-auto">AUTO</span>':'';
@@ -2183,7 +2198,16 @@ var PSol=(function(){
         '<div class="hs"><div><small>PROGRAMADA</small><span><em>'+dia+'</em>'+e(hp)+'</span></div><div><small>'+(auto?'SAÍDA':'LIBERADA')+'</small><span><em>'+dia+'</em>'+e(hr)+'</span></div></div>'+
         '<div class="ft" title="'+e(rod)+'">'+e(rod)+'</div>'+
       '</div></div>';
-    }).join('')+'</div>';
+    };
+    // separado por GRUPO DE ESCALA (prefixo da escala da última soltura do carro: GCE, STP, IPB…); quem aguarda fica no fim
+    var grupo=function(c){ var x=c.ult; if(!x||!x.escala) return c.auto?'~AUTO':'~PEN'; var m=String(x.escala).match(/^[A-Z]+/i); return m?m[0].toUpperCase():'~OUT'; };
+    var setorDe={}; V.forEach(function(c){ var k=grupo(c); if(c.ult&&c.ult.setor&&!setorDe[k]) setorDe[k]=String(c.ult.setor); });
+    var G={}; V.forEach(function(c){ (G[grupo(c)]=G[grupo(c)]||[]).push(c); });
+    var ord=Object.keys(G).sort(function(a,b){ return (a[0]==='~')-(b[0]==='~') || a.localeCompare(b); });
+    var rot=function(k){ if(k==='~PEN') return ['Aguardando soltura','']; if(k==='~AUTO') return ['Soltura automática a vincular','']; if(k==='~OUT') return ['Outras','']; var st=(setorDe[k]||'').replace(/^\d+\s*-\s*/,''); return [k,st?nome(st):'']; };
+    g('psMain').innerHTML=ord.map(function(k){ var r=rot(k), L=G[k], lib=L.filter(function(c){ return !!(c.ult||c.auto); }).length;
+      return '<section class="ps-grp"><div class="ps-gh"><b>'+e(r[0])+'</b>'+(r[1]?'<span>'+e(r[1])+'</span>':'')+'<em>'+L.length+' carro'+(L.length===1?'':'s')+(k[0]==='~'?'':' · '+lib+' liberado'+(lib===1?'':'s'))+'</em></div>'+
+        '<div class="ps-grid">'+L.map(cartao).join('')+'</div></section>'; }).join('');
   }
   function iniciar(){
     document.body.classList.add('modo-psol'); document.title='Painel de soltura · Univale';

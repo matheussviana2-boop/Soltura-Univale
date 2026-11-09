@@ -903,6 +903,23 @@
   #psol .ps-card .lbm{font-size:.8em;font-weight:700;color:#5B6B7E}
   .row.livre.rota{background:#F8FAFC}
   .row.semtb{padding-left:16px}
+
+  /* barra única (modelo 1): áreas em botões segmentados + Escalas/Veículos + busca + localidade */
+  .tool{gap:10px;flex-wrap:wrap}
+  .tabs{background:#E2E8EF;border-radius:13px;padding:4px;gap:2px}
+  .tab{height:38px;padding:0 14px;font-size:14px;font-weight:600;color:#3D4E63;gap:7px}
+  .tab i{display:none}
+  .tab .n{font-size:12px;opacity:.75}
+  .tab.on,.tab.t-pend.on,.tab.t-interd.on,.tab.t-lib.on{background:#FFFFFF;color:#0F1B33;box-shadow:0 1px 3px rgba(15,27,51,.14)}
+  .tool .vseg{display:inline-flex;background:#FFFFFF;border:1px solid #D7DFE8;border-radius:12px;padding:0;gap:0;height:46px;overflow:hidden;flex-shrink:0}
+  .tool .vseg button{border:0;background:none;border-radius:0;padding:0 16px;font:600 14px var(--sg);color:#5B6B7E;box-shadow:none}
+  .tool .vseg button.on{background:#0E6E78;color:#FFFFFF}
+  .tool .busca{flex:1 1 260px;height:46px}
+  .tool .locsel{height:46px;padding:0 10px 0 14px;background:#FFFFFF;border:1px solid #D7DFE8;border-radius:12px;flex-shrink:0}
+  .tool .locsel .lt{display:none}
+  .tool .locsel select{height:34px;min-width:200px;border:0;font-size:14px;padding:0 28px 0 4px}
+  .tool .locn{font-size:12px} .tool .locn b{font-size:15px}
+  @media (max-width:760px){ .tool .vseg{flex:1} .tool .vseg button{flex:1} .tool .busca{flex:1 1 100%} .tool .locsel{flex:1 1 100%} .tool .locsel select{flex:1;min-width:0} }
 </style>
 </head>
 <body>
@@ -926,10 +943,12 @@
 
 <div class="tool">
   <nav class="tabs" id="tabs"></nav>
+  <div class="vseg" id="vistaSeg" role="group" aria-label="Ver por"><button type="button" data-vista="esc" aria-pressed="true">Escalas</button><button type="button" data-vista="vei" aria-pressed="false">Veículos</button></div>
   <label class="busca">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
     <input id="fBusca" placeholder="Buscar veículo, linha ou motorista…" aria-label="Buscar">
   </label>
+  <label class="locsel" id="gSeg"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg><span class="lt">Localidade</span><select id="fGar" aria-label="Localidade dos carros"></select><span class="locn" id="locN" aria-live="polite"></span></label>
   <div class="avwrap" id="avWrap" style="display:none">
     <button type="button" class="avbtn" id="avBtn" aria-haspopup="true" aria-expanded="false" title="Avisos">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><circle cx="12" cy="17" r=".6"/></svg>
@@ -941,7 +960,7 @@
 
 
 <div class="banner" id="banner" style="display:none"></div>
-<div class="locbar" id="locBar" style="display:none"><div class="vseg" id="vistaSeg" role="group" aria-label="Ver por"><button type="button" data-vista="esc" aria-pressed="true">Por escala</button><button type="button" data-vista="vei" aria-pressed="false">Por veículo</button></div><label class="locsel" id="gSeg"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg><span class="lt">Localidade</span><select id="fGar" aria-label="Localidade dos carros"></select><span class="locn" id="locN" aria-live="polite"></span></label><span class="lochint" id="locHint">onde cada carro está agora, pela telemetria</span></div>
+<div class="locbar" id="locBar" style="display:none"><span id="locHint"></span></div>
 <div class="list" id="list"></div>
 
 <!-- modal: soltar com alteração / editar realizada -->
@@ -1257,7 +1276,7 @@ var ICO_CLOCK='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" strok
 var ICO_PIN='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>';
 var ICO_LOCK='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/></svg>';
 var ICO_OK='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>';
-var TABS=[['pend','Soltura'],['interd','Veículos com O.S.'],['lib','Soltura realizada']];
+var TABS=[['pend','Soltura'],['interd','Com O.S.'],['lib','Realizadas']];
 var SUBLIB=[['conferir','A conferir'],['conferidos','Conferidos'],['todos','Todos']];
 
 function render(){
@@ -1288,7 +1307,9 @@ function render(){
   if($('locHint')) $('locHint').textContent=GL?'carros no ponto ou perto dele agora, pela telemetria':'todos os carros da frota e onde cada um está agora';
   var n={carros:CL?CL.length:0, pend:pend.length+sem.length+atrasados.length+saiuSem.length, interd:interd.length, lib:feitas.length+soltAuto().filter(function(a){ return !G || q || a.de===G; }).length+(S.dia.semEscala||[]).filter(function(x){ return !G || q || x.garagem===G; }).length};
 
-  $('tabs').innerHTML=TABS.map(function(t){
+  // Escalas: Soltura e Realizadas · Veículos: Soltura (frota), Com O.S. e Realizadas
+  if(S.tab==='interd'&&S.vista!=='vei') S.tab='pend';
+  $('tabs').innerHTML=TABS.filter(function(t){ return t[0]!=='interd'||S.vista==='vei'; }).map(function(t){
     var extra='';
     return '<button type="button" class="tab t-'+t[0]+(S.tab===t[0]?' on':'')+'" data-tab="'+t[0]+'"><i></i>'+t[1]+(t[0]==='pend'?'':'<span class="n">'+n[t[0]]+'</span>')+extra+'</button>';
   }).join('');
@@ -1296,8 +1317,7 @@ function render(){
   var r=[], h='';
   // aba Soltura: alterna entre ESCALA (escalas a sair) e VEÍCULO (frota, com o filtro de localidade)
   var vei=S.tab==='pend'&&S.vista==='vei';
-  $('locBar').style.display=S.tab==='pend'?'':'none';
-  $('gSeg').style.display=vei&&$('fGar').options.length?'':'none'; if($('locHint')) $('locHint').style.display=vei?'':'none';
+  $('gSeg').style.display=vei&&$('fGar').options.length?'':'none';
   Array.prototype.forEach.call(document.querySelectorAll('#vistaSeg [data-vista]'),function(b){ var on=b.getAttribute('data-vista')===(S.vista); b.classList.toggle('on',on); b.setAttribute('aria-pressed',on?'true':'false'); });
   if(vei){
     if(!CL){ r.push('Telemetria indisponível agora'); h='<div class="empty">Sem telemetria no momento — não dá para saber quais carros estão em '+esc(nomeLocal(GL))+'.</div>'; } else {

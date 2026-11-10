@@ -1136,6 +1136,8 @@ function getResp(){ return ls(LS_RESP); }
 function hojeISO_(){ var d=new Date(), z=function(n){return ('0'+n).slice(-2);}; return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate()); }
 function cacheLe(k){ try{ return JSON.parse(localStorage.getItem('soltura.cache.'+k)||'null'); }catch(e){ return null; } }
 function cacheGrava(k,v){ try{ localStorage.setItem('soltura.cache.'+k,JSON.stringify(v)); }catch(e){ try{ localStorage.removeItem('soltura.cache.'+k); }catch(x){} } }
+/* motorista que a telemetria não reconheceu: "MOTORISTA RFID · CÓD 1234" (o fiscal identifica depois) */
+function semIdent(n){ return /RFID|N.O IDENTIFICADO|C.D \d/i.test(String(n||'')); }
 function titulo(n){ return String(n||'').toLowerCase().replace(/(^|\s)\S/g,function(m){return m.toUpperCase();}).replace(/\s(De|Da|Do|Dos|Das|E)\s/g,function(m){return m.toLowerCase();}); }
 function semAcento(s){ return String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase(); }
 function fmtData(iso){ var p=iso.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
@@ -1769,12 +1771,12 @@ function linhaReg(it){
     '<div class="bus" role="img" aria-label="Ônibus"></div>'+
     '<div class="ident"><div class="pref'+(tv?' chg':'')+'">'+(ns?esc(it.veiculo||'—'):esc(r.veiculo_real))+(tv?'<small>previsto '+esc(it.veiculo||'—')+'</small>':'')+'</div><div class="esc">'+esc(it.escala)+' · '+esc(it.linha)+'</div></div>'+
     '<div class="info" data-act="editR" data-id="'+it.id+'" title="Toque para corrigir">'+
-      (!ns&&tm?'<div class="mot dup"><span class="lb">Saiu</span><span class="chg">'+esc(titulo(r.motorista_real)||'Motorista não identificado')+'</span>'+(r.cracha_real?'<small>'+esc(r.cracha_real)+'</small>':'')+'</div>'+
+      (!ns&&tm?'<div class="mot dup"><span class="lb">Saiu</span><span class="chg">'+esc(semIdent(r.motorista_real)?r.motorista_real:(titulo(r.motorista_real)||'Motorista não identificado'))+'</span>'+(r.cracha_real?'<small>'+esc(r.cracha_real)+'</small>':'')+'</div>'+
         '<div class="mot dup esc0"><span class="lb">Escalado</span><span>'+esc(titulo(r.motorista_prev||it.motorista)||'—')+'</span>'+((r.cracha_prev||it.cracha)?'<small>'+esc(r.cracha_prev||it.cracha)+'</small>':'')+'</div>'
       :'<div class="mot"><span>'+esc(titulo(ns?it.motorista:r.motorista_real))+'</span></div>')+
       '<div class="chs">'+ch('',ICO_CLK13,'Programado '+dataHora(S.dia.data,it.hora_prevista))+
         (ns?(r.motivo?ch('ns',null,r.motivo):''):ch('outra',ICO_OK13,(String(r.responsavel).toUpperCase()==='SOLTURA AUTOMÁTICA'?'Soltura automática ':'Liberado ')+dataHora(dLib,r.hora_real)))+
-        (!ns&&tm?ch('ns',null,r.motorista_real?'Outro motorista':'Motorista não identificado'):'')+(r.ocorrencia?ch('ns',ICO_WR,'Ocorrência '+(r.ocorrencia_hora||'')+': '+titulo(r.ocorrencia)+(r.veiculo_troca?' → '+r.veiculo_troca:'')):'')+'</div>'+
+        (!ns&&tm?ch('ns',null,r.motorista_real&&!semIdent(r.motorista_real)?'Outro motorista':'Motorista não identificado'):'')+(r.ocorrencia?ch('ns',ICO_WR,'Ocorrência '+(r.ocorrencia_hora||'')+': '+titulo(r.ocorrencia)+(r.veiculo_troca?' → '+r.veiculo_troca:'')):'')+'</div>'+
     '</div>'+(!ns&&r.lat&&r.lng?'<button type="button" class="maplink msol" data-act="mapsol" data-id="'+esc(it.id)+'" title="Ver no mapa onde a soltura foi registrada" aria-label="Ver no mapa o local da soltura de '+esc(r.veiculo_real||'')+'">'+ICO_PIN.replace('width="16" height="16"','width="22" height="22"')+'</button>':'')+respBox(r.responsavel, ns)+
   '</div>';
 }
@@ -2325,8 +2327,8 @@ var PSol=(function(){
       var oc=x&&x.ocorrencia?'<span class="oc-tag" title="'+e((x.ocorrencia_obs||'')+(x.veiculo_troca?' · trocado por '+x.veiculo_troca:''))+'">'+e(x.ocorrencia)+(x.ocorrencia_hora?' '+e(x.ocorrencia_hora):'')+(x.veiculo_troca?' → '+e(x.veiculo_troca):'')+'</span>':'';
       return '<div class="ps-card ps-'+k+(x&&x.id?' edt':'')+(oc?' ps-oc':'')+'"'+(x&&x.id?' data-oc="'+e(x.id)+'" role="button" tabindex="0"':'')+' title="'+e(c.prefixo+' · '+(esc||'')+' · '+(auto?'soltura automática':'liberado')+' às '+hr+(x&&x.id?' · toque para registrar ocorrência':''))+'">'+ck+'<div class="bd">'+
         '<div class="l1"><b>'+e(c.prefixo)+'</b>'+tag+os+oc+(dv?'<span class="dv">'+e(dv)+'</span>':'')+'</div>'+
-        '<div class="mo" title="'+e(mot||'')+'">'+(x&&x.troca_motorista&&x.motorista_prev?'<span class="lbm">Saiu:</span> ':'')+(mot?e(nome(mot)):'<span class="vz">Motorista não identificado</span>')+'</div>'+
-        '<div class="es2">'+e(esc||'')+(x&&x.troca_motorista?'<span class="n2 sub">'+(mot?'OUTRO MOTORISTA':'SEM IDENTIFICAÇÃO')+'</span>':'')+mais+'</div>'+
+        '<div class="mo" title="'+e(mot||'')+'">'+(x&&x.troca_motorista&&x.motorista_prev?'<span class="lbm">Saiu:</span> ':'')+(mot?(semIdent(mot)?'<span class="vz">'+e(mot)+'</span>':e(nome(mot))):'<span class="vz">Motorista não identificado</span>')+'</div>'+
+        '<div class="es2">'+e(esc||'')+(x&&x.troca_motorista?'<span class="n2 sub">'+(mot&&!semIdent(mot)?'OUTRO MOTORISTA':'SEM IDENTIFICAÇÃO')+'</span>':'')+mais+'</div>'+
         (x&&x.troca_motorista&&x.motorista_prev?'<div class="es2 esc-prev" title="Motorista da escala">Escalado: '+e(nome(x.motorista_prev))+'</div>':'')+
         '<div class="hs"><div><small>PROGRAMADA</small><span><em>'+dia+'</em>'+e(hp)+'</span></div><div><small>'+(auto?'SAÍDA':'LIBERADA')+'</small><span><em>'+dia+'</em>'+e(hr)+'</span></div></div>'+
         '<div class="ft" title="'+e(rod)+'">'+e(rod)+'</div>'+

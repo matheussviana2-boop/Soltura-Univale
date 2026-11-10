@@ -1536,7 +1536,7 @@ function linhaCarroLocal(x){
   var c=x.c, t=c.tel||{}, l=x.l, u=x.u;
   var mk=l.k==='in'?'in':(l.k==='perto'?'fora':'outra');
   var mp=(t.lat&&t.lng)?'<button type="button" class="maplink m-'+mk+'" data-act="mapcar" data-car="'+esc(c.prefixo)+'" title="Ver onde o carro está">'+ICO_PIN.replace('width="16" height="16"','width="22" height="22"')+'</button>':'';
-  var saiu=u&&u.k==='lib'?'Saiu hoje na '+u.it.escala+(u.it.reg&&u.it.reg.hora_real?' às '+u.it.reg.hora_real:''):'';
+  var saiu='';   // tela de carros disponíveis: não mostra a saída anterior do dia
   var man=x.m||libManutDe(c.prefixo);
   return '<div class="row livre semtb'+(man?' manut':(l.k==='in'?'':l.k==='perto'?' perto':' rota'))+'">'+
     '<div class="bus" role="img" aria-label="Ônibus"></div>'+
@@ -1785,9 +1785,10 @@ function tick(){
   if(!S.dia) return;
   $('clock').textContent=hhmm(agora());
   var tn=S.dia.escalaTN||{}, dm=function(iso){ var x=String(iso||'').split('-'); return x.length===3?x[2]+'/'+x[1]:''; }, eh='';
-  if(tn.de){ var velha=S.dia.data>tn.ate;
-    eh=' <span class="hesc'+(velha?' velha':'')+'" title="Escala semanal TransNet em uso'+(tn.em?' · importada em '+esc(tn.em):'')+'">Escala TransNet '+dm(tn.de)+' a '+dm(tn.ate)+
-      (velha?' · desatualizada'+(tn.repetidaDe?', repetindo '+dm(tn.repetidaDe):''):'')+(tn.proxDe?' · próxima '+dm(tn.proxDe)+' a '+dm(tn.proxAte)+' recebida':'')+'</span>'; }
+  // período da escala TransNet: só aparece como alerta quando a escala do dia não chegou (está repetindo a anterior)
+  if(tn.de&&S.dia.data>tn.ate){
+    eh=' <span class="hesc velha" title="Escala semanal TransNet em uso'+(tn.em?' · importada em '+esc(tn.em):'')+'">Escala TransNet '+dm(tn.de)+' a '+dm(tn.ate)+
+      ' · desatualizada'+(tn.repetidaDe?', repetindo '+dm(tn.repetidaDe):'')+'</span>'; }
   $('hData').innerHTML=esc(dataLonga(S.dia.data))+eh;
   var b=$('banner'), msgs=[];
   if(S.dia.data!==S.dia.hoje) msgs.push('Você está vendo '+fmtData(S.dia.data)+', não hoje. Ao liberar, a hora de saída precisa ser informada.');

@@ -1774,7 +1774,7 @@ function linhaReg(it){
       :'<div class="mot"><span>'+esc(titulo(ns?it.motorista:r.motorista_real))+'</span></div>')+
       '<div class="chs">'+ch('',ICO_CLK13,'Programado '+dataHora(S.dia.data,it.hora_prevista))+
         (ns?(r.motivo?ch('ns',null,r.motivo):''):ch('outra',ICO_OK13,(String(r.responsavel).toUpperCase()==='SOLTURA AUTOMÁTICA'?'Soltura automática ':'Liberado ')+dataHora(dLib,r.hora_real)))+
-        (!ns&&tm?ch('ns',null,'Outro motorista'):'')+(r.ocorrencia?ch('ns',ICO_WR,'Ocorrência '+(r.ocorrencia_hora||'')+': '+titulo(r.ocorrencia)+(r.veiculo_troca?' → '+r.veiculo_troca:'')):'')+'</div>'+
+        (!ns&&tm?ch('ns',null,r.motorista_real?'Outro motorista':'Motorista não identificado'):'')+(r.ocorrencia?ch('ns',ICO_WR,'Ocorrência '+(r.ocorrencia_hora||'')+': '+titulo(r.ocorrencia)+(r.veiculo_troca?' → '+r.veiculo_troca:'')):'')+'</div>'+
     '</div>'+(!ns&&r.lat&&r.lng?'<button type="button" class="maplink msol" data-act="mapsol" data-id="'+esc(it.id)+'" title="Ver no mapa onde a soltura foi registrada" aria-label="Ver no mapa o local da soltura de '+esc(r.veiculo_real||'')+'">'+ICO_PIN.replace('width="16" height="16"','width="22" height="22"')+'</button>':'')+respBox(r.responsavel, ns)+
   '</div>';
 }
@@ -2326,7 +2326,7 @@ var PSol=(function(){
       return '<div class="ps-card ps-'+k+(x&&x.id?' edt':'')+(oc?' ps-oc':'')+'"'+(x&&x.id?' data-oc="'+e(x.id)+'" role="button" tabindex="0"':'')+' title="'+e(c.prefixo+' · '+(esc||'')+' · '+(auto?'soltura automática':'liberado')+' às '+hr+(x&&x.id?' · toque para registrar ocorrência':''))+'">'+ck+'<div class="bd">'+
         '<div class="l1"><b>'+e(c.prefixo)+'</b>'+tag+os+oc+(dv?'<span class="dv">'+e(dv)+'</span>':'')+'</div>'+
         '<div class="mo" title="'+e(mot||'')+'">'+(x&&x.troca_motorista&&x.motorista_prev?'<span class="lbm">Saiu:</span> ':'')+(mot?e(nome(mot)):'<span class="vz">Motorista não identificado</span>')+'</div>'+
-        '<div class="es2">'+e(esc||'')+(x&&x.troca_motorista?'<span class="n2 sub">OUTRO MOTORISTA</span>':'')+mais+'</div>'+
+        '<div class="es2">'+e(esc||'')+(x&&x.troca_motorista?'<span class="n2 sub">'+(mot?'OUTRO MOTORISTA':'SEM IDENTIFICAÇÃO')+'</span>':'')+mais+'</div>'+
         (x&&x.troca_motorista&&x.motorista_prev?'<div class="es2 esc-prev" title="Motorista da escala">Escalado: '+e(nome(x.motorista_prev))+'</div>':'')+
         '<div class="hs"><div><small>PROGRAMADA</small><span><em>'+dia+'</em>'+e(hp)+'</span></div><div><small>'+(auto?'SAÍDA':'LIBERADA')+'</small><span><em>'+dia+'</em>'+e(hr)+'</span></div></div>'+
         '<div class="ft" title="'+e(rod)+'">'+e(rod)+'</div>'+
